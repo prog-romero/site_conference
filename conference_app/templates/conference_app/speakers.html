@@ -1,0 +1,56 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}Speakers - Conference 2025{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h1>Conference Speakers</h1>
+        <p class="lead">Meet the industry experts and thought leaders who will be sharing their knowledge and expertise</p>
+    </div>
+</section>
+
+<!-- Speakers List -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            {% for speaker in speakers %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                    {% if speaker.photo %}
+                    <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="speaker-img">
+                    {% else %}
+                    <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ speaker.name }}" class="speaker-img">
+                    {% endif %}
+                    <div class="card-body pb-2">
+                        <h4 class="card-title">{{ speaker.name }}</h4>
+                        <p class="card-text text-muted mb-2">{{ speaker.title }}</p>
+                        <p class="card-text fw-bold">{{ speaker.organization }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0 pb-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-primary-custom">View Session</a>
+                            <a href="{% url 'speaker_detail' speaker.id %}#bio" class="btn btn-outline-primary-custom">View Bio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <p>No speakers have been added yet. Check back soon!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-light-custom">
+    <div class="container text-center">
+        <h2 class="mb-4">Want to join our speaker lineup?</h2>
+        <p class="lead mb-4">We're always looking for experts to share their knowledge and experience with our community.</p>
+        <a href="{% url 'contact' %}" class="btn btn-primary-custom">Contact Us About Speaking</a>
+    </div>
+</section>
+{% endblock %}

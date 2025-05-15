@@ -1,0 +1,368 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}Conference 2025 - The Premier IT Event{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">Conference 2025</h1>
+        <p class="hero-subtitle">The Premier IT Event Returns.</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Now</a>
+            <a href="{% url 'sessions' %}" class="btn btn-outline-light btn-lg">Explore Sessions</a>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="py-5 bg-light-custom">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="section-title">Reconnect with the Ecosystem</h2>
+                <p class="lead mb-4">After a decade away, the Conference is back, and we're bringing it home! Join us for three days of hands-on training, expert-led sessions, and networking opportunities.</p>
+                <p class="mb-4">This is more than a conference. This is your ticket behind the curtain.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Learn directly from developers and engineers</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Network with peers facing similar monitoring challenges</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Discover the latest innovations in the platform</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Take home practical skills you can implement immediately</li>
+                </ul>
+                <a href="{% url 'sessions' %}" class="btn btn-primary-custom mt-3">Explore Sessions</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Conference audience" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Who Should Attend Section -->
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <h2 class="section-title section-title-center text-center text-white mb-5">Who Should Attend?</h2>
+        <p class="text-center mb-5">Find sessions tailored to your role, experience level, and goals.</p>
+        
+        <div class="row g-4">
+            {% for type in attendee_types %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-user-gear"></i>
+                        </div>
+                        <h4 class="card-title mb-3">{{ type.name }}</h4>
+                        <p class="card-text text-muted">{{ type.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h4 class="card-title mb-3">System Administrators</h4>
+                        <p class="card-text text-muted">Seeking proactive monitoring solutions and automation strategies</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4 class="card-title mb-3">IT Directors & Managers</h4>
+                        <p class="card-text text-muted">Wanting to get more value from your tools and demonstrate their impact on business</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Partners & Resellers</h4>
+                        <p class="card-text text-muted">Connecting with technical decision-makers and enhancing product knowledge</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Developers & Engineers</h4>
+                        <p class="card-text text-muted">Looking to improve performance, security, and scalability</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Why Attend Section -->
+<section class="py-5 bg-light-custom">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title section-title-center text-center">Why Should I Attend?</h2>
+            <p class="lead">After a decade away, the Conference is back! Join us for three days of hands-on training, expert-led sessions, and networking opportunities. Get certified, discover the latest in monitoring, and engage with IT professionals shaping the future.</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon bg-primary-dark mb-4">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Attend</h4>
+                        <p class="card-text">Engage with industry experts through insightful sessions and live demos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon bg-warning mb-4">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Train</h4>
+                        <p class="card-text">Participate in hands-on workshops to enhance your IT monitoring skills</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon bg-success mb-4">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Network</h4>
+                        <p class="card-text">Connect with global IT professionals and expand your professional circle</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="feature-icon bg-accent-color mb-4">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Certify</h4>
+                        <p class="card-text">Receive a discount code for the Certified Professional – Core certification exam</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Speakers Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-5">
+            <h2 class="section-title mb-0">Featured Speakers</h2>
+            <a href="{% url 'speakers' %}" class="btn btn-primary-custom">View All Speakers</a>
+        </div>
+        <p class="lead mb-5">Get ready to hear from industry leaders and experts as they share valuable insights, best practices, and strategies to elevate your IT monitoring.</p>
+        
+        <div class="row g-4">
+            {% for speaker in featured_speakers %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                    {% if speaker.photo %}
+                    <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="speaker-img">
+                    {% else %}
+                    <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ speaker.name }}" class="speaker-img">
+                    {% endif %}
+                    <div class="card-body pb-2">
+                        <h4 class="card-title">{{ speaker.name }}</h4>
+                        <p class="card-text text-muted mb-2">{{ speaker.title }}</p>
+                        <p class="card-text fw-bold">{{ speaker.organization }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0 pb-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-primary-custom">View Session</a>
+                            <a href="{% url 'speaker_detail' speaker.id %}#bio" class="btn btn-outline-primary-custom">View Bio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                    <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="John Doe" class="speaker-img">
+                    <div class="card-body pb-2">
+                        <h4 class="card-title">John Doe</h4>
+                        <p class="card-text text-muted mb-2">Developer Associate</p>
+                        <p class="card-text fw-bold">Tech Solutions Inc.</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0 pb-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="#" class="btn btn-primary-custom">View Session</a>
+                            <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                    <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Dave Williams" class="speaker-img">
+                    <div class="card-body pb-2">
+                        <h4 class="card-title">Dave Williams</h4>
+                        <p class="card-text text-muted mb-2">SysAdmin</p>
+                        <p class="card-text fw-bold">Community Member</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0 pb-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="#" class="btn btn-primary-custom">View Session</a>
+                            <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                    <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Sarah Johnson" class="speaker-img">
+                    <div class="card-body pb-2">
+                        <h4 class="card-title">Sarah Johnson</h4>
+                        <p class="card-text text-muted mb-2">Founder and President</p>
+                        <p class="card-text fw-bold">Monitoring Solutions</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0 pb-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="#" class="btn btn-primary-custom">View Session</a>
+                            <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                    <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Eric Loyd" class="speaker-img">
+                    <div class="card-body pb-2">
+                        <h4 class="card-title">Eric Loyd</h4>
+                        <p class="card-text text-muted mb-2">COO</p>
+                        <p class="card-text fw-bold">Global Monitoring</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0 pb-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="#" class="btn btn-primary-custom">View Session</a>
+                            <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Sessions Section -->
+<section class="py-5 bg-light-custom">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-5">
+            <h2 class="section-title mb-0">Upcoming Sessions</h2>
+            <a href="{% url 'sessions' %}" class="btn btn-primary-custom">View All Sessions</a>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="list-group">
+                    {% for session in upcoming_sessions %}
+                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <h5 class="mb-2">{{ session.title }}</h5>
+                            <small class="text-muted">{{ session.date|date:"F d, Y" }} | {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</small>
+                        </div>
+                        <div class="mb-3">
+                            <span class="badge bg-primary-dark me-2">{{ session.get_track_display }}</span>
+                            <span class="badge bg-secondary">{{ session.location }}</span>
+                        </div>
+                        <p class="mb-3">{{ session.description|truncatewords:30 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Speakers: 
+                                {% for speaker in session.speakers.all %}
+                                    {{ speaker.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                                </small>
+                            </div>
+                            <a href="{% url 'session_detail' session.id %}" class="btn btn-sm btn-outline-primary-custom">View Details</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <h5 class="mb-2">Advanced Monitoring Techniques</h5>
+                            <small class="text-muted">June 15, 2025 | 10:00 AM - 11:30 AM</small>
+                        </div>
+                        <div class="mb-3">
+                            <span class="badge bg-primary-dark me-2">Technical</span>
+                            <span class="badge bg-secondary">Room 101</span>
+                        </div>
+                        <p class="mb-3">Learn advanced monitoring techniques that will help you identify and resolve issues before they affect your users...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Speakers: John Doe, Sara Smith</small>
+                            </div>
+                            <a href="#" class="btn btn-sm btn-outline-primary-custom">View Details</a>
+                        </div>
+                    </div>
+                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <h5 class="mb-2">Scaling Monitoring Infrastructure</h5>
+                            <small class="text-muted">June 15, 2025 | 1:00 PM - 2:30 PM</small>
+                        </div>
+                        <div class="mb-3">
+                            <span class="badge bg-primary-dark me-2">Technical</span>
+                            <span class="badge bg-secondary">Room 102</span>
+                        </div>
+                        <p class="mb-3">Discover strategies and best practices for scaling your monitoring infrastructure to handle millions of metrics...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Speakers: Eric Loyd, Dave Williams</small>
+                            </div>
+                            <a href="#" class="btn btn-sm btn-outline-primary-custom">View Details</a>
+                        </div>
+                    </div>
+                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <h5 class="mb-2">Monitoring for Business Impact</h5>
+                            <small class="text-muted">June 16, 2025 | 9:00 AM - 10:30 AM</small>
+                        </div>
+                        <div class="mb-3">
+                            <span class="badge bg-primary-dark me-2">Business</span>
+                            <span class="badge bg-secondary">Main Hall</span>
+                        </div>
+                        <p class="mb-3">How to translate technical metrics into business value and demonstrate the ROI of your monitoring solutions...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Speakers: Sarah Johnson</small>
+                            </div>
+                            <a href="#" class="btn btn-sm btn-outline-primary-custom">View Details</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h2 class="mb-4">Ready to Join Us at Conference 2025?</h2>
+        <p class="lead mb-4">Secure your spot now and prepare for three days of learning, networking, and professional growth.</p>
+        <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Today</a>
+    </div>
+</section>
+{% endblock %}

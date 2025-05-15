@@ -1,0 +1,206 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}Venue - Conference 2025{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h1>Conference Venue</h1>
+        <p class="lead">Everything you need to know about our event location</p>
+    </div>
+</section>
+
+<!-- Venue Information -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="section-title mb-4">Conference Center</h2>
+                <p class="lead mb-4">Our state-of-the-art venue offers the perfect setting for learning, networking, and collaboration.</p>
+                <p class="mb-4">The Conference Center features modern facilities equipped with the latest technology, comfortable meeting spaces, and ample room for networking and socializing. Located in the heart of the city, it offers convenience and accessibility for all attendees.</p>
+                
+                <div class="d-flex mb-4">
+                    <i class="fas fa-map-marker-alt fa-2x text-primary-dark me-3"></i>
+                    <div>
+                        <h5 class="mb-1">Address</h5>
+                        <p class="mb-0">123 Conference Center<br>City, State 12345<br>United States</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-4">
+                    <i class="fas fa-phone fa-2x text-primary-dark me-3"></i>
+                    <div>
+                        <h5 class="mb-1">Contact</h5>
+                        <p class="mb-0">(555) 123-4567<br>venue@conferencecentre.com</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex">
+                    <i class="fas fa-globe fa-2x text-primary-dark me-3"></i>
+                    <div>
+                        <h5 class="mb-1">Website</h5>
+                        <p class="mb-0"><a href="#">www.conferencecentre.com</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://images.pexels.com/photos/2977519/pexels-photo-2977519.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Conference Center" class="img-fluid rounded shadow">
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-directions fa-3x text-primary-dark"></i>
+                        </div>
+                        <h4 class="card-title text-center mb-3">Getting There</h4>
+                        <ul class="list-unstyled">
+                            <li class="mb-3"><strong>From the Airport:</strong> 20 minutes by taxi or shuttle service</li>
+                            <li class="mb-3"><strong>Public Transportation:</strong> Bus routes 10, 15, and 22 stop directly in front of the venue</li>
+                            <li class="mb-3"><strong>Subway:</strong> Blue Line, Conference Center Station</li>
+                            <li><strong>Parking:</strong> Underground parking available for $15/day</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-hotel fa-3x text-primary-dark"></i>
+                        </div>
+                        <h4 class="card-title text-center mb-3">Accommodation</h4>
+                        <p class="mb-3">We've partnered with several hotels near the venue to offer special rates for conference attendees.</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-3"><strong>Grand Hotel:</strong> 0.1 miles – Special rate: $189/night</li>
+                            <li class="mb-3"><strong>City Suites:</strong> 0.3 miles – Special rate: $159/night</li>
+                            <li class="mb-3"><strong>Business Inn:</strong> 0.5 miles – Special rate: $129/night</li>
+                        </ul>
+                        <p><em>Use code "CONF2025" when booking to receive the discounted rate.</em></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-utensils fa-3x text-primary-dark"></i>
+                        </div>
+                        <h4 class="card-title text-center mb-3">Dining Options</h4>
+                        <p class="mb-3">The venue offers various dining options, and there are many restaurants within walking distance:</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-3"><strong>Conference Café:</strong> Located in the main lobby</li>
+                            <li class="mb-3"><strong>Rooftop Restaurant:</strong> Fine dining with city views</li>
+                            <li class="mb-3"><strong>Urban Bistro:</strong> 2-minute walk, casual dining</li>
+                            <li class="mb-3"><strong>Sushi Corner:</strong> 5-minute walk, Japanese cuisine</li>
+                            <li><strong>Italian Villa:</strong> 7-minute walk, authentic Italian</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Venue Map -->
+<section class="py-5 bg-light-custom">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Location & Map</h2>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="ratio ratio-16x9 mb-4 shadow">
+                    <!-- Placeholder for Google Maps iframe -->
+                    <img src="https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Map of venue location" class="img-fluid">
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-3">Nearby Attractions</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul>
+                                    <li class="mb-2">City Museum (0.4 miles)</li>
+                                    <li class="mb-2">Central Park (0.7 miles)</li>
+                                    <li class="mb-2">Shopping District (0.3 miles)</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul>
+                                    <li class="mb-2">Historic District (1.2 miles)</li>
+                                    <li class="mb-2">Waterfront Promenade (0.8 miles)</li>
+                                    <li class="mb-2">Arts Center (0.5 miles)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Venue Facilities -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Venue Facilities</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Free Wi-Fi</h4>
+                        <p class="card-text text-muted">High-speed internet access throughout the venue</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Power Stations</h4>
+                        <p class="card-text text-muted">Charging stations available throughout conference areas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-universal-access"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Accessibility</h4>
+                        <p class="card-text text-muted">Fully accessible facilities for all attendees</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
+                            <i class="fas fa-coffee"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Refreshment Areas</h4>
+                        <p class="card-text text-muted">Coffee, tea, and water stations throughout the venue</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Registration CTA -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h2 class="mb-4">Ready to Join Us at the Conference Center?</h2>
+        <p class="lead mb-4">Secure your spot now and prepare for three days of learning, networking, and professional growth.</p>
+        <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Today</a>
+    </div>
+</section>
+{% endblock %}

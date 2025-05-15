@@ -1,0 +1,157 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}Contact Us - Conference 2025{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h1>Contact Us</h1>
+        <p class="lead">Have questions about Conference 2025? We're here to help!</p>
+    </div>
+</section>
+
+<!-- Contact Form -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4 mb-lg-0">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="card-title mb-4">Send Us a Message</h3>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">Your Name</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                    <div class="text-danger mt-1">
+                                        {{ form.name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                    <div class="text-danger mt-1">
+                                        {{ form.email.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="{{ form.subject.id_for_label }}" class="form-label">Subject</label>
+                                {{ form.subject }}
+                                {% if form.subject.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.subject.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="{{ form.message.id_for_label }}" class="form-label">Message</label>
+                                {{ form.message }}
+                                {% if form.message.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.message.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary-custom btn-lg">Send Message</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Contact Information</h4>
+                        
+                        <div class="d-flex mb-4">
+                            <i class="fas fa-envelope fa-2x text-primary-dark me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Email</h5>
+                                <p class="mb-0"><a href="mailto:info@conference2025.com">romerotchiazefouosso@gmail.com</a></p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex mb-4">
+                            <i class="fas fa-phone fa-2x text-primary-dark me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Phone</h5>
+                                <p class="mb-0">(555) 123-4567</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex mb-4">
+                            <i class="fas fa-map-marker-alt fa-2x text-primary-dark me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Location</h5>
+                                <p class="mb-0">123 Conference Center<br>City, State 12345<br>United States</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex">
+                            <i class="fas fa-clock fa-2x text-primary-dark me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Office Hours</h5>
+                                <p class="mb-0">Monday - Friday: 9:00 AM - 5:00 PM<br>Saturday - Sunday: Closed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Connect With Us</h4>
+                        
+                        <div class="d-flex gap-3 mb-4">
+                            <a href="#" class="btn btn-outline-primary-custom btn-lg rounded-circle">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-primary-custom btn-lg rounded-circle">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-primary-custom btn-lg rounded-circle">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-primary-custom btn-lg rounded-circle">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                        
+                        <h5 class="mb-3">Subscribe to Our Newsletter</h5>
+                        <p class="mb-3">Stay updated with conference news and announcements.</p>
+                        
+                        <form>
+                            <div class="input-group mb-3">
+                                <input type="email" class="form-control" placeholder="Your email address">
+                                <button class="btn btn-primary-custom" type="button">Subscribe</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ CTA -->
+<section class="py-5 bg-light-custom">
+    <div class="container text-center">
+        <h2 class="mb-4">Frequently Asked Questions</h2>
+        <p class="lead mb-4">Find answers to common questions about Conference 2025.</p>
+        <a href="{% url 'faq' %}" class="btn btn-primary-custom btn-lg">View FAQ</a>
+    </div>
+</section>
+{% endblock %}

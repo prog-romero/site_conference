@@ -1,0 +1,100 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}{{ speaker.name }} - Conference 2025 Speaker{% endblock %}
+
+{% block content %}
+<!-- Speaker Header -->
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-3 text-center text-lg-start mb-4 mb-lg-0">
+                {% if speaker.photo %}
+                <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;">
+                {% else %}
+                <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ speaker.name }}" class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;">
+                {% endif %}
+            </div>
+            <div class="col-lg-9 text-center text-lg-start">
+                <h1 class="mb-2">{{ speaker.name }}</h1>
+                <p class="mb-2 lead">{{ speaker.title }}</p>
+                <p class="mb-4 fs-5">{{ speaker.organization }}</p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                    <a href="#sessions" class="btn btn-primary-custom">View Sessions</a>
+                    <a href="#bio" class="btn btn-outline-light">Read Bio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Speaker Bio -->
+<section class="py-5" id="bio">
+    <div class="container">
+        <h2 class="section-title mb-4">About {{ speaker.name }}</h2>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <p class="card-text lead">{{ speaker.bio|linebreaks }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Speaker Sessions -->
+<section class="py-5 bg-light-custom" id="sessions">
+    <div class="container">
+        <h2 class="section-title mb-4">{{ speaker.name }}'s Sessions</h2>
+        
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="list-group">
+                    {% for session in sessions %}
+                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <h5 class="mb-2">{{ session.title }}</h5>
+                            <small class="text-muted">{{ session.date|date:"F d, Y" }} | {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</small>
+                        </div>
+                        <div class="mb-3">
+                            <span class="badge bg-primary-dark me-2">{{ session.get_track_display }}</span>
+                            <span class="badge bg-secondary">{{ session.location }}</span>
+                        </div>
+                        <p class="mb-3">{{ session.description|truncatewords:50 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">
+                                    {% with speaker_count=session.speakers.count %}
+                                    {% if speaker_count > 1 %}
+                                    Also presented by:
+                                    {% for s in session.speakers.all %}
+                                        {% if s.id != speaker.id %}
+                                        <a href="{% url 'speaker_detail' s.id %}">{{ s.name }}</a>{% if not forloop.last %}, {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% else %}
+                                    Solo presentation
+                                    {% endif %}
+                                    {% endwith %}
+                                </small>
+                            </div>
+                            <a href="{% url 'session_detail' session.id %}" class="btn btn-sm btn-outline-primary-custom">View Details</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <p>No sessions currently scheduled for this speaker. Check back soon!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Other Speakers CTA -->
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Discover More Speakers</h2>
+        <p class="lead mb-4">Explore our full lineup of expert speakers and their insightful sessions.</p>
+        <a href="{% url 'speakers' %}" class="btn btn-primary-custom">View All Speakers</a>
+    </div>
+</section>
+{% endblock %}

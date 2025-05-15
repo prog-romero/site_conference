@@ -1,0 +1,523 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}FAQ - Conference 2025{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h1>Frequently Asked Questions</h1>
+        <p class="lead">Find answers to common questions about Conference 2025</p>
+    </div>
+</section>
+
+<!-- FAQ Sections -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 mb-4 mb-lg-0">
+                <div class="sticky-top pt-4">
+                    <div class="nav flex-column nav-pills" id="faq-tab" role="tablist">
+                        <button class="nav-link active mb-3" id="general-tab" data-bs-toggle="pill" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General Information</button>
+                        <button class="nav-link mb-3" id="registration-tab" data-bs-toggle="pill" data-bs-target="#registration" type="button" role="tab" aria-controls="registration" aria-selected="false">Registration & Tickets</button>
+                        <button class="nav-link mb-3" id="schedule-tab" data-bs-toggle="pill" data-bs-target="#schedule" type="button" role="tab" aria-controls="schedule" aria-selected="false">Schedule & Sessions</button>
+                        <button class="nav-link mb-3" id="venue-tab" data-bs-toggle="pill" data-bs-target="#venue" type="button" role="tab" aria-controls="venue" aria-selected="false">Venue & Accommodation</button>
+                        <button class="nav-link" id="other-tab" data-bs-toggle="pill" data-bs-target="#other" type="button" role="tab" aria-controls="other" aria-selected="false">Other Questions</button>
+                    </div>
+                    <div class="card mt-4 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-3">Still Have Questions?</h5>
+                            <p class="card-text">Contact our support team for personalized assistance.</p>
+                            <a href="{% url 'contact' %}" class="btn btn-primary-custom w-100">Contact Us</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <div class="tab-content" id="faq-tabContent">
+                    <!-- General Information -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                        <h2 class="section-title mb-4">General Information</h2>
+                        
+                        <div class="accordion" id="accordionGeneral">
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingG1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG1" aria-expanded="true" aria-controls="collapseG1">
+                                        What is Conference 2025?
+                                    </button>
+                                </h3>
+                                <div id="collapseG1" class="accordion-collapse collapse show" aria-labelledby="headingG1" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>Conference 2025 is the premier IT monitoring event of the year. After a decade away, the conference returns with three days of hands-on training, expert-led sessions, and valuable networking opportunities. This event brings together industry leaders, developers, engineers, and IT professionals to share knowledge, best practices, and the latest innovations.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingG2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG2" aria-expanded="false" aria-controls="collapseG2">
+                                        When and where is the conference?
+                                    </button>
+                                </h3>
+                                <div id="collapseG2" class="accordion-collapse collapse" aria-labelledby="headingG2" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>Conference 2025 will be held on June 15-17, 2025, at the Conference Center located in City, State. The venue address is 123 Conference Center, City, State 12345, United States.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingG3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG3" aria-expanded="false" aria-controls="collapseG3">
+                                        Who should attend the conference?
+                                    </button>
+                                </h3>
+                                <div id="collapseG3" class="accordion-collapse collapse" aria-labelledby="headingG3" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>Conference 2025 is designed for:</p>
+                                        <ul>
+                                            <li>System Administrators seeking proactive monitoring solutions and automation strategies</li>
+                                            <li>IT Directors & Managers wanting to get more value from their tools and demonstrate their impact on business</li>
+                                            <li>Partners & Resellers connecting with technical decision-makers and enhancing product knowledge</li>
+                                            <li>Developers & Engineers looking to improve performance, security, and scalability</li>
+                                        </ul>
+                                        <p>Whether you're new to IT monitoring or an experienced professional, there will be sessions tailored to your role, experience level, and goals.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingG4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG4" aria-expanded="false" aria-controls="collapseG4">
+                                        What can I expect at the conference?
+                                    </button>
+                                </h3>
+                                <div id="collapseG4" class="accordion-collapse collapse" aria-labelledby="headingG4" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>At Conference 2025, you can expect:</p>
+                                        <ul>
+                                            <li>Expert-led sessions on the latest monitoring trends and technologies</li>
+                                            <li>Hands-on workshops to enhance your technical skills</li>
+                                            <li>Networking opportunities with peers and industry leaders</li>
+                                            <li>Access to certification pathways at discounted rates</li>
+                                            <li>Exposure to the latest innovations in IT monitoring</li>
+                                            <li>Practical knowledge you can implement immediately</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border shadow-sm">
+                                <h3 class="accordion-header" id="headingG5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseG5" aria-expanded="false" aria-controls="collapseG5">
+                                        How can I stay updated about the conference?
+                                    </button>
+                                </h3>
+                                <div id="collapseG5" class="accordion-collapse collapse" aria-labelledby="headingG5" data-bs-parent="#accordionGeneral">
+                                    <div class="accordion-body">
+                                        <p>Stay updated on Conference 2025 by:</p>
+                                        <ul>
+                                            <li>Subscribing to our newsletter on the <a href="{% url 'contact' %}">Contact page</a></li>
+                                            <li>Following us on social media (Twitter, LinkedIn, Facebook)</li>
+                                            <li>Checking our website regularly for updates</li>
+                                            <li>Registering for the conference to receive attendee updates via email</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Registration & Tickets -->
+                    <div class="tab-pane fade" id="registration" role="tabpanel" aria-labelledby="registration-tab">
+                        <h2 class="section-title mb-4">Registration & Tickets</h2>
+                        
+                        <div class="accordion" id="accordionRegistration">
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingR1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseR1" aria-expanded="true" aria-controls="collapseR1">
+                                        How do I register for the conference?
+                                    </button>
+                                </h3>
+                                <div id="collapseR1" class="accordion-collapse collapse show" aria-labelledby="headingR1" data-bs-parent="#accordionRegistration">
+                                    <div class="accordion-body">
+                                        <p>You can register for Conference 2025 by:</p>
+                                        <ol>
+                                            <li>Visiting our <a href="{% url 'register' %}">Registration page</a></li>
+                                            <li>Filling out the registration form with your information</li>
+                                            <li>Submitting the form to complete your registration</li>
+                                        </ol>
+                                        <p>After registration, you'll receive a confirmation email with further details.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingR2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseR2" aria-expanded="false" aria-controls="collapseR2">
+                                        What is included in the registration fee?
+                                    </button>
+                                </h3>
+                                <div id="collapseR2" class="accordion-collapse collapse" aria-labelledby="headingR2" data-bs-parent="#accordionRegistration">
+                                    <div class="accordion-body">
+                                        <p>Your registration fee includes:</p>
+                                        <ul>
+                                            <li>Full access to all conference sessions and workshops</li>
+                                            <li>Conference materials and resources</li>
+                                            <li>Breakfast, lunch, and refreshments during the conference</li>
+                                            <li>Evening networking events</li>
+                                            <li>Discount code for certification exams</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingR3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseR3" aria-expanded="false" aria-controls="collapseR3">
+                                        Is there an early bird registration discount?
+                                    </button>
+                                </h3>
+                                <div id="collapseR3" class="accordion-collapse collapse" aria-labelledby="headingR3" data-bs-parent="#accordionRegistration">
+                                    <div class="accordion-body">
+                                        <p>Yes, we offer early bird registration discounts:</p>
+                                        <ul>
+                                            <li>Super Early Bird (until December 31, 2024): 30% discount</li>
+                                            <li>Early Bird (January 1 - March 31, 2025): 15% discount</li>
+                                        </ul>
+                                        <p>After March 31, 2025, standard registration rates will apply.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingR4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseR4" aria-expanded="false" aria-controls="collapseR4">
+                                        Can I cancel my registration?
+                                    </button>
+                                </h3>
+                                <div id="collapseR4" class="accordion-collapse collapse" aria-labelledby="headingR4" data-bs-parent="#accordionRegistration">
+                                    <div class="accordion-body">
+                                        <p>Our cancellation policy:</p>
+                                        <ul>
+                                            <li>Cancellations made more than 30 days before the event (before May 15, 2025): Full refund minus a $50 processing fee</li>
+                                            <li>Cancellations made within 30 days of the event (May 15, 2025, or later): Non-refundable</li>
+                                        </ul>
+                                        <p>However, if you can't attend, you can transfer your registration to another person at no additional cost. Please contact us to arrange a transfer.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border shadow-sm">
+                                <h3 class="accordion-header" id="headingR5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseR5" aria-expanded="false" aria-controls="collapseR5">
+                                        Are group discounts available?
+                                    </button>
+                                </h3>
+                                <div id="collapseR5" class="accordion-collapse collapse" aria-labelledby="headingR5" data-bs-parent="#accordionRegistration">
+                                    <div class="accordion-body">
+                                        <p>Yes, we offer group discounts for organizations sending multiple attendees:</p>
+                                        <ul>
+                                            <li>3-5 attendees: 10% discount</li>
+                                            <li>6-10 attendees: 15% discount</li>
+                                            <li>11+ attendees: 20% discount</li>
+                                        </ul>
+                                        <p>To arrange group registration, please contact us at <a href="mailto:groups@conference2025.com">groups@conference2025.com</a>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Schedule & Sessions -->
+                    <div class="tab-pane fade" id="schedule" role="tabpanel" aria-labelledby="schedule-tab">
+                        <h2 class="section-title mb-4">Schedule & Sessions</h2>
+                        
+                        <div class="accordion" id="accordionSchedule">
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingS1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS1" aria-expanded="true" aria-controls="collapseS1">
+                                        What are the conference hours?
+                                    </button>
+                                </h3>
+                                <div id="collapseS1" class="accordion-collapse collapse show" aria-labelledby="headingS1" data-bs-parent="#accordionSchedule">
+                                    <div class="accordion-body">
+                                        <p>The general conference hours are:</p>
+                                        <ul>
+                                            <li>Day 1 (June 15): 8:00 AM - 8:00 PM (includes evening reception)</li>
+                                            <li>Day 2 (June 16): 8:30 AM - 5:30 PM</li>
+                                            <li>Day 3 (June 17): 8:30 AM - 5:00 PM</li>
+                                        </ul>
+                                        <p>For a detailed schedule, please visit our <a href="{% url 'agenda' %}">Agenda page</a>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingS2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS2" aria-expanded="false" aria-controls="collapseS2">
+                                        How do I build my conference schedule?
+                                    </button>
+                                </h3>
+                                <div id="collapseS2" class="accordion-collapse collapse" aria-labelledby="headingS2" data-bs-parent="#accordionSchedule">
+                                    <div class="accordion-body">
+                                        <p>To build your conference schedule:</p>
+                                        <ol>
+                                            <li>Browse through the <a href="{% url 'sessions' %}">Sessions page</a> to see all available sessions</li>
+                                            <li>On each session detail page, click the "Add to My Schedule" button</li>
+                                            <li>Log in with your registration email to save your selections</li>
+                                            <li>Access your personalized schedule in your conference account or the mobile app (coming soon)</li>
+                                        </ol>
+                                        <p>You can modify your schedule at any time before and during the conference.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingS3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS3" aria-expanded="false" aria-controls="collapseS3">
+                                        Do I need to pre-register for specific sessions?
+                                    </button>
+                                </h3>
+                                <div id="collapseS3" class="accordion-collapse collapse" aria-labelledby="headingS3" data-bs-parent="#accordionSchedule">
+                                    <div class="accordion-body">
+                                        <p>Most sessions are open to all registered attendees on a first-come, first-served basis. However, hands-on workshops have limited capacity and do require pre-registration.</p>
+                                        <p>Workshop registration will open in April 2025. Registered attendees will receive an email notification when workshop registration becomes available.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingS4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS4" aria-expanded="false" aria-controls="collapseS4">
+                                        What types of sessions will be offered?
+                                    </button>
+                                </h3>
+                                <div id="collapseS4" class="accordion-collapse collapse" aria-labelledby="headingS4" data-bs-parent="#accordionSchedule">
+                                    <div class="accordion-body">
+                                        <p>Conference 2025 will feature a variety of session formats:</p>
+                                        <ul>
+                                            <li><strong>Keynotes:</strong> Visionary presentations by industry leaders</li>
+                                            <li><strong>Technical Sessions:</strong> In-depth technical content focused on implementation and best practices</li>
+                                            <li><strong>Business Sessions:</strong> Strategy, ROI, and business value discussions</li>
+                                            <li><strong>Workshops:</strong> Hands-on interactive sessions with guided exercises</li>
+                                            <li><strong>Panel Discussions:</strong> Expert panels discussing trends and challenges</li>
+                                            <li><strong>Case Studies:</strong> Real-world implementation stories and lessons learned</li>
+                                            <li><strong>Birds of a Feather:</strong> Topic-based informal discussion groups</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border shadow-sm">
+                                <h3 class="accordion-header" id="headingS5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS5" aria-expanded="false" aria-controls="collapseS5">
+                                        Will session materials be available after the conference?
+                                    </button>
+                                </h3>
+                                <div id="collapseS5" class="accordion-collapse collapse" aria-labelledby="headingS5" data-bs-parent="#accordionSchedule">
+                                    <div class="accordion-body">
+                                        <p>Yes, all presentation slides and session materials will be available to registered attendees through our conference portal for up to one year after the event. Some sessions may also be recorded and available for on-demand viewing, subject to speaker permission.</p>
+                                        <p>Access information will be provided to attendees via email after the conference concludes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Venue & Accommodation -->
+                    <div class="tab-pane fade" id="venue" role="tabpanel" aria-labelledby="venue-tab">
+                        <h2 class="section-title mb-4">Venue & Accommodation</h2>
+                        
+                        <div class="accordion" id="accordionVenue">
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingV1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseV1" aria-expanded="true" aria-controls="collapseV1">
+                                        Where is the conference venue located?
+                                    </button>
+                                </h3>
+                                <div id="collapseV1" class="accordion-collapse collapse show" aria-labelledby="headingV1" data-bs-parent="#accordionVenue">
+                                    <div class="accordion-body">
+                                        <p>Conference 2025 will be held at the Conference Center located at:</p>
+                                        <p>123 Conference Center<br>City, State 12345<br>United States</p>
+                                        <p>For more details about the venue, including maps and directions, please visit our <a href="{% url 'venue' %}">Venue page</a>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingV2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseV2" aria-expanded="false" aria-controls="collapseV2">
+                                        Are there recommended hotels near the venue?
+                                    </button>
+                                </h3>
+                                <div id="collapseV2" class="accordion-collapse collapse" aria-labelledby="headingV2" data-bs-parent="#accordionVenue">
+                                    <div class="accordion-body">
+                                        <p>Yes, we've partnered with several hotels near the venue to offer special rates for conference attendees:</p>
+                                        <ul>
+                                            <li><strong>Grand Hotel:</strong> 0.1 miles from venue – Special rate: $189/night</li>
+                                            <li><strong>City Suites:</strong> 0.3 miles from venue – Special rate: $159/night</li>
+                                            <li><strong>Business Inn:</strong> 0.5 miles from venue – Special rate: $129/night</li>
+                                        </ul>
+                                        <p>To receive the discounted rate, use code "CONF2025" when booking directly through the hotel websites or by phone. These special rates are available until May 15, 2025, or until the room block is filled.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingV3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseV3" aria-expanded="false" aria-controls="collapseV3">
+                                        How do I get to the conference venue?
+                                    </button>
+                                </h3>
+                                <div id="collapseV3" class="accordion-collapse collapse" aria-labelledby="headingV3" data-bs-parent="#accordionVenue">
+                                    <div class="accordion-body">
+                                        <p>The Conference Center is easily accessible via various transportation options:</p>
+                                        <ul>
+                                            <li><strong>From the Airport:</strong> 20 minutes by taxi or shuttle service</li>
+                                            <li><strong>Public Transportation:</strong> Bus routes 10, 15, and 22 stop directly in front of the venue</li>
+                                            <li><strong>Subway:</strong> Blue Line, Conference Center Station (0.2 miles walking distance)</li>
+                                            <li><strong>Driving:</strong> On-site parking available for $15/day</li>
+                                        </ul>
+                                        <p>Detailed directions and transportation information can be found on our <a href="{% url 'venue' %}">Venue page</a>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingV4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseV4" aria-expanded="false" aria-controls="collapseV4">
+                                        Is parking available at the venue?
+                                    </button>
+                                </h3>
+                                <div id="collapseV4" class="accordion-collapse collapse" aria-labelledby="headingV4" data-bs-parent="#accordionVenue">
+                                    <div class="accordion-body">
+                                        <p>Yes, the Conference Center has an underground parking garage available for attendees at a rate of $15 per day. In-and-out privileges are included with the daily rate.</p>
+                                        <p>Additionally, there are several public parking lots within a 5-10 minute walk of the venue, with rates ranging from $10-$20 per day.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border shadow-sm">
+                                <h3 class="accordion-header" id="headingV5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseV5" aria-expanded="false" aria-controls="collapseV5">
+                                        Is the venue accessible for people with disabilities?
+                                    </button>
+                                </h3>
+                                <div id="collapseV5" class="accordion-collapse collapse" aria-labelledby="headingV5" data-bs-parent="#accordionVenue">
+                                    <div class="accordion-body">
+                                        <p>Yes, the Conference Center is fully accessible for people with disabilities:</p>
+                                        <ul>
+                                            <li>Wheelchair-accessible entrances and elevators</li>
+                                            <li>Accessible restrooms on all floors</li>
+                                            <li>Reserved seating in all session rooms</li>
+                                            <li>Assistive listening devices available upon request</li>
+                                            <li>Service animals welcome</li>
+                                        </ul>
+                                        <p>If you have specific accessibility requirements or questions, please contact us at <a href="mailto:accessibility@conference2025.com">accessibility@conference2025.com</a> so we can ensure your needs are accommodated.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Other Questions -->
+                    <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="other-tab">
+                        <h2 class="section-title mb-4">Other Questions</h2>
+                        
+                        <div class="accordion" id="accordionOther">
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingO1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseO1" aria-expanded="true" aria-controls="collapseO1">
+                                        Is there a dress code for the conference?
+                                    </button>
+                                </h3>
+                                <div id="collapseO1" class="accordion-collapse collapse show" aria-labelledby="headingO1" data-bs-parent="#accordionOther">
+                                    <div class="accordion-body">
+                                        <p>The dress code for the conference is business casual. We recommend comfortable attire as you'll be moving between sessions throughout the day. The venue is air-conditioned, so you might want to bring a light jacket or sweater.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingO2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseO2" aria-expanded="false" aria-controls="collapseO2">
+                                        Will meals be provided?
+                                    </button>
+                                </h3>
+                                <div id="collapseO2" class="accordion-collapse collapse" aria-labelledby="headingO2" data-bs-parent="#accordionOther">
+                                    <div class="accordion-body">
+                                        <p>Yes, your registration includes:</p>
+                                        <ul>
+                                            <li>Continental breakfast each morning</li>
+                                            <li>Buffet lunch each day</li>
+                                            <li>Morning and afternoon coffee/refreshment breaks</li>
+                                            <li>Welcome reception on the first evening (includes appetizers and drinks)</li>
+                                        </ul>
+                                        <p>Vegetarian, vegan, gluten-free, and other dietary options will be available. Please indicate any dietary restrictions during registration.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingO3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseO3" aria-expanded="false" aria-controls="collapseO3">
+                                        Will there be Wi-Fi available?
+                                    </button>
+                                </h3>
+                                <div id="collapseO3" class="accordion-collapse collapse" aria-labelledby="headingO3" data-bs-parent="#accordionOther">
+                                    <div class="accordion-body">
+                                        <p>Yes, complimentary high-speed Wi-Fi will be available throughout the venue for all attendees. Network details and access information will be provided in your registration materials.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border mb-3 shadow-sm">
+                                <h3 class="accordion-header" id="headingO4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseO4" aria-expanded="false" aria-controls="collapseO4">
+                                        Can I get a certificate of attendance?
+                                    </button>
+                                </h3>
+                                <div id="collapseO4" class="accordion-collapse collapse" aria-labelledby="headingO4" data-bs-parent="#accordionOther">
+                                    <div class="accordion-body">
+                                        <p>Yes, certificates of attendance will be available to all registered attendees. You can request your certificate:</p>
+                                        <ul>
+                                            <li>At the registration desk during the conference</li>
+                                            <li>Online through your conference account after the event</li>
+                                            <li>By emailing <a href="mailto:certificates@conference2025.com">certificates@conference2025.com</a> with your name and registration ID</li>
+                                        </ul>
+                                        <p>Certificates will include your name, the conference name, dates, and total professional development hours.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item border shadow-sm">
+                                <h3 class="accordion-header" id="headingO5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseO5" aria-expanded="false" aria-controls="collapseO5">
+                                        Will there be translation or interpretation services?
+                                    </button>
+                                </h3>
+                                <div id="collapseO5" class="accordion-collapse collapse" aria-labelledby="headingO5" data-bs-parent="#accordionOther">
+                                    <div class="accordion-body">
+                                        <p>The primary language of the conference will be English. We currently do not have plans for real-time translation or interpretation services for the general sessions.</p>
+                                        <p>However, if you require language assistance, please contact us at <a href="mailto:accessibility@conference2025.com">accessibility@conference2025.com</a> at least 30 days before the conference, and we'll do our best to accommodate your needs.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact CTA -->
+<section class="py-5 bg-light-custom text-center">
+    <div class="container">
+        <h2 class="mb-4">Still Have Questions?</h2>
+        <p class="lead mb-4">We're here to help! Contact our team for any additional information about Conference 2025.</p>
+        <a href="{% url 'contact' %}" class="btn btn-primary-custom btn-lg">Contact Us</a>
+    </div>
+</section>
+{% endblock %}

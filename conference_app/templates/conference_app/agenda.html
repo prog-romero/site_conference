@@ -1,0 +1,457 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}Agenda - Conference 2025{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h1>Conference Agenda</h1>
+        <p class="lead">Your complete guide to all sessions, keynotes, and activities</p>
+    </div>
+</section>
+
+<!-- Agenda Tabs -->
+<section class="py-5">
+    <div class="container">
+        <!-- Tabs for days -->
+        <ul class="nav nav-pills mb-4 justify-content-center" id="agendaTabs" role="tablist">
+            {% for day in agenda_days %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if forloop.first %}active{% endif %}" 
+                        id="day-{{ forloop.counter }}-tab" 
+                        data-bs-toggle="tab" 
+                        data-bs-target="#day-{{ forloop.counter }}" 
+                        type="button" 
+                        role="tab" 
+                        aria-controls="day-{{ forloop.counter }}" 
+                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                    {{ day.date_formatted }}
+                </button>
+            </li>
+            {% empty %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" 
+                        id="day-1-tab" 
+                        data-bs-toggle="tab" 
+                        data-bs-target="#day-1" 
+                        type="button" 
+                        role="tab" 
+                        aria-controls="day-1" 
+                        aria-selected="true">
+                    Day 1 - June 15
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" 
+                        id="day-2-tab" 
+                        data-bs-toggle="tab" 
+                        data-bs-target="#day-2" 
+                        type="button" 
+                        role="tab" 
+                        aria-controls="day-2" 
+                        aria-selected="false">
+                    Day 2 - June 16
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" 
+                        id="day-3-tab" 
+                        data-bs-toggle="tab" 
+                        data-bs-target="#day-3" 
+                        type="button" 
+                        role="tab" 
+                        aria-controls="day-3" 
+                        aria-selected="false">
+                    Day 3 - June 17
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+        
+        <!-- Tab content -->
+        <div class="tab-content" id="agendaTabContent">
+            {% for day in agenda_days %}
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                 id="day-{{ forloop.counter }}" 
+                 role="tabpanel" 
+                 aria-labelledby="day-{{ forloop.counter }}-tab">
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary-dark text-white">
+                        <h3 class="mb-0">{{ day.date_formatted }}</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 15%">Time</th>
+                                        <th style="width: 25%">Session</th>
+                                        <th style="width: 40%">Description</th>
+                                        <th style="width: 20%">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in day.items %}
+                                    <tr {% if item.item_type == 'break' or item.item_type == 'lunch' %}class="table-light"{% endif %}>
+                                        <td>{{ item.start_time|time:"g:i A" }} - {{ item.end_time|time:"g:i A" }}</td>
+                                        <td>
+                                            {% if item.item_type == 'session' and item.session %}
+                                            <a href="{% url 'session_detail' item.session.id %}">{{ item.title }}</a>
+                                            <span class="badge bg-primary-dark ms-2">{{ item.session.get_track_display }}</span>
+                                            {% else %}
+                                            {{ item.title }}
+                                            <span class="badge bg-secondary ms-2">{{ item.get_item_type_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.description|default:""|truncatewords:20 }}</td>
+                                        <td>{{ item.location|default:"" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="tab-pane fade show active" id="day-1" role="tabpanel" aria-labelledby="day-1-tab">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary-dark text-white">
+                        <h3 class="mb-0">Day 1 - June 15, 2025</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 15%">Time</th>
+                                        <th style="width: 25%">Session</th>
+                                        <th style="width: 40%">Description</th>
+                                        <th style="width: 20%">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>8:00 AM - 9:00 AM</td>
+                                        <td>
+                                            Registration & Breakfast
+                                            <span class="badge bg-secondary ms-2">Registration</span>
+                                        </td>
+                                        <td>Pick up your badge and enjoy breakfast</td>
+                                        <td>Main Lobby</td>
+                                    </tr>
+                                    <tr>
+                                        <td>9:00 AM - 10:00 AM</td>
+                                        <td>
+                                            <a href="#">Opening Keynote</a>
+                                            <span class="badge bg-primary-dark ms-2">General</span>
+                                        </td>
+                                        <td>Welcome address and conference overview</td>
+                                        <td>Main Hall</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>10:00 AM - 10:30 AM</td>
+                                        <td>
+                                            Coffee Break
+                                            <span class="badge bg-secondary ms-2">Break</span>
+                                        </td>
+                                        <td>Networking opportunity</td>
+                                        <td>Atrium</td>
+                                    </tr>
+                                    <tr>
+                                        <td>10:30 AM - 12:00 PM</td>
+                                        <td>
+                                            <a href="#">Advanced Monitoring Techniques</a>
+                                            <span class="badge bg-primary-dark ms-2">Technical</span>
+                                        </td>
+                                        <td>Learn advanced monitoring techniques for complex environments</td>
+                                        <td>Room 101</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>12:00 PM - 1:30 PM</td>
+                                        <td>
+                                            Lunch
+                                            <span class="badge bg-secondary ms-2">Lunch</span>
+                                        </td>
+                                        <td>Buffet lunch with networking</td>
+                                        <td>Dining Hall</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1:30 PM - 3:00 PM</td>
+                                        <td>
+                                            <a href="#">Scaling Monitoring Infrastructure</a>
+                                            <span class="badge bg-primary-dark ms-2">Technical</span>
+                                        </td>
+                                        <td>Best practices for scaling your monitoring infrastructure</td>
+                                        <td>Room 102</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>3:00 PM - 3:30 PM</td>
+                                        <td>
+                                            Coffee Break
+                                            <span class="badge bg-secondary ms-2">Break</span>
+                                        </td>
+                                        <td>Afternoon refreshments</td>
+                                        <td>Atrium</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3:30 PM - 5:00 PM</td>
+                                        <td>
+                                            <a href="#">Panel Discussion: Future of Monitoring</a>
+                                            <span class="badge bg-primary-dark ms-2">General</span>
+                                        </td>
+                                        <td>Industry experts discuss trends and future directions</td>
+                                        <td>Main Hall</td>
+                                    </tr>
+                                    <tr>
+                                        <td>6:00 PM - 8:00 PM</td>
+                                        <td>
+                                            Welcome Reception
+                                            <span class="badge bg-secondary ms-2">Networking</span>
+                                        </td>
+                                        <td>Drinks and appetizers with fellow attendees</td>
+                                        <td>Rooftop Terrace</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="day-2" role="tabpanel" aria-labelledby="day-2-tab">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary-dark text-white">
+                        <h3 class="mb-0">Day 2 - June 16, 2025</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 15%">Time</th>
+                                        <th style="width: 25%">Session</th>
+                                        <th style="width: 40%">Description</th>
+                                        <th style="width: 20%">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>8:30 AM - 9:00 AM</td>
+                                        <td>
+                                            Breakfast
+                                            <span class="badge bg-secondary ms-2">Break</span>
+                                        </td>
+                                        <td>Continental breakfast</td>
+                                        <td>Dining Hall</td>
+                                    </tr>
+                                    <tr>
+                                        <td>9:00 AM - 10:30 AM</td>
+                                        <td>
+                                            <a href="#">Monitoring for Business Impact</a>
+                                            <span class="badge bg-primary-dark ms-2">Business</span>
+                                        </td>
+                                        <td>Translating technical metrics into business value</td>
+                                        <td>Main Hall</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>10:30 AM - 11:00 AM</td>
+                                        <td>
+                                            Coffee Break
+                                            <span class="badge bg-secondary ms-2">Break</span>
+                                        </td>
+                                        <td>Morning refreshments</td>
+                                        <td>Atrium</td>
+                                    </tr>
+                                    <tr>
+                                        <td>11:00 AM - 12:30 PM</td>
+                                        <td>
+                                            <a href="#">Hands-on Workshop: Advanced Configuration</a>
+                                            <span class="badge bg-primary-dark ms-2">Workshop</span>
+                                        </td>
+                                        <td>Interactive workshop on advanced configuration techniques</td>
+                                        <td>Workshop Room A</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>12:30 PM - 2:00 PM</td>
+                                        <td>
+                                            Lunch
+                                            <span class="badge bg-secondary ms-2">Lunch</span>
+                                        </td>
+                                        <td>Buffet lunch with themed tables for networking</td>
+                                        <td>Dining Hall</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2:00 PM - 3:30 PM</td>
+                                        <td>
+                                            <a href="#">Security Monitoring Best Practices</a>
+                                            <span class="badge bg-primary-dark ms-2">Technical</span>
+                                        </td>
+                                        <td>Learn how to integrate security monitoring with your existing infrastructure</td>
+                                        <td>Room 101</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>3:30 PM - 4:00 PM</td>
+                                        <td>
+                                            Coffee Break
+                                            <span class="badge bg-secondary ms-2">Break</span>
+                                        </td>
+                                        <td>Afternoon refreshments</td>
+                                        <td>Atrium</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4:00 PM - 5:30 PM</td>
+                                        <td>
+                                            <a href="#">Birds of a Feather Sessions</a>
+                                            <span class="badge bg-primary-dark ms-2">Networking</span>
+                                        </td>
+                                        <td>Topic-based discussion groups</td>
+                                        <td>Various Rooms</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="day-3" role="tabpanel" aria-labelledby="day-3-tab">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary-dark text-white">
+                        <h3 class="mb-0">Day 3 - June 17, 2025</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 15%">Time</th>
+                                        <th style="width: 25%">Session</th>
+                                        <th style="width: 40%">Description</th>
+                                        <th style="width: 20%">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>8:30 AM - 9:00 AM</td>
+                                        <td>
+                                            Breakfast
+                                            <span class="badge bg-secondary ms-2">Break</span>
+                                        </td>
+                                        <td>Continental breakfast</td>
+                                        <td>Dining Hall</td>
+                                    </tr>
+                                    <tr>
+                                        <td>9:00 AM - 10:30 AM</td>
+                                        <td>
+                                            <a href="#">Cloud Monitoring Strategies</a>
+                                            <span class="badge bg-primary-dark ms-2">Technical</span>
+                                        </td>
+                                        <td>Effective approaches for monitoring cloud-based infrastructure</td>
+                                        <td>Room 102</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>10:30 AM - 11:00 AM</td>
+                                        <td>
+                                            Coffee Break
+                                            <span class="badge bg-secondary ms-2">Break</span>
+                                        </td>
+                                        <td>Morning refreshments</td>
+                                        <td>Atrium</td>
+                                    </tr>
+                                    <tr>
+                                        <td>11:00 AM - 12:30 PM</td>
+                                        <td>
+                                            <a href="#">Hands-on Workshop: Automation</a>
+                                            <span class="badge bg-primary-dark ms-2">Workshop</span>
+                                        </td>
+                                        <td>Learn how to automate monitoring tasks</td>
+                                        <td>Workshop Room B</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>12:30 PM - 2:00 PM</td>
+                                        <td>
+                                            Lunch
+                                            <span class="badge bg-secondary ms-2">Lunch</span>
+                                        </td>
+                                        <td>Final networking lunch</td>
+                                        <td>Dining Hall</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2:00 PM - 3:30 PM</td>
+                                        <td>
+                                            <a href="#">Case Studies: Success Stories</a>
+                                            <span class="badge bg-primary-dark ms-2">Business</span>
+                                        </td>
+                                        <td>Real-world implementation success stories</td>
+                                        <td>Main Hall</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3:30 PM - 4:30 PM</td>
+                                        <td>
+                                            <a href="#">Closing Keynote</a>
+                                            <span class="badge bg-primary-dark ms-2">General</span>
+                                        </td>
+                                        <td>Conference wrap-up and future vision</td>
+                                        <td>Main Hall</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4:30 PM - 5:00 PM</td>
+                                        <td>
+                                            Farewell Reception
+                                            <span class="badge bg-secondary ms-2">Networking</span>
+                                        </td>
+                                        <td>Final networking opportunity</td>
+                                        <td>Main Lobby</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Agenda Legend -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body">
+                <h4 class="mb-3">Legend</h4>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary-dark me-2">Technical</span>
+                        <span>Technical sessions focused on implementation and best practices</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary-dark me-2">Business</span>
+                        <span>Sessions focused on strategy, ROI, and business value</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary-dark me-2">Workshop</span>
+                        <span>Hands-on interactive sessions</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary-dark me-2">General</span>
+                        <span>Sessions appropriate for all attendees</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-secondary me-2">Break/Networking</span>
+                        <span>Scheduled breaks and networking opportunities</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Download Section -->
+<section class="py-5 bg-light-custom">
+    <div class="container text-center">
+        <h2 class="mb-4">Take the Agenda With You</h2>
+        <p class="lead mb-4">Download the complete conference schedule for offline reference.</p>
+        <a href="#" class="btn btn-primary-custom btn-lg">
+            <i class="fas fa-download me-2"></i> Download PDF Schedule
+        </a>
+    </div>
+</section>
+{% endblock %}

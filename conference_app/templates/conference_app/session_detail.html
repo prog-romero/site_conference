@@ -1,0 +1,175 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}{{ session.title }} - Conference 2025{% endblock %}
+
+{% block content %}
+<!-- Session Header -->
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <span class="badge bg-light text-dark mb-3">{{ session.get_track_display }}</span>
+        <h1 class="mb-3">{{ session.title }}</h1>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="mb-4">
+                    <p class="mb-1"><i class="far fa-calendar-alt me-2"></i> {{ session.date|date:"l, F d, Y" }}</p>
+                    <p class="mb-1"><i class="far fa-clock me-2"></i> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</p>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> {{ session.location }}</p>
+                </div>
+                
+                <h5 class="mb-3">Presented by:</h5>
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    {% for speaker in session.speakers.all %}
+                    <a href="{% url 'speaker_detail' speaker.id %}" class="text-decoration-none">
+                        <div class="d-flex align-items-center bg-white text-dark p-2 rounded-pill">
+                            {% if speaker.photo %}
+                            <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                            <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=50&w=50" alt="{{ speaker.name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% endif %}
+                            <span class="fw-bold">{{ speaker.name }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                
+                <a href="#register-interest" class="btn btn-primary-custom">Add to My Schedule</a>
+                <a href="{% url 'sessions' %}" class="btn btn-outline-light ms-2">Back to Sessions</a>
+            </div>
+            <div class="col-md-4 mt-4 mt-md-0">
+                <div class="card bg-white text-dark p-3 rounded shadow">
+                    <h5 class="card-title">Session Details</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent"><strong>Duration:</strong> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</li>
+                        <li class="list-group-item bg-transparent"><strong>Track:</strong> {{ session.get_track_display }}</li>
+                        <li class="list-group-item bg-transparent"><strong>Location:</strong> {{ session.location }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Session Description -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h2 class="section-title mb-4">About This Session</h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <p class="card-text">{{ session.description|linebreaks }}</p>
+                    </div>
+                </div>
+                
+                <!-- What You'll Learn (placeholder) -->
+                <h3 class="mt-5 mb-4">What You'll Learn</h3>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Understanding of key concepts and principles</li>
+                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Practical techniques you can apply immediately</li>
+                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Best practices for implementation</li>
+                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Strategies for overcoming common challenges</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Who Should Attend (placeholder) -->
+                <h3 class="mt-5 mb-4">Who Should Attend</h3>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <p>This session is ideal for:</p>
+                        <ul>
+                            <li>IT Professionals looking to expand their knowledge</li>
+                            <li>System Administrators seeking practical solutions</li>
+                            <li>Technology Managers interested in implementation strategies</li>
+                            <li>Anyone wanting to stay current with industry trends</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mt-5 mt-lg-0">
+                <!-- Speakers Section -->
+                <h3 class="mb-4">About the Speakers</h3>
+                {% for speaker in session.speakers.all %}
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            {% if speaker.photo %}
+                            <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% else %}
+                            <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=100&w=100" alt="{{ speaker.name }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% endif %}
+                            <div>
+                                <h5 class="card-title mb-0">{{ speaker.name }}</h5>
+                                <p class="card-text text-muted mb-0">{{ speaker.title }}</p>
+                                <p class="card-text"><small>{{ speaker.organization }}</small></p>
+                            </div>
+                        </div>
+                        <p class="card-text">{{ speaker.bio|truncatewords:30 }}</p>
+                        <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-sm btn-outline-primary-custom">Full Bio</a>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Related Sessions -->
+                <h3 class="mb-4">Related Sessions</h3>
+                <div class="list-group mb-4">
+                    <!-- Placeholder related sessions - in a real app, this would be dynamically generated -->
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Advanced Techniques</h5>
+                        </div>
+                        <p class="mb-1">Further exploration of topics covered in this session</p>
+                        <small class="text-muted">June 16, 2:00 PM</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Hands-on Workshop</h5>
+                        </div>
+                        <p class="mb-1">Practice the concepts discussed in this session</p>
+                        <small class="text-muted">June 17, 10:00 AM</small>
+                    </a>
+                </div>
+                
+                <!-- Express Interest Form -->
+                <div id="register-interest" class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary-dark text-white py-3">
+                        <h5 class="mb-0">Add to My Schedule</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Your Name</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="reminder">
+                                <label class="form-check-label" for="reminder">Send me a reminder before the session</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom w-100">Add to My Schedule</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- More Sessions CTA -->
+<section class="py-5 bg-light-custom">
+    <div class="container text-center">
+        <h2 class="mb-4">Explore More Sessions</h2>
+        <p class="lead mb-4">Discover our full lineup of expert-led sessions, workshops, and keynotes.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'sessions' %}" class="btn btn-primary-custom">Browse All Sessions</a>
+            <a href="{% url 'register' %}" class="btn btn-outline-primary-custom">Register Now</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
