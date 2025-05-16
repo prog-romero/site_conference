@@ -131,3 +131,12 @@ def venue_view(request):
 
 def faq_view(request):
     return render(request, 'conference_app/faq.html')
+
+def terms(request):
+    return render(request, 'conference_app/tos.html')
+
+def privacy_policy(request):
+    return render(request, 'conference_app/policy.html')
+
+
+

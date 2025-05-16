@@ -1,3 +1,5 @@
+{% load static %} 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -181,6 +183,25 @@
                 font-size: 1.2rem;
             }
         }
+
+        .brand-logo {
+            opacity: 0.9;  /* Ajustez l'opacité (0.8 à 0.95 pour un bon effet fondu) */
+            transition: opacity 0.3s ease;
+            mix-blend-mode: multiply;  /* Pour un bel effet de fusion */
+            }
+        
+        .brand-logo:hover {
+            opacity: 1;  /* Pleine opacité au survol */
+        }
+        
+        /* Si le fond est sombre, utilisez plutôt : */
+        .navbar-dark .brand-logo {
+            mix-blend-mode: screen;
+            opacity: 0.85;
+        }
+
+
+
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -189,7 +210,10 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary-dark">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
-                <span class="fw-bold fs-4">Conference 2025</span>
+                <img src="/media/logo/conference_logo.jpg" 
+                    alt="Conference IAOUNDE-GRENOBLE"
+                    class="brand-logo"
+                    style="height: 80px;">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -285,8 +309,8 @@
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <p class="mb-0">
-                        <a href="#" class="text-white me-3">Privacy Policy</a>
-                        <a href="#" class="text-white">Terms of Service</a>
+                        <a href="{% url 'policy' %}" class="text-white me-3">Privacy Policy</a>
+                        <a href="{% url 'terms' %}" class="text-white">Terms of Service</a>
                     </p>
                 </div>
             </div>
