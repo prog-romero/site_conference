@@ -7,12 +7,26 @@ from .models import Speaker, Session, AgendaItem, AttendeeType, Attendee
 from .forms import RegistrationForm, ContactForm
 from django.db.models import Q
 from datetime import datetime
+from .forms import SubscribeForm
 
 
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+
+
+from django.http import HttpResponse
+
+from io import StringIO
+from django.utils.timezone import localtime
+from reportlab.pdfgen import canvas
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 
 
@@ -164,6 +178,121 @@ def register(request):
 def registration_success(request):
     return render(request, 'conference_app/registration_success.html')
 
+def agenda_view(request):
+    # Récupérez les jours et les éléments d'agenda depuis la base de données
+    agenda_items = AgendaItem.objects.all().order_by('date', 'start_time')
+    
+    # Regrouper les éléments par date
+    dates = agenda_items.values_list('date', flat=True).distinct()
+    
+    agenda_days = []
+    for date in dates:
+        items = agenda_items.filter(date=date)
+        agenda_days.append({
+            'date': date,
+            'date_formatted': date.strftime("%A, %B %d, %Y"),
+            'items': items
+        })
+    
+    context = {
+        'agenda_days': agenda_days
+    }
+    return render(request, 'conference_app/agenda.html', context)
+
+def download_agenda(request):
+    # Récupérer les éléments de l'agenda
+    agenda_items = AgendaItem.objects.all().order_by('date', 'start_time')
+    
+    # Regrouper les éléments par date
+    dates = agenda_items.values_list('date', flat=True).distinct()
+    
+    agenda_days = []
+    for date in dates:
+        items = agenda_items.filter(date=date)
+        agenda_days.append({
+            'date': date,
+            'date_formatted': date.strftime("%A, %B %d, %Y"),
+            'items': items
+        })
+    
+    # Créer un buffer pour le PDF
+    buffer = BytesIO()
+    
+    # Créer le canvas PDF
+    p = canvas.Canvas(buffer, pagesize=letter)
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    
+    # Titre du document
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(300, 750, "Conference Agenda")
+    p.setFont("Helvetica", 12)
+    
+    y_position = 700  # Position verticale initiale
+    
+    for day in agenda_days:
+        # Titre du jour
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(50, y_position, day['date_formatted'])
+        y_position -= 20
+        
+        # Préparer les données du tableau
+        data = [["Time", "Session", "Type", "Location"]]
+        
+        for item in day['items']:
+            time_str = f"{item.start_time.strftime('%H:%M')} - {item.end_time.strftime('%H:%M')}"
+            
+            data.append([
+                time_str,
+                item.title,
+                item.get_item_type_display(),
+                item.location or ""
+            ])
+        
+        # Créer le tableau
+        table = Table(data, colWidths=[100, 200, 100, 100])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        
+        # Dessiner le tableau
+        table_height = len(data) * 20
+        
+        # Vérifier s'il y a assez d'espace sur la page actuelle
+        if y_position - table_height < 50:
+            p.showPage()
+            y_position = 750
+            p.setFont("Helvetica-Bold", 14)
+            p.drawString(50, y_position, day['date_formatted'] + " (continued)")
+            y_position -= 20
+        
+        table.wrapOn(p, 400, table_height)
+        table.drawOn(p, 50, y_position - table_height)
+        
+        y_position -= table_height + 40
+    
+    # Finaliser le PDF
+    p.showPage()
+    p.save()
+    
+    # Récupérer le PDF depuis le buffer
+    pdf = buffer.getvalue()
+    buffer.close()
+    
+    # Créer la réponse HTTP
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="conference_agenda.pdf"'
+    return response
+    
+
 
 
 def contact_view(request):
@@ -195,6 +324,22 @@ def code_of_conduct(request):
 
 def accessibility(request):
     return render(request, 'conference_app/accessibility.html')
+
+def subscribe(request):
+    if request.method == 'POST':
+        form = SubscribeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Merci pour votre abonnement !')
+            return redirect('home')  # Redirige vers la page d'accueil
+    else:
+        form = SubscribeForm()
+    
+    return render(request, 'votre_template.html', {'form': form})
+
+
+
+
 
 @login_required
 def speaker_create(request):

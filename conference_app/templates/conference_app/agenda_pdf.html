@@ -1,0 +1,39 @@
+{% extends 'conference_app/base_pdf.html' %}
+
+{% block content %}
+<h1>Conference Agenda</h1>
+
+{% for day in agenda_days %}
+<h2>{{ day.date_formatted }}</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Session</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in day.items %}
+        <tr>
+            <td>{{ item.start_time|time:"g:i A" }} - {{ item.end_time|time:"g:i A" }}</td>
+            <td>{{ item.title }}</td>
+            <td>
+                {% if item.item_type == 'session' and item.session %}
+                {{ item.session.get_track_display }}
+                {% else %}
+                {{ item.get_item_type_display }}
+                {% endif %}
+            </td>
+            <td>{{ item.description|default:"" }}</td>
+            <td>{{ item.location|default:"" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+{% endblock %}
+

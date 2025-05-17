@@ -1,5 +1,6 @@
 from django import forms
-from .models import Attendee
+from .models import Attendee,  Subscriber
+
 
 class RegistrationForm(forms.ModelForm):
     class Meta:
@@ -31,3 +32,17 @@ class ContactForm(forms.Form):
         'placeholder': 'Your Message',
         'rows': 5
     }))
+
+
+
+#me
+class SubscribeForm(forms.ModelForm):
+    class Meta:
+        model = Subscriber
+        fields = ['email']
+        widgets = {
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Your email address'
+            })
+        }

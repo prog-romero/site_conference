@@ -22,8 +22,10 @@ urlpatterns = [
     path('accessibility/', views.accessibility, name='accessibility'),
 
     path('admin/', admin.site.urls),
-
+    path('subscribe/', views.subscribe, name='subscribe'),
+    path('agenda/download/', views.download_agenda, name='download_agenda'),
     
+
     # Admin management URLs
     path('dashboard/speaker/add/', views.speaker_create, name='speaker_create'),
     path('dashboard/speaker/<int:pk>/edit/', views.speaker_edit, name='speaker_edit'),

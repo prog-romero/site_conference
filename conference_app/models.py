@@ -73,3 +73,13 @@ class Attendee(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.email}"
+    
+
+
+
+class Subscriber(models.Model):
+    email = models.EmailField(unique=True)
+    date_subscribed = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email
