@@ -184,23 +184,6 @@
             }
         }
 
-        .brand-logo {
-            opacity: 0.9;  /* Ajustez l'opacité (0.8 à 0.95 pour un bon effet fondu) */
-            transition: opacity 0.3s ease;
-            mix-blend-mode: multiply;  /* Pour un bel effet de fusion */
-            }
-        
-        .brand-logo:hover {
-            opacity: 1;  /* Pleine opacité au survol */
-        }
-        
-        /* Si le fond est sombre, utilisez plutôt : */
-        .navbar-dark .brand-logo {
-            mix-blend-mode: screen;
-            opacity: 0.85;
-        }
-
-
 
     </style>
     {% block extra_css %}{% endblock %}
@@ -210,10 +193,10 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary-dark">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
-                <img src="/media/logo/conference_logo.jpg" 
-                    alt="Conference IAOUNDE-GRENOBLE"
+                <img src="{% static 'media/logo.jpg' %}" 
+                    alt="Conference Logo"
                     class="brand-logo"
-                    style="height: 80px;">
+                    style="height: 120px;">  <!-- Ajustez la hauteur selon besoin -->
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -287,8 +270,8 @@
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="{% url 'faq' %}">FAQ</a></li>
                         <li class="mb-2"><a href="{% url 'venue' %}">Venue Information</a></li>
-                        <li class="mb-2"><a href="#">Code of Conduct</a></li>
-                        <li class="mb-2"><a href="#">Accessibility</a></li>
+                        <li class="mb-2"><a href="{% url 'code_of_conduct' %}">Code of Conduct</a></li>
+                        <li class="mb-2"><a href="{% url 'accessibility' %}">Accessibility</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">

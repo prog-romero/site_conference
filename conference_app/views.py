@@ -7,6 +7,15 @@ from .forms import RegistrationForm, ContactForm
 from django.db.models import Q
 from datetime import datetime
 
+
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+
+
+
+
 def home(request):
     featured_speakers = Speaker.objects.all()[:4]
     upcoming_sessions = Session.objects.filter(date__gte=datetime.now().date()).order_by('date', 'start_time')[:5]
@@ -114,6 +123,48 @@ def register_view(request):
     
     return render(request, 'conference_app/register.html', {'form': form})
 
+#moi
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            # Sauvegarde de l'inscription
+            registration = form.save()
+            
+            # Préparation de l'email
+            subject = 'Confirmation de votre inscription à Conference 2025'
+            html_message = render_to_string('conference_app/email_confirmation.html', {
+                'name': registration.name,
+                'event_name': 'Conference 2025',
+                'event_date': 'June 15-17, 2025',
+                'event_location': 'Conference Center',
+            })
+            plain_message = strip_tags(html_message)
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to_email = registration.email
+            
+            # Envoi de l'email
+            send_mail(
+                subject,
+                plain_message,
+                from_email,
+                [to_email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            
+            return redirect('registration_success')
+    else:
+        form = RegistrationForm()
+    
+    return render(request, 'conference_app/register.html', {'form': form})
+
+#moi
+def registration_success(request):
+    return render(request, 'conference_app/registration_success.html')
+
+
+
 def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
@@ -138,5 +189,9 @@ def terms(request):
 def privacy_policy(request):
     return render(request, 'conference_app/policy.html')
 
+def code_of_conduct(request):
+    return render(request, 'conference_app/code_of_conduct.html')
 
+def accessibility(request):
+    return render(request, 'conference_app/accessibility.html')
 

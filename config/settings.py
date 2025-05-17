@@ -92,15 +92,28 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'conference_app'),
 ]
 
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField' 
+
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Ex: smtp.gmail.com
+EMAIL_PORT = 587  # Pour TLS
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'nathanaelfetue1237@gmail.com'
+EMAIL_HOST_PASSWORD = 'cpasBIEN.c0m'
+DEFAULT_FROM_EMAIL = 'nathanaelfetue1237@gmail.com'

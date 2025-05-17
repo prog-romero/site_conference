@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib import admin
 from . import views
 
 urlpatterns = [
@@ -16,5 +17,9 @@ urlpatterns = [
 
     path('terms/', views.terms, name='terms'),
     path('policy/', views.privacy_policy, name='policy'),
+    path('code_of_conduct/', views.code_of_conduct, name='code_of_conduct'),
+    path('accessibility/', views.accessibility, name='accessibility'),
+
+    path('admin/', admin.site.urls),
 
 ]

@@ -1,0 +1,13 @@
+<!-- templates/conference_app/registration_success.html -->
+{% extends 'conference_app/base.html' %}
+
+{% block content %}
+<section class="py-5 text-center">
+    <div class="container">
+        <h1 class="display-4 text-success mb-4">Inscription réussie !</h1>
+        <p class="lead">Merci pour votre inscription à Conference 2025.</p>
+        <p>Un email de confirmation vous a été envoyé avec les détails de votre inscription.</p>
+        <a href="{% url 'home' %}" class="btn btn-primary-custom mt-4">Retour à l'accueil</a>
+    </div>
+</section>
+{% endblock %}
