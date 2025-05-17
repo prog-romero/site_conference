@@ -1,0 +1,80 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}Manage Session - Conference 2025{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <h1>{% if session %}Edit{% else %}Add New{% endif %} Session</h1>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label class="form-label">Title</label>
+                                <input type="text" name="title" class="form-control" value="{{ session.title|default:'' }}" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="5" required>{{ session.description|default:'' }}</textarea>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" name="date" class="form-control" value="{{ session.date|date:'Y-m-d'|default:'' }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Start Time</label>
+                                    <input type="time" name="start_time" class="form-control" value="{{ session.start_time|time:'H:i'|default:'' }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">End Time</label>
+                                    <input type="time" name="end_time" class="form-control" value="{{ session.end_time|time:'H:i'|default:'' }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Track</label>
+                                <select name="track" class="form-select" required>
+                                    {% for value, label in track_choices %}
+                                    <option value="{{ value }}" {% if session.track == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Location</label>
+                                <input type="text" name="location" class="form-control" value="{{ session.location|default:'' }}" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Speakers</label>
+                                <select name="speakers" class="form-select" multiple required>
+                                    {% for speaker in speakers %}
+                                    <option value="{{ speaker.id }}" {% if speaker in session.speakers.all %}selected{% endif %}>{{ speaker.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">Hold Ctrl/Cmd to select multiple speakers</small>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary-custom">Save Session</button>
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

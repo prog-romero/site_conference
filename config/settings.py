@@ -117,3 +117,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'nathanaelfetue1237@gmail.com'
 EMAIL_HOST_PASSWORD = 'cpasBIEN.c0m'
 DEFAULT_FROM_EMAIL = 'nathanaelfetue1237@gmail.com'
+# Authentication settings
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/'
