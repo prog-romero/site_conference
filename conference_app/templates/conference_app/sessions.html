@@ -40,7 +40,7 @@
         <div class="mb-4">
             <h4>Filter Results:</h4>
             {% if request.GET.search %}<span class="badge bg-primary-dark me-2">Search: "{{ request.GET.search }}"</span>{% endif %}
-            {% if request.GET.track %}<span class="badge bg-primary-dark me-2">Track: {{ tracks|get_item:request.GET.track }}</span>{% endif %}
+            {% if request.GET.track %}<span class="badge bg-primary-dark me-2">Track: {{ tracks.request.GET.track }}</span>{% endif %}
             <a href="{% url 'sessions' %}" class="btn btn-sm btn-outline-secondary">Clear Filters</a>
         </div>
         {% endif %}

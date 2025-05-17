@@ -1,0 +1,52 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}Login - Conference 2025{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h1>Admin Login</h1>
+        <p class="lead">Please login to access the dashboard</p>
+    </div>
+</section>
+
+<!-- Login Form -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="card-title mb-4">Login</h3>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            {% if form.errors %}
+                            <div class="alert alert-danger">
+                                Your username and password didn't match. Please try again.
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label for="id_username" class="form-label">Username</label>
+                                <input type="text" name="username" id="id_username" class="form-control" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_password" class="form-label">Password</label>
+                                <input type="password" name="password" id="id_password" class="form-control" required>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary-custom btn-lg">Login</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

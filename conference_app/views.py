@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, TemplateView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Speaker, Session, AgendaItem, AttendeeType, Attendee
 from .forms import RegistrationForm, ContactForm
 from django.db.models import Q
@@ -131,3 +132,150 @@ def venue_view(request):
 
 def faq_view(request):
     return render(request, 'conference_app/faq.html')
+
+@login_required
+def speaker_create(request):
+    if request.method == 'POST':
+        # Handle form submission
+        speaker = Speaker.objects.create(
+            name=request.POST['name'],
+            title=request.POST['title'],
+            organization=request.POST['organization'],
+            bio=request.POST['bio']
+        )
+        if 'photo' in request.FILES:
+            speaker.photo = request.FILES['photo']
+            speaker.save()
+        messages.success(request, 'Speaker added successfully.')
+        return redirect('dashboard')
+    return render(request, 'admin/speaker_form.html')
+
+@login_required
+def speaker_edit(request, pk):
+    speaker = get_object_or_404(Speaker, pk=pk)
+    if request.method == 'POST':
+        # Handle form submission
+        speaker.name = request.POST['name']
+        speaker.title = request.POST['title']
+        speaker.organization = request.POST['organization']
+        speaker.bio = request.POST['bio']
+        if 'photo' in request.FILES:
+            speaker.photo = request.FILES['photo']
+        speaker.save()
+        messages.success(request, 'Speaker updated successfully.')
+        return redirect('dashboard')
+    return render(request, 'admin/speaker_form.html', {'speaker': speaker})
+
+@login_required
+def session_create(request):
+    if request.method == 'POST':
+        # Handle form submission
+        session = Session.objects.create(
+            title=request.POST['title'],
+            description=request.POST['description'],
+            date=request.POST['date'],
+            start_time=request.POST['start_time'],
+            end_time=request.POST['end_time'],
+            track=request.POST['track'],
+            location=request.POST['location']
+        )
+        session.speakers.set(request.POST.getlist('speakers'))
+        messages.success(request, 'Session added successfully.')
+        return redirect('dashboard')
+    context = {
+        'track_choices': Session.TRACK_CHOICES,
+        'speakers': Speaker.objects.all()
+    }
+    return render(request, 'admin/session_form.html', context)
+
+@login_required
+def session_edit(request, pk):
+    session = get_object_or_404(Session, pk=pk)
+    if request.method == 'POST':
+        # Handle form submission
+        session.title = request.POST['title']
+        session.description = request.POST['description']
+        session.date = request.POST['date']
+        session.start_time = request.POST['start_time']
+        session.end_time = request.POST['end_time']
+        session.track = request.POST['track']
+        session.location = request.POST['location']
+        session.speakers.set(request.POST.getlist('speakers'))
+        session.save()
+        messages.success(request, 'Session updated successfully.')
+        return redirect('dashboard')
+    context = {
+        'session': session,
+        'track_choices': Session.TRACK_CHOICES,
+        'speakers': Speaker.objects.all()
+    }
+    return render(request, 'admin/session_form.html', context)
+
+@login_required
+def agenda_create(request):
+    if request.method == 'POST':
+        # Handle form submission
+        agenda_item = AgendaItem.objects.create(
+            title=request.POST['title'],
+            description=request.POST['description'],
+            date=request.POST['date'],
+            start_time=request.POST['start_time'],
+            end_time=request.POST['end_time'],
+            item_type=request.POST['item_type'],
+            location=request.POST['location'],
+            session_id=request.POST['session'] or None
+        )
+        messages.success(request, 'Agenda item added successfully.')
+        return redirect('dashboard')
+    context = {
+        'item_type_choices': AgendaItem.ITEM_TYPE_CHOICES,
+        'sessions': Session.objects.all()
+    }
+    return render(request, 'admin/agenda_form.html', context)
+
+@login_required
+def agenda_edit(request, pk):
+    agenda_item = get_object_or_404(AgendaItem, pk=pk)
+    if request.method == 'POST':
+        # Handle form submission
+        agenda_item.title = request.POST['title']
+        agenda_item.description = request.POST['description']
+        agenda_item.date = request.POST['date']
+        agenda_item.start_time = request.POST['start_time']
+        agenda_item.end_time = request.POST['end_time']
+        agenda_item.item_type = request.POST['item_type']
+        agenda_item.location = request.POST['location']
+        agenda_item.session_id = request.POST['session'] or None
+        agenda_item.save()
+        messages.success(request, 'Agenda item updated successfully.')
+        return redirect('dashboard')
+    context = {
+        'agenda_item': agenda_item,
+        'item_type_choices': AgendaItem.ITEM_TYPE_CHOICES,
+        'sessions': Session.objects.all()
+    }
+    return render(request, 'admin/agenda_form.html', context)
+
+@login_required
+def attendee_type_create(request):
+    if request.method == 'POST':
+        # Handle form submission
+        AttendeeType.objects.create(
+            name=request.POST['name'],
+            description=request.POST['description']
+        )
+        messages.success(request, 'Attendee type added successfully.')
+        return redirect('dashboard')
+    return render(request, 'admin/attendee_type_form.html')
+
+@login_required
+def attendee_type_edit(request, pk):
+    attendee_type = get_object_or_404(AttendeeType, pk=pk)
+    if request.method == 'POST':
+        # Handle form submission
+        attendee_type.name = request.POST['name']
+        attendee_type.description = request.POST['description']
+        attendee_type.save()
+        messages.success(request, 'Attendee type updated successfully.')
+        return redirect('dashboard')
+    return render(request, 'admin/attendee_type_form.html', {'attendee_type': attendee_type})
