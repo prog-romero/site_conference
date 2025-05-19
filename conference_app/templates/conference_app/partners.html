@@ -1,0 +1,69 @@
+{% extends 'conference_app/base_pdf.html' %}
+
+{% block title %}Partenaires - IAOUNDE Conference{% endblock %}
+
+{% block content %}
+    <!-- En-tête de page -->
+    <section class="page-header">
+        <div class="container">
+            <h1 class="page-title">Partenaires</h1>
+            <p class="page-subtitle">Les organisations qui rendent cette conférence possible</p>
+        </div>
+    </section>
+
+    <!-- Partenaires Platine -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Partenaires Platine</h2>
+            </div>
+            
+            <div class="partners-grid partners-grid-large">
+                <div class="partner-card">
+                    <img src="{% static 'images/partners/partner1.png' %}" alt="Google">
+                    <div class="partner-info">
+                        <h3>Google</h3>
+                        <p>Leader mondial en intelligence artificielle et technologies numériques</p>
+                        <a href="https://google.com" target="_blank" rel="noopener noreferrer" class="partner-link">Visiter le site</a>
+                    </div>
+                </div>
+                
+                <div class="partner-card">
+                    <img src="{% static 'images/partners/partner2.png' %}" alt="Ministère de la Recherche Scientifique">
+                    <div class="partner-info">
+                        <h3>Ministère de la Recherche Scientifique</h3>
+                        <p>Institution gouvernementale camerounaise dédiée à la promotion de la recherche</p>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="partner-link">Visiter le site</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partenaires Or -->
+    <section class="section section-alt">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Partenaires Or</h2>
+            </div>
+            
+            <div class="partners-grid">
+                <div class="partner-card">
+                    <img src="{% static 'images/partners/partner3.png' %}" alt="Microsoft">
+                    <h3>Microsoft</h3>
+                </div>
+                
+                <div class="partner-card">
+                    <img src="{% static 'images/partners/partner4.png' %}" alt="IBM">
+                    <h3>IBM</h3>
+                </div>
+                
+                <div class="partner-card">
+                    <img src="{% static 'images/partners/partner5.png' %}" alt="Université de Yaoundé I">
+                    <h3>Université de Yaoundé I</h3>
+                </div>
+            </div>
+        </div>
+    </section>  
+
+{% endblock %}

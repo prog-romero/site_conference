@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Speaker, Session, AgendaItem, Attendee, AttendeeType
+from .models import Speaker, Session, AgendaItem, Attendee, AttendeeType, Partner
 
 @admin.register(Speaker)
 class SpeakerAdmin(admin.ModelAdmin):
@@ -28,3 +28,11 @@ class AttendeeAdmin(admin.ModelAdmin):
 @admin.register(AttendeeType)
 class AttendeeTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
+
+
+
+@admin.register(Partner)
+class PartnerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'website', 'is_active')
+    search_fields = ('name',)
+    list_filter = ('is_active',)

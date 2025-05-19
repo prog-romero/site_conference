@@ -3,6 +3,37 @@
 {% block title %}Conference 2025 - The Premier IT Event{% endblock %}
 
 {% block content %}
+
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<style>
+  .swiper {
+    width: 100%;
+    padding: 20px 0;
+  }
+  .swiper-slide {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+  }
+  .swiper-slide:hover {
+    transform: scale(1.05);
+  }
+  .partner-logo {
+    max-height: 60px;
+    max-width: 100%;
+    object-fit: contain;
+  }
+</style>
+
+
+
+
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
@@ -357,6 +388,51 @@
     </div>
 </section>
 
+
+
+<!-- Partners Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="section-title">Our Valued Partners</h2>
+      <p class="lead">We're grateful for the support of these organizations who make this conference possible</p>
+    </div>
+
+    <div class="swiper mySwiper">
+      <div class="swiper-wrapper">
+        {% for partner in partners %}
+        <div class="swiper-slide">
+          <div class="partner-card text-center p-3 bg-white shadow-sm rounded">
+            <div class="partner-logo-container mb-2">
+              {% if partner.logo %}
+              <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo">
+              {% else %}
+              <div class="partner-initials">{{ partner.name|slice:":2"|upper }}</div>
+              {% endif %}
+            </div>
+            <h5 class="mb-1">{{ partner.name }}</h5>
+            {% if partner.website %}
+            <a href="{{ partner.website }}" target="_blank" class="small text-primary">
+              Visit Website <i class="fas fa-external-link-alt ms-1"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
 <!-- CTA Section -->
 <section class="py-5 bg-primary-dark text-white text-center">
     <div class="container">
@@ -365,4 +441,6 @@
         <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Today</a>
     </div>
 </section>
+
+
 {% endblock %}

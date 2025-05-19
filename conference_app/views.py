@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView, TemplateView
+from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Speaker, Session, AgendaItem, AttendeeType, Attendee
+from .models import Speaker, Session, AgendaItem, AttendeeType, Attendee, Partner
 from .forms import RegistrationForm, ContactForm
 from django.db.models import Q
 from datetime import datetime
-from .forms import SubscribeForm
+from .forms import SubscribeForm, PartnerForm
+
+from django.urls import reverse_lazy
 
 
 from django.core.mail import send_mail
@@ -35,11 +37,13 @@ def home(request):
     featured_speakers = Speaker.objects.all()[:4]
     upcoming_sessions = Session.objects.filter(date__gte=datetime.now().date()).order_by('date', 'start_time')[:5]
     attendee_types = AttendeeType.objects.all()
+    partners = Partner.objects.filter(is_active=True).order_by('name')  # Récupération des partenaires actifs
     
     context = {
         'featured_speakers': featured_speakers,
         'upcoming_sessions': upcoming_sessions,
         'attendee_types': attendee_types,
+        'partners': partners,  # Ajout des partenaires au contexte
     }
     return render(request, 'conference_app/home.html', context)
 
@@ -112,19 +116,6 @@ class AgendaView(TemplateView):
         context['agenda_days'] = agenda_by_date.values()
         return context
 
-@login_required
-def dashboard_view(request):
-    context = {
-        'total_registrations': Attendee.objects.count(),
-        'total_sessions': Session.objects.count(),
-        'total_speakers': Speaker.objects.count(),
-        'recent_registrations': Attendee.objects.all().order_by('-registration_date')[:10],
-        'speakers': Speaker.objects.all(),
-        'sessions': Session.objects.all().order_by('date', 'start_time'),
-        'agenda_items': AgendaItem.objects.all().order_by('date', 'start_time'),
-        'attendee_types': AttendeeType.objects.all(),
-    }
-    return render(request, 'conference_app/dashboard.html', context)
 
 def register_view(request):
     if request.method == 'POST':
@@ -338,6 +329,128 @@ def subscribe(request):
     return render(request, 'votre_template.html', {'form': form})
 
 
+# Ajout des nouvelles vues pour les partenaires
+class PartnerListView(ListView):
+    model = Partner
+    template_name = 'conference_app/partners.html'
+    context_object_name = 'partners'
+    queryset = Partner.objects.filter(is_active=True).order_by('name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = "Nos Partenaires"
+        return context
+    
+
+
+class PartnerDetailView(DetailView):
+    model = Partner
+    template_name = 'conference_app/partner_detail.html'
+    context_object_name = 'partner'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"Partenaire - {self.object.name}"
+        return context
+
+# Vue pour le téléchargement du PDF des partenaires
+def download_partners_pdf(request):
+    partners = Partner.objects.filter(is_active=True).order_by('name')
+    
+    # Création du PDF
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    
+    # Titre du document
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawCentredString(300, 750, "Partenaires de la Conférence")
+    pdf.setFont("Helvetica", 12)
+    
+    y_position = 700  # Position verticale initiale
+    
+    for partner in partners:
+        # Nom du partenaire
+        pdf.setFont("Helvetica-Bold", 14)
+        pdf.drawString(50, y_position, partner.name)
+        y_position -= 20
+        
+        # Description si elle existe
+        if partner.description:
+            pdf.setFont("Helvetica", 12)
+            pdf.drawString(50, y_position, partner.description)
+            y_position -= 20
+        
+        # Site web si il existe
+        if partner.website:
+            pdf.setFont("Helvetica-Oblique", 12)
+            pdf.drawString(50, y_position, f"Site web: {partner.website}")
+            y_position -= 20
+        
+        # Séparateur
+        y_position -= 20
+        
+        # Nouvelle page si nécessaire
+        if y_position < 100:
+            pdf.showPage()
+            y_position = 750
+            pdf.setFont("Helvetica-Bold", 16)
+            pdf.drawCentredString(300, 750, "Partenaires de la Conférence (suite)")
+            pdf.setFont("Helvetica", 12)
+    
+    # Finalisation du PDF
+    pdf.showPage()
+    pdf.save()
+    
+    # Récupération du PDF depuis le buffer
+    pdf_data = buffer.getvalue()
+    buffer.close()
+    
+    # Création de la réponse HTTP
+    response = HttpResponse(pdf_data, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="partenaires_conference.pdf"'
+    return response
+
+
+
+# === Partenaires dans le dashboard ===
+
+class PartnerAdminListView(ListView):
+    model = Partner
+    template_name = 'conference_app/dashboard/partner_list.html'
+    context_object_name = 'partners'
+    ordering = ['name']
+    paginate_by = 10
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = "Gestion des Partenaires"
+        return context
+
+
+@login_required
+def dashboard_view(request):
+
+    partner_count = Partner.objects.count()
+    active_partners = Partner.objects.filter(is_active=True).count()
+    recent_partners = Partner.objects.order_by('-created_at')[:6]
+    context = {
+        'total_registrations': Attendee.objects.count(),
+        'total_sessions': Session.objects.count(),
+        'total_speakers': Speaker.objects.count(),
+        'recent_registrations': Attendee.objects.all().order_by('-registration_date')[:10],
+        'speakers': Speaker.objects.all(),
+        'sessions': Session.objects.all().order_by('date', 'start_time'),
+        'agenda_items': AgendaItem.objects.all().order_by('date', 'start_time'),
+        'attendee_types': AttendeeType.objects.all(),
+
+        'partner_count': partner_count,
+        'active_partners': active_partners,
+        'recent_partners': recent_partners,
+        'partners': Partner.objects.all(),
+        'page_title': "Tableau de bord Administrateur"
+    }
+
+    return render(request, 'conference_app/dashboard.html', context)
 
 
 
@@ -487,3 +600,53 @@ def attendee_type_edit(request, pk):
         messages.success(request, 'Attendee type updated successfully.')
         return redirect('dashboard')
     return render(request, 'admin/attendee_type_form.html', {'attendee_type': attendee_type})
+
+
+
+
+@login_required
+def partner_create(request):
+    if request.method == 'POST':
+
+        is_active = request.POST.get('is_active') == 'on'
+        
+        # Handle form submission
+        partner = Partner.objects.create(
+            name=request.POST['name'],
+            description=request.POST['description'],
+            website=request.POST['website'],
+            is_active=is_active
+        )
+        if 'logo' in request.FILES:
+            partner.logo = request.FILES['logo']
+            partner.save()
+        messages.success(request, 'Partner added successfully.')
+        return redirect('dashboard')
+    return render(request, 'admin/partner_form.html')
+
+@login_required
+def partner_edit(request, pk):
+    partner = get_object_or_404(Partner, pk=pk)
+    if request.method == 'POST':
+
+        
+        # Handle form submission
+        partner.name = request.POST['name']
+        partner.description = request.POST['description']
+        partner.website = request.POST['website']
+        partner.is_active = request.POST.get('is_active', True) == 'on'
+        if 'logo' in request.FILES:
+            partner.logo = request.FILES['logo']
+        partner.save()
+        messages.success(request, 'Partner updated successfully.')
+        return redirect('dashboard')
+    return render(request, 'admin/partner_form.html', {'partner': partner})
+
+@login_required
+def partner_delete(request, pk):
+    partner = get_object_or_404(Partner, pk=pk)
+    if request.method == 'POST':
+        partner.delete()
+        messages.success(request, 'Partner deleted successfully.')
+        return redirect('dashboard')
+    return render(request, 'admin/partner_confirm_delete.html', {'partner': partner})

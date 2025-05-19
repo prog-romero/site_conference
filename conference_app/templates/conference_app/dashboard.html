@@ -32,6 +32,10 @@
                             <span>Total Speakers:</span>
                             <strong>{{ total_speakers }}</strong>
                         </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <span>Total Partners:</span>
+                            <strong>{{ partner_count }}</strong>
+                        </div>
                     </div>
                 </div>
 
@@ -51,6 +55,9 @@
                     <a href="#attendee-types" class="list-group-item list-group-item-action" data-bs-toggle="list">
                         <i class="fas fa-tags me-2"></i> Attendee Types
                     </a>
+                        <a href="#partners" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                            <i class="fas fa-handshake me-2"></i> Partners
+                        </a>
                 </div>
             </div>
 
@@ -288,6 +295,76 @@
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- Dans la partie Main Content Area, après les autres onglets -->
+                <div class="tab-pane fade" id="partners">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Partners</h5>
+                                <div>
+                                    <a href="{% url 'download_partners_pdf' %}" class="btn btn-outline-secondary btn-sm me-2">
+                                        <i class="fas fa-download me-1"></i> Export PDF
+                                    </a>
+                                    <a href="{% url 'partner_create' %}" class="btn btn-primary-custom btn-sm">
+                                        <i class="fas fa-plus me-1"></i> Add Partner
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Logo</th>
+                                            <th>Website</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for partner in partners %}
+                                        <tr>
+                                            <td>{{ partner.name }}</td>
+                                            <td>
+                                                {% if partner.logo %}
+                                                <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" style="max-height: 30px;">
+                                                {% else %} - {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if partner.website %}
+                                                <a href="{{ partner.website }}" target="_blank">Visit</a>
+                                                {% else %} - {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if partner.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                                    {{ partner.is_active|yesno:"Active,Inactive" }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'partner_edit' partner.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'partner_delete' partner.id %}" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">No partners found</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

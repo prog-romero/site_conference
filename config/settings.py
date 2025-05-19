@@ -115,7 +115,7 @@ EMAIL_HOST = 'smtp.gmail.com'  # Ex: smtp.gmail.com
 EMAIL_PORT = 587  # Pour TLS
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'nathanaelfetue1237@gmail.com'
-EMAIL_HOST_PASSWORD = 'jvbjkejveves_112'
+EMAIL_HOST_PASSWORD = 'jvbjkejveves_112 '
 DEFAULT_FROM_EMAIL = 'nathanaelfetue1237@gmail.com'
 # Authentication settings
 LOGIN_REDIRECT_URL = '/dashboard/'

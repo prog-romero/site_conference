@@ -1,5 +1,5 @@
 from django import forms
-from .models import Attendee,  Subscriber
+from .models import Attendee,  Subscriber, Partner
 
 
 class RegistrationForm(forms.ModelForm):
@@ -45,4 +45,14 @@ class SubscribeForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Your email address'
             })
+        }
+
+
+
+class PartnerForm(forms.ModelForm):
+    class Meta:
+        model = Partner
+        fields = ['name', 'logo', 'website', 'description', 'is_active']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
         }

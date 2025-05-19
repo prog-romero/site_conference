@@ -83,3 +83,15 @@ class Subscriber(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class Partner(models.Model):
+    name = models.CharField(max_length=100)
+    logo = models.ImageField(upload_to='partners/', blank=True, null=True)
+    website = models.URLField(blank=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

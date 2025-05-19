@@ -24,6 +24,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('subscribe/', views.subscribe, name='subscribe'),
     path('agenda/download/', views.download_agenda, name='download_agenda'),
+    path('partners/', views.PartnerListView.as_view(), name='partners'),  # Nouvelle URL
+    path('partners/<int:pk>/', views.PartnerDetailView.as_view(), name='partner_detail'),  # Nouvelle URL
+    path('partners/download/', views.download_partners_pdf, name='download_partners_pdf'),  # Nouvelle URL
+    
     
 
     # Admin management URLs
@@ -35,4 +39,12 @@ urlpatterns = [
     path('dashboard/agenda/<int:pk>/edit/', views.agenda_edit, name='agenda_edit'),
     path('dashboard/attendee-type/add/', views.attendee_type_create, name='attendee_type_create'),
     path('dashboard/attendee-type/<int:pk>/edit/', views.attendee_type_edit, name='attendee_type_edit'),
+
+
+
+    # Dans urlpatterns, ajoute ces paths pour la gestion des partenaires dans le dashboard
+    path('dashboard/partners/', views.PartnerAdminListView.as_view(), name='partner_list'),
+    path('dashboard/partner/add/', views.partner_create, name='partner_create'),
+    path('dashboard/partner/<int:pk>/edit/', views.partner_edit, name='partner_edit'),
+    path('dashboard/partner/<int:pk>/delete/', views.partner_delete, name='partner_delete'),
 ]
