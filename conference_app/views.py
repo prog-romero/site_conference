@@ -13,20 +13,24 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Attendee, Speaker, Session, AgendaItem, AttendeeType
+from django.utils import timezone
+
 
 
 def home(request):
     featured_speakers = Speaker.objects.all()[:4]
-    upcoming_sessions = Session.objects.filter(date__gte=datetime.now().date()).order_by('date', 'start_time')[:5]
+    upcoming_sessions = Session.objects.filter(date__gte=timezone.now().date()).order_by('date', 'start_time')[:5]
+    latest_session = Session.objects.filter(date__gte=timezone.now().date()).order_by('date', 'start_time').first()
     attendee_types = AttendeeType.objects.all()
     
     context = {
         'featured_speakers': featured_speakers,
         'upcoming_sessions': upcoming_sessions,
         'attendee_types': attendee_types,
+        'latest_session': latest_session,
     }
     return render(request, 'conference_app/home.html', context)
-
+ 
 class SpeakerListView(ListView):
     model = Speaker
     template_name = 'conference_app/speakers.html'
