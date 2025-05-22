@@ -18,6 +18,14 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Attendee, Speaker, Session, AgendaItem, AttendeeType
+
+
 from django.http import HttpResponse
 
 from io import StringIO
@@ -31,6 +39,12 @@ from reportlab.platypus import Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
 
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Attendee, Speaker, Session, AgendaItem, AttendeeType
 
 
 def home(request):
@@ -290,13 +304,46 @@ def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            # Process form data (in a real app, send email)
-            messages.success(request, 'Your message has been sent. We will get back to you soon!')
-            return redirect('contact')
+            # Récupération des données du formulaire
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+            
+            # Construction du message
+            full_message = f"""
+            Nouveau message de contact:
+            
+            De: {name} <{email}>
+            Sujet: {subject}
+            
+            Message:
+            {message}
+            """
+            
+            try:
+                # Envoi de l'email
+                send_mail(
+                    subject=f"Message de contact: {subject}",
+                    message=full_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.DEFAULT_FROM_EMAIL],
+                    fail_silently=False,
+                )
+                
+                # Message de succès
+                messages.success(request, "Votre message a bien été envoyé ! Nous vous répondrons dès que possible.")
+                return redirect('contact')  # Redirige vers la même page contact
+                
+            except Exception as e:
+                messages.error(request, f"Une erreur est survenue lors de l'envoi du message. Veuillez réessayer. Erreur: {str(e)}")
+                return redirect('contact')
     else:
         form = ContactForm()
     
     return render(request, 'conference_app/contact.html', {'form': form})
+
+
 
 def venue_view(request):
     return render(request, 'conference_app/venue.html')
@@ -650,3 +697,55 @@ def partner_delete(request, pk):
         messages.success(request, 'Partner deleted successfully.')
         return redirect('dashboard')
     return render(request, 'admin/partner_confirm_delete.html', {'partner': partner})
+# Vue pour supprimer un participant (Attendee)
+@login_required
+def delete_attendee(request, pk):
+    attendee = get_object_or_404(Attendee, pk=pk)
+    if request.method == 'POST':
+        attendee.delete()
+        messages.success(request, f"Registration for {attendee.name} has been deleted successfully.")
+        return redirect('dashboard')
+    return redirect('dashboard')
+
+# Vue pour supprimer un speaker
+@login_required
+def delete_speaker(request, pk):
+    speaker = get_object_or_404(Speaker, pk=pk)
+    if request.method == 'POST':
+        speaker_name = speaker.name
+        speaker.delete()
+        messages.success(request, f"Speaker {speaker_name} has been deleted successfully.")
+        return redirect('dashboard')
+    
+# Vue pour supprimer une session
+@login_required
+def delete_session(request, pk):
+    session = get_object_or_404(Session, pk=pk)
+    if request.method == 'POST':
+        session_title = session.title
+        session.delete()
+        messages.success(request, f"Session '{session_title}' has been deleted successfully.")
+        return redirect('dashboard')
+    return redirect('dashboard')
+
+# Vue pour supprimer un élément d'agenda
+@login_required
+def delete_agenda_item(request, pk):
+    agenda_item = get_object_or_404(AgendaItem, pk=pk)
+    if request.method == 'POST':
+        item_title = agenda_item.title
+        agenda_item.delete()
+        messages.success(request, f"Agenda item '{item_title}' has been deleted successfully.")
+        return redirect('dashboard')
+    return redirect('dashboard')
+
+# Vue pour supprimer un type de participant
+@login_required
+def delete_attendee_type(request, pk):
+    attendee_type = get_object_or_404(AttendeeType, pk=pk)
+    if request.method == 'POST':
+        type_name = attendee_type.name
+        attendee_type.delete()
+        messages.success(request, f"Attendee type '{type_name}' has been deleted successfully.")
+        return redirect('dashboard')
+    return redirect('dashboard')

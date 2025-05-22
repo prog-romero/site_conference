@@ -120,3 +120,14 @@ DEFAULT_FROM_EMAIL = 'nathanaelfetue1237@gmail.com'
 # Authentication settings
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Pour Gmail
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'romerotchiazefouosso@gmail.com'  # Votre adresse Gmail
+EMAIL_HOST_PASSWORD = 'qzza hzgf zgfe jnyb '  # Mot de passe d'application (voir étape 2)
+DEFAULT_FROM_EMAIL = 'romerotchiazefouosso@gmail.com'  # Adresse d'expéditeur par défaut

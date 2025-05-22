@@ -1,6 +1,13 @@
 from django.urls import path
 from django.contrib import admin
 from . import views
+from django.urls import path
+from .views import (
+    delete_attendee, delete_speaker, 
+    delete_session, delete_agenda_item,
+    delete_attendee_type
+)
+
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -47,4 +54,10 @@ urlpatterns = [
     path('dashboard/partner/add/', views.partner_create, name='partner_create'),
     path('dashboard/partner/<int:pk>/edit/', views.partner_edit, name='partner_edit'),
     path('dashboard/partner/<int:pk>/delete/', views.partner_delete, name='partner_delete'),
+
+    path('dashboard/attendee/delete/<int:pk>/', delete_attendee, name='delete_attendee'),
+    path('dashboard/speaker/delete/<int:pk>/', delete_speaker, name='delete_speaker'),
+    path('dashboard/session/delete/<int:pk>/', delete_session, name='delete_session'),
+    path('dashboard/agenda/delete/<int:pk>/', delete_agenda_item, name='delete_agenda_item'),
+    path('dashboard/attendee-type/delete/<int:pk>/', delete_attendee_type, name='delete_attendee_type'),
 ]
