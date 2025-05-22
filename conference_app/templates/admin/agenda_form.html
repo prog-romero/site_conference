@@ -15,8 +15,25 @@
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
-                        <form method="post">
+                        <form method="post" id="agendaForm">
                             {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Related Session</label>
+                                <select name="session" id="sessionSelect" class="form-select" required>
+                                    <option value="">Select a Session</option>
+                                    {% for session in sessions %}
+                                    <option value="{{ session.id }}" 
+                                        data-date="{{ session.date|date:'Y-m-d' }}"
+                                        data-start-time="{{ session.start_time|time:'H:i' }}"
+                                        data-end-time="{{ session.end_time|time:'H:i' }}"
+                                        {% if agenda_item.session_id == session.id %}selected{% endif %}>
+                                        {{ session.title }} ({{ session.date|date:"M d" }} {{ session.start_time|time:"H:i" }}-{{ session.end_time|time:"H:i" }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
                             <div class="mb-4">
                                 <label class="form-label">Title</label>
                                 <input type="text" name="title" class="form-control" value="{{ agenda_item.title|default:'' }}" required>
@@ -30,15 +47,15 @@
                             <div class="row mb-4">
                                 <div class="col-md-4">
                                     <label class="form-label">Date</label>
-                                    <input type="date" name="date" class="form-control" value="{{ agenda_item.date|date:'Y-m-d'|default:'' }}" required>
+                                    <input type="date" name="date" id="dateInput" class="form-control" value="{{ agenda_item.date|date:'Y-m-d'|default:'' }}" required readonly>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Start Time</label>
-                                    <input type="time" name="start_time" class="form-control" value="{{ agenda_item.start_time|time:'H:i'|default:'' }}" required>
+                                    <input type="time" name="start_time" id="startTimeInput" class="form-control" value="{{ agenda_item.start_time|time:'H:i'|default:'' }}" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">End Time</label>
-                                    <input type="time" name="end_time" class="form-control" value="{{ agenda_item.end_time|time:'H:i'|default:'' }}" required>
+                                    <input type="time" name="end_time" id="endTimeInput" class="form-control" value="{{ agenda_item.end_time|time:'H:i'|default:'' }}" required>
                                 </div>
                             </div>
                             
@@ -53,17 +70,7 @@
                             
                             <div class="mb-4">
                                 <label class="form-label">Location</label>
-                                <input type="text" name="location" class="form-control" value="{{ agenda_item.location|default:'' }}">
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label">Related Session</label>
-                                <select name="session" class="form-select">
-                                    <option value="">No Related Session</option>
-                                    {% for session in sessions %}
-                                    <option value="{{ session.id }}" {% if agenda_item.session_id == session.id %}selected{% endif %}>{{ session.title }}</option>
-                                    {% endfor %}
-                                </select>
+                                <input type="text" name="location" id="locationInput" class="form-control" value="{{ agenda_item.location|default:'' }}">
                             </div>
                             
                             <div class="d-flex gap-2">
@@ -77,4 +84,58 @@
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sessionSelect = document.getElementById('sessionSelect');
+    const dateInput = document.getElementById('dateInput');
+    const startTimeInput = document.getElementById('startTimeInput');
+    const endTimeInput = document.getElementById('endTimeInput');
+    const locationInput = document.getElementById('locationInput');
+    const agendaForm = document.getElementById('agendaForm');
+
+    // Update fields when session is selected
+    sessionSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            // Set date from session data
+            dateInput.value = selectedOption.dataset.date;
+            
+            // Set default times from session
+            startTimeInput.value = selectedOption.dataset.startTime;
+            endTimeInput.value = selectedOption.dataset.endTime;
+            
+            // Set location from session (if available)
+            if (selectedOption.dataset.location) {
+                locationInput.value = selectedOption.dataset.location;
+            }
+        } else {
+            // Clear fields if no session selected
+            dateInput.value = '';
+            startTimeInput.value = '';
+            endTimeInput.value = '';
+        }
+    });
+
+    // Validate time range on form submission
+    agendaForm.addEventListener('submit', function(e) {
+        const startTime = startTimeInput.value;
+        const endTime = endTimeInput.value;
+        const sessionStart = sessionSelect.options[sessionSelect.selectedIndex]?.dataset.startTime;
+        const sessionEnd = sessionSelect.options[sessionSelect.selectedIndex]?.dataset.endTime;
+        
+        if (sessionSelect.value && (startTime < sessionStart || endTime > sessionEnd)) {
+            e.preventDefault();
+            alert('Agenda item time must be within the selected session time range (' + 
+                  sessionStart + ' to ' + sessionEnd + ')');
+        }
+    });
+
+    // Trigger change event if session is pre-selected (edit mode)
+    if (sessionSelect.value) {
+        sessionSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
 {% endblock %}

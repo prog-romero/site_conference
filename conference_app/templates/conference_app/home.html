@@ -1,6 +1,6 @@
 {% extends 'conference_app/base.html' %}
 
-{% block title %}Conference 2025 - The Premier IT Event{% endblock %}
+{% block title %}{% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %} - The Premier IT Event{% endblock %}
 
 {% block content %}
 
@@ -37,14 +37,14 @@
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
-        <h1 class="hero-title">Conference 2025</h1>
-        <p class="hero-subtitle">The Premier IT Event Returns.</p>
+        <h1 class="hero-title">{% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %}</h1>
+        <p class="hero-subtitle">{% if latest_session %}{{ latest_session.description }}{% else %}The Premier IT Event Returns.{% endif %}</p>
         <div class="d-flex gap-3 justify-content-center">
             <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Now</a>
             <a href="{% url 'sessions' %}" class="btn btn-outline-light btn-lg">Explore Sessions</a>
         </div>
     </div>
-</section>
+</section> 
 
 <!-- About Section -->
 <section class="py-5 bg-light-custom">
@@ -187,7 +187,7 @@
                             <i class="fas fa-certificate"></i>
                         </div>
                         <h4 class="card-title mb-3">Certify</h4>
-                        <p class="card-text">Receive a discount code for the Certified Professional – Core certification exam</p>
+                        <p class="card-text">Receive a discount code for the Certified Professional - Core certification exam</p>
                     </div>
                 </div>
             </div>
@@ -199,100 +199,125 @@
 <section class="py-5">
     <div class="container">
         <div class="d-flex align-items-center justify-content-between mb-5">
-            <h2 class="section-title mb-0">Featured Speakers</h2>
+            <h2 class="section-title mb-0">
+                {% if latest_session %}
+                    Speakers for {{ latest_session.title }}
+                {% else %}
+                    Featured Speakers
+                {% endif %}
+            </h2>
             <a href="{% url 'speakers' %}" class="btn btn-primary-custom">View All Speakers</a>
         </div>
-        <p class="lead mb-5">Get ready to hear from industry leaders and experts as they share valuable insights, best practices, and strategies to elevate your IT monitoring.</p>
+        
+        <p class="lead mb-5">
+            {% if latest_session %}
+                Meet the experts presenting at our upcoming session
+            {% else %}
+                Get ready to hear from industry leaders and experts as they share valuable insights, best practices, and strategies to elevate your IT monitoring.
+            {% endif %}
+        </p>
         
         <div class="row g-4">
-            {% for speaker in featured_speakers %}
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                    {% if speaker.photo %}
-                    <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="speaker-img">
-                    {% else %}
-                    <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ speaker.name }}" class="speaker-img">
-                    {% endif %}
-                    <div class="card-body pb-2">
-                        <h4 class="card-title">{{ speaker.name }}</h4>
-                        <p class="card-text text-muted mb-2">{{ speaker.title }}</p>
-                        <p class="card-text fw-bold">{{ speaker.organization }}</p>
-                    </div>
-                    <div class="card-footer bg-white border-0 pt-0 pb-4">
-                        <div class="d-flex justify-content-center gap-2">
-                            <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-primary-custom">View Session</a>
-                            <a href="{% url 'speaker_detail' speaker.id %}#bio" class="btn btn-outline-primary-custom">View Bio</a>
+            {% if latest_session and latest_session.speakers.all %}
+                {% for speaker in latest_session.speakers.all|slice:":4" %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                        {% if speaker.photo %}
+                        <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="speaker-img">
+                        {% else %}
+                        <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ speaker.name }}" class="speaker-img">
+                        {% endif %}
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">{{ speaker.name }}</h4>
+                            <p class="card-text text-muted mb-2">{{ speaker.title }}</p>
+                            <p class="card-text fw-bold">{{ speaker.organization }}</p>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-primary-custom">View Session</a>
+                                <a href="{% url 'speaker_detail' speaker.id %}#bio" class="btn btn-outline-primary-custom">View Bio</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% empty %}
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                    <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="John Doe" class="speaker-img">
-                    <div class="card-body pb-2">
-                        <h4 class="card-title">John Doe</h4>
-                        <p class="card-text text-muted mb-2">Developer Associate</p>
-                        <p class="card-text fw-bold">Tech Solutions Inc.</p>
-                    </div>
-                    <div class="card-footer bg-white border-0 pt-0 pb-4">
-                        <div class="d-flex justify-content-center gap-2">
-                            <a href="#" class="btn btn-primary-custom">View Session</a>
-                            <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                {% endfor %}
+            
+            {% else %}
+                <!-- Fallback when no latest_session or no speakers -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                        <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="John Doe" class="speaker-img">
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">John Doe</h4>
+                            <p class="card-text text-muted mb-2">Developer Associate</p>
+                            <p class="card-text fw-bold">Tech Solutions Inc.</p>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-primary-custom">View Session</a>
+                                <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                    <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Dave Williams" class="speaker-img">
-                    <div class="card-body pb-2">
-                        <h4 class="card-title">Dave Williams</h4>
-                        <p class="card-text text-muted mb-2">SysAdmin</p>
-                        <p class="card-text fw-bold">Community Member</p>
-                    </div>
-                    <div class="card-footer bg-white border-0 pt-0 pb-4">
-                        <div class="d-flex justify-content-center gap-2">
-                            <a href="#" class="btn btn-primary-custom">View Session</a>
-                            <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                        <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Dave Williams" class="speaker-img">
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">Dave Williams</h4>
+                            <p class="card-text text-muted mb-2">SysAdmin</p>
+                            <p class="card-text fw-bold">Community Member</p>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-primary-custom">View Session</a>
+                                <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                    <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Sarah Johnson" class="speaker-img">
-                    <div class="card-body pb-2">
-                        <h4 class="card-title">Sarah Johnson</h4>
-                        <p class="card-text text-muted mb-2">Founder and President</p>
-                        <p class="card-text fw-bold">Monitoring Solutions</p>
-                    </div>
-                    <div class="card-footer bg-white border-0 pt-0 pb-4">
-                        <div class="d-flex justify-content-center gap-2">
-                            <a href="#" class="btn btn-primary-custom">View Session</a>
-                            <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Sarah Johnson" class="speaker-img">
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">Sarah Johnson</h4>
+                            <p class="card-text text-muted mb-2">Founder and President</p>
+                            <p class="card-text fw-bold">Monitoring Solutions</p>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-primary-custom">View Session</a>
+                                <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                    <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Eric Loyd" class="speaker-img">
-                    <div class="card-body pb-2">
-                        <h4 class="card-title">Eric Loyd</h4>
-                        <p class="card-text text-muted mb-2">COO</p>
-                        <p class="card-text fw-bold">Global Monitoring</p>
-                    </div>
-                    <div class="card-footer bg-white border-0 pt-0 pb-4">
-                        <div class="d-flex justify-content-center gap-2">
-                            <a href="#" class="btn btn-primary-custom">View Session</a>
-                            <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                        <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Eric Loyd" class="speaker-img">
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">Eric Loyd</h4>
+                            <p class="card-text text-muted mb-2">COO</p>
+                            <p class="card-text fw-bold">Global Monitoring</p>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-primary-custom">View Session</a>
+                                <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+            {% endif %}
         </div>
+        
+        {% if latest_session and latest_session.speakers.all.count > 4 %}
+        <div class="text-center mt-4">
+            <a href="{% url 'speakers' %}" class="btn btn-outline-primary-custom">
+                View All {{ latest_session.speakers.all.count }} Speakers for This Session
+            </a>
+        </div>
+        {% endif %}
     </div>
 </section>
 
@@ -436,7 +461,7 @@
 <!-- CTA Section -->
 <section class="py-5 bg-primary-dark text-white text-center">
     <div class="container">
-        <h2 class="mb-4">Ready to Join Us at Conference 2025?</h2>
+        <h2 class="mb-4">Ready to Join Us at {% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %}?</h2>
         <p class="lead mb-4">Secure your spot now and prepare for three days of learning, networking, and professional growth.</p>
         <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Today</a>
     </div>
