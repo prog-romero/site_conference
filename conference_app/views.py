@@ -18,13 +18,6 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 
-from django.core.mail import send_mail
-from django.conf import settings
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Attendee, Speaker, Session, AgendaItem, AttendeeType
-
 
 from django.http import HttpResponse
 
