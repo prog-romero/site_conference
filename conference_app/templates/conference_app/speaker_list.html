@@ -1,0 +1,74 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}{{ title }} - Conference 2025{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <h1>{{ title }}</h1>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Intervenants</h5>
+                    <a href="{% url 'speaker_create' %}" class="btn btn-primary-custom btn-sm">
+                        <i class="fas fa-plus me-1"></i> Ajouter un intervenant
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Organisation</th>
+                                <th>Session</th>
+                                <th>Type d'intervention</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for speaker in speakers %}
+                            <tr>
+                                <td>{{ speaker.name }}</td>
+                                <td>{{ speaker.organization }}</td>
+                                <td>{{ speaker.session.title }}</td>
+                                <td>{{ speaker.get_intervention_type_display }}</td>
+                                <td>
+                                    {% if speaker.intervention_date %}
+                                    {{ speaker.intervention_date|date:"d/m/Y" }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'delete_speaker_intervention' speaker.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet intervenant?');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">Aucun intervenant trouvé</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,174 +1,469 @@
 {% extends 'conference_app/base.html' %}
 
-{% block title %}{{ session.title }} - Conference 2025{% endblock %}
+{% block title %}{{ title }} - Conference 2025{% endblock %}
 
 {% block content %}
-<!-- Session Header -->
 <section class="py-5 bg-primary-dark text-white">
     <div class="container">
-        <span class="badge bg-light text-dark mb-3">{{ session.get_track_display }}</span>
-        <h1 class="mb-3">{{ session.title }}</h1>
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <div class="mb-4">
-                    <p class="mb-1"><i class="far fa-calendar-alt me-2"></i> {{ session.date|date:"l, F d, Y" }}</p>
-                    <p class="mb-1"><i class="far fa-clock me-2"></i> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</p>
-                    <p><i class="fas fa-map-marker-alt me-2"></i> {{ session.location }}</p>
-                </div>
-                
-                <h5 class="mb-3">Presented by:</h5>
-                <div class="d-flex flex-wrap gap-3 mb-4">
-                    {% for speaker in session.speakers.all %}
-                    <a href="{% url 'speaker_detail' speaker.id %}" class="text-decoration-none">
-                        <div class="d-flex align-items-center bg-white text-dark p-2 rounded-pill">
-                            {% if speaker.photo %}
-                            <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                            {% else %}
-                            <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=50&w=50" alt="{{ speaker.name }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                            {% endif %}
-                            <span class="fw-bold">{{ speaker.name }}</span>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-                
-                <a href="#register-interest" class="btn btn-primary-custom">Add to My Schedule</a>
-                <a href="{% url 'sessions' %}" class="btn btn-outline-light ms-2">Back to Sessions</a>
-            </div>
-            <div class="col-md-4 mt-4 mt-md-0">
-                <div class="card bg-white text-dark p-3 rounded shadow">
-                    <h5 class="card-title">Session Details</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item bg-transparent"><strong>Duration:</strong> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</li>
-                        <li class="list-group-item bg-transparent"><strong>Track:</strong> {{ session.get_track_display }}</li>
-                        <li class="list-group-item bg-transparent"><strong>Location:</strong> {{ session.location }}</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        <h1>{{ session.title }}</h1>
+        <p class="lead">{{ session.start_date|date:"d/m/Y" }} - {{ session.end_date|date:"d/m/Y" }}</p>
     </div>
 </section>
 
-<!-- Session Description -->
 <section class="py-5">
     <div class="container">
         <div class="row">
-            <div class="col-lg-8">
-                <h2 class="section-title mb-4">About This Session</h2>
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <p class="card-text">{{ session.description|linebreaks }}</p>
-                    </div>
-                </div>
-                
-                <!-- What You'll Learn (placeholder) -->
-                <h3 class="mt-5 mb-4">What You'll Learn</h3>
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Understanding of key concepts and principles</li>
-                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Practical techniques you can apply immediately</li>
-                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Best practices for implementation</li>
-                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i> Strategies for overcoming common challenges</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Who Should Attend (placeholder) -->
-                <h3 class="mt-5 mb-4">Who Should Attend</h3>
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <p>This session is ideal for:</p>
-                        <ul>
-                            <li>IT Professionals looking to expand their knowledge</li>
-                            <li>System Administrators seeking practical solutions</li>
-                            <li>Technology Managers interested in implementation strategies</li>
-                            <li>Anyone wanting to stay current with industry trends</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 mt-5 mt-lg-0">
-                <!-- Speakers Section -->
-                <h3 class="mb-4">About the Speakers</h3>
-                {% for speaker in session.speakers.all %}
-                <div class="card mb-4 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            {% if speaker.photo %}
-                            <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                            {% else %}
-                            <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=100&w=100" alt="{{ speaker.name }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                            {% endif %}
-                            <div>
-                                <h5 class="card-title mb-0">{{ speaker.name }}</h5>
-                                <p class="card-text text-muted mb-0">{{ speaker.title }}</p>
-                                <p class="card-text"><small>{{ speaker.organization }}</small></p>
-                            </div>
-                        </div>
-                        <p class="card-text">{{ speaker.bio|truncatewords:30 }}</p>
-                        <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-sm btn-outline-primary-custom">Full Bio</a>
-                    </div>
-                </div>
-                {% endfor %}
-                
-                <!-- Related Sessions -->
-                <h3 class="mb-4">Related Sessions</h3>
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3">
                 <div class="list-group mb-4">
-                    <!-- Placeholder related sessions - in a real app, this would be dynamically generated -->
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Advanced Techniques</h5>
-                        </div>
-                        <p class="mb-1">Further exploration of topics covered in this session</p>
-                        <small class="text-muted">June 16, 2:00 PM</small>
+                    <a href="#details" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                        <i class="fas fa-info-circle me-2"></i> Détails
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Hands-on Workshop</h5>
-                        </div>
-                        <p class="mb-1">Practice the concepts discussed in this session</p>
-                        <small class="text-muted">June 17, 10:00 AM</small>
+                    <a href="#speakers" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-microphone me-2"></i> Intervenants
+                    </a>
+                    <a href="#organizers" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-users me-2"></i> Organisateurs
+                    </a>
+                    <a href="#fundings" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-money-bill me-2"></i> Financements
+                    </a>
+                    <a href="#agenda" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-calendar-alt me-2"></i> Agenda
                     </a>
                 </div>
                 
-                <!-- Express Interest Form -->
-                <div id="register-interest" class="card border-0 shadow-sm">
-                    <div class="card-header bg-primary-dark text-white py-3">
-                        <h5 class="mb-0">Add to My Schedule</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <form>
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Your Name</label>
-                                <input type="text" class="form-control" id="name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="email" required>
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="reminder">
-                                <label class="form-check-label" for="reminder">Send me a reminder before the session</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary-custom w-100">Add to My Schedule</button>
-                        </form>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Actions</h5>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'session_edit' session.id %}" class="btn btn-primary-custom">
+                                <i class="fas fa-edit me-2"></i> Modifier la session
+                            </a>
+                            <a href="{% url 'agenda_create' %}?session={{ session.id }}" class="btn btn-outline-primary">
+                                <i class="fas fa-plus me-2"></i> Ajouter un agenda
+                            </a>
+                            <form method="post" action="{% url 'delete_session' session.id %}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette session?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-trash me-2"></i> Supprimer la session
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
 
-<!-- More Sessions CTA -->
-<section class="py-5 bg-light-custom">
-    <div class="container text-center">
-        <h2 class="mb-4">Explore More Sessions</h2>
-        <p class="lead mb-4">Discover our full lineup of expert-led sessions, workshops, and keynotes.</p>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="{% url 'sessions' %}" class="btn btn-primary-custom">Browse All Sessions</a>
-            <a href="{% url 'register' %}" class="btn btn-outline-primary-custom">Register Now</a>
+            <!-- Main Content Area -->
+            <div class="col-lg-9">
+                <div class="tab-content">
+                    <!-- Details Tab -->
+                    <div class="tab-pane fade show active" id="details">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Informations générales</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Description:</div>
+                                    <div class="col-md-9">{{ session.description|linebreaks }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Catégorie:</div>
+                                    <div class="col-md-9">{{ session.get_track_display }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Durée:</div>
+                                    <div class="col-md-9">{{ session.duration_days }} jour(s)</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Type:</div>
+                                    <div class="col-md-9">
+                                        {% if session.is_hybrid %}
+                                        <span class="badge bg-info">Hybride</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Présentiel uniquement</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Lieux d'intervention</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Pays</th>
+                                                <th>Principal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for location in session.locations.all %}
+                                            <tr>
+                                                <td>{{ location.name }}</td>
+                                                <td>{{ location.country }}</td>
+                                                <td>
+                                                    {% if location.is_primary %}
+                                                    <span class="badge bg-success">Oui</span>
+                                                    {% else %}
+                                                    <span class="badge bg-secondary">Non</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="3" class="text-center">Aucun lieu d'intervention défini</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speakers Tab -->
+                    <div class="tab-pane fade" id="speakers">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Intervenants</h5>
+                                    <a href="{% url 'speaker_create' %}?session={{ session.id }}" class="btn btn-primary-custom btn-sm">
+                                        <i class="fas fa-plus me-1"></i> Ajouter un intervenant
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Organisation</th>
+                                                <th>Type d'intervention</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for speaker in speakers %}
+                                            <tr>
+                                                <td>{{ speaker.name }}</td>
+                                                <td>{{ speaker.organization }}</td>
+                                                <td>{{ speaker.get_intervention_type_display }}</td>
+                                                <td>
+                                                    {% if speaker.intervention_date %}
+                                                    {{ speaker.intervention_date|date:"d/m/Y" }}
+                                                    {% else %}
+                                                    -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form method="post" action="{% url 'delete_speaker_intervention' speaker.id %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet intervenant?');">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center">Aucun intervenant défini</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Ajouter un intervenant</h6>
+                                <form method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="add_speaker" value="1">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Nom</label>
+                                            {{ speaker_form.name }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Organisation</label>
+                                            {{ speaker_form.organization }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Type d'intervention</label>
+                                            {{ speaker_form.intervention_type }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Lieu</label>
+                                            {{ speaker_form.location }}
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Biographie</label>
+                                            {{ speaker_form.bio }}
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organizers Tab -->
+                    <div class="tab-pane fade" id="organizers">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Organisateurs</h5>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Organisation</th>
+                                                <th>Principal</th>
+                                                <th>Ordre</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for organizer in organizers %}
+                                            <tr>
+                                                <td>{{ organizer.name }}</td>
+                                                <td>{{ organizer.organization }}</td>
+                                                <td>
+                                                    {% if organizer.is_primary %}
+                                                    <span class="badge bg-success">Oui</span>
+                                                    {% else %}
+                                                    <span class="badge bg-secondary">Non</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ organizer.order }}</td>
+                                                <td>
+                                                    <form method="post" action="{% url 'delete_session_organizer' organizer.id %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet organisateur?');">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center">Aucun organisateur défini</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Ajouter un organisateur</h6>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="add_organizer" value="1">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Nom</label>
+                                            {{ organizer_form.name }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Organisation</label>
+                                            {{ organizer_form.organization }}
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Ordre</label>
+                                            {{ organizer_form.order }}
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label d-block">&nbsp;</label>
+                                            <div class="form-check">
+                                                {{ organizer_form.is_primary }}
+                                                <label class="form-check-label" for="{{ organizer_form.is_primary.id_for_label }}">
+                                                    Principal
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fundings Tab -->
+                    <div class="tab-pane fade" id="fundings">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Financements</h5>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Partenaire</th>
+                                                <th>Type</th>
+                                                <th>Montant</th>
+                                                <th>Pays</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for funding in fundings %}
+                                            <tr>
+                                                <td>{{ funding.partner.name }}</td>
+                                                <td>{{ funding.get_funding_type_display }}</td>
+                                                <td>
+                                                    {% if funding.amount %}
+                                                    {{ funding.amount }} €
+                                                    {% else %}
+                                                    -
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ funding.country }}</td>
+                                                <td>
+                                                    <form method="post" action="{% url 'delete_session_funding' funding.id %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce financement?');">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center">Aucun financement défini</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Ajouter un financement</h6>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="add_funding" value="1">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Partenaire</label>
+                                            {{ funding_form.partner }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Type</label>
+                                            {{ funding_form.funding_type }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Pays</label>
+                                            {{ funding_form.country }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Montant (optionnel)</label>
+                                            {{ funding_form.amount }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Nombre de participants couverts (optionnel)</label>
+                                            {{ funding_form.covers_participants }}
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Description</label>
+                                            {{ funding_form.description }}
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agenda Tab -->
+                    <div class="tab-pane fade" id="agenda">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Agenda</h5>
+                                    <a href="{% url 'agenda_create' %}?session={{ session.id }}" class="btn btn-primary-custom btn-sm">
+                                        <i class="fas fa-plus me-1"></i> Ajouter un élément
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {% if agenda_items %}
+                                    {% regroup agenda_items by date as agenda_by_date %}
+                                    {% for date_group in agenda_by_date %}
+                                        <h6 class="mb-3">{{ date_group.grouper|date:"l d F Y" }}</h6>
+                                        <div class="table-responsive mb-4">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Heure</th>
+                                                        <th>Titre</th>
+                                                        <th>Type</th>
+                                                        <th>Lieu</th>
+                                                        <th>Intervenant</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for item in date_group.list %}
+                                                    <tr>
+                                                        <td>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</td>
+                                                        <td>{{ item.title }}</td>
+                                                        <td>{{ item.get_item_type_display }}</td>
+                                                        <td>{{ item.location.name }}</td>
+                                                        <td>{{ item.speaker.name|default:"-" }}</td>
+                                                        <td>
+                                                            <a href="{% url 'agenda_edit' item.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <form method="post" action="{% url 'delete_agenda_item' item.id %}" style="display: inline;">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément d\'agenda?');">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        Aucun élément d'agenda n'a été défini pour cette session.
+                                        <a href="{% url 'agenda_create' %}?session={{ session.id }}" class="alert-link">Ajouter un élément</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>

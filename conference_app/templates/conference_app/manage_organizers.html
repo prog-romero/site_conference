@@ -1,0 +1,41 @@
+{% extends 'conference_app/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Manage Organizers for {{ session.title }}</h2>
+    
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="name" class="form-control" placeholder="Name" required>
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="organization" class="form-control" placeholder="Organization" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="order" class="form-control" placeholder="Order">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" name="add_organizer" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="list-group">
+        {% for organizer in organizers %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ organizer.name }}</strong> - {{ organizer.organization }}
+                {% if organizer.is_primary %}<span class="badge bg-primary ms-2">Primary</span>{% endif %}
+            </div>
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="organizer_id" value="{{ organizer.id }}">
+                <button type="submit" name="remove_organizer" class="btn btn-sm btn-danger">Remove</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
