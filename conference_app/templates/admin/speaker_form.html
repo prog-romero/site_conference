@@ -112,29 +112,6 @@
                                 {% endif %}
                             </div>
                             
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <label class="form-label">Date d'intervention</label>
-                                    {{ form.intervention_date }}
-                                    {% if form.intervention_date.errors %}
-                                    <div class="text-danger">{{ form.intervention_date.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Heure de début</label>
-                                    {{ form.start_time }}
-                                    {% if form.start_time.errors %}
-                                    <div class="text-danger">{{ form.start_time.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Heure de fin</label>
-                                    {{ form.end_time }}
-                                    {% if form.end_time.errors %}
-                                    <div class="text-danger">{{ form.end_time.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
                             
                             <div class="mb-4">
                                 <label class="form-label">Pays d'origine</label>

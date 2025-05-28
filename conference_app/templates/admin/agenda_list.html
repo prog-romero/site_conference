@@ -1,0 +1,96 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}Gestion des agenda items - Conference 2025{% endblock %}
+
+{% block content %}
+<section class="section-py-5 text-white bg-primary-dark">
+    <div class="container">
+        <h1>Gestion des Agenda Items</h1>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Agenda Items</h5>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-sm">Retour au Dashboard</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Session</th>
+                                        <th>Date</th>
+                                        <th>Heure</th>
+                                        <th>Titre</th>
+                                        <th>Type</th>
+                                        <th>Lieu</th>
+                                        <th>Intervenant</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in agenda_items %}
+                                    <tr>
+                                        <td>{{ item.session.title }}</td>
+                                        <td>{{ item.date|date:"d F Y" }}</td>
+                                        <td>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</td>
+                                        <td>{{ item.title }}</td>
+                                        <td>{{ item.get_item_type_display }}</td>
+                                        <td>{{ item.location.name|default:"-" }}</td>
+                                        <td>{{ item.speaker.name|default:"-" }}</td>
+                                        <td>
+                                            <a href="{% url 'agenda_edit' item.id %}" class="btn btn-sm btn-primary-outline me-1">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="post" action="{% url 'agenda_delete' item.id %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger-outline" onclick="return confirm('"'Êtes-vous sûr de vouloir supprimer cet élément d\'agenda ?');">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">Aucun élément d’agenda défini</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if is_paginated %}
+                        <nav class="mt-4" aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></a>
+                                </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.num_pages %}
+                                    <li class="page-item {num page_obj.number == num %}active{% %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></a>
+                                </li>
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_obj }}">Next</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Next</span></span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

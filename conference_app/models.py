@@ -134,7 +134,6 @@ class AgendaItem(models.Model):
     item_type = models.CharField(max_length=20, choices=ITEM_TYPE_CHOICES)
     location = models.ForeignKey(InterventionLocation, on_delete=models.SET_NULL, null=True, blank=True, related_name='agenda_items')
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, blank=True, null=True, related_name='agenda_items')
-    speaker = models.ForeignKey(SpeakersInterventions, on_delete=models.SET_NULL, blank=True, null=True, related_name='agenda_items')
     
     class Meta:
         ordering = ['date', 'start_time']
@@ -143,11 +142,10 @@ class AgendaItem(models.Model):
         return f"{self.title} - {self.date} {self.start_time}"
     
     def clean(self):
-        # Vérifier que la date de l'agenda est dans la période de la session
         if self.session and self.date:
             if self.date < self.session.start_date or self.date > self.session.end_date:
                 from django.core.exceptions import ValidationError
-                raise ValidationError("La date de l'agenda doit être dans la période de la session")
+                raise ValidationError("The agenda item date must be within the session period.")
 
 class Attendee(models.Model):
     name = models.CharField(max_length=100)

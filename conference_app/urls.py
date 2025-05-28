@@ -4,10 +4,11 @@ from . import views
 from django.urls import path, include
 from .views import (
     delete_attendee, delete_speaker_intervention, 
-    delete_session, delete_agenda_item,
+    delete_session, agenda_delete, agenda_edit,
     delete_attendee_type, partner_delete,
     delete_intervention_location, delete_session_organizer,
-    delete_session_funding
+    delete_session_funding,
+    organizer_list, organizer_create, organizer_edit, organizer_delete,funding_list,
 )
 
 urlpatterns = [
@@ -51,6 +52,9 @@ urlpatterns = [
     # === ADMIN/DASHBOARD URLS ===
     path('dashboard/', views.dashboard_view, name='dashboard'),
     
+    # AJAX endpoint for session data
+    path('api/session/<int:session_id>/data/', views.get_session_data, name='get_session_data'),
+    
     # Speakers Management
     path('dashboard/speakers/', include([
         path('', views.SpeakersInterventionsAdminListView.as_view(), name='speaker_list'),
@@ -71,29 +75,27 @@ urlpatterns = [
         path('<int:session_id>/fundings/', views.manage_session_fundings, name='manage_session_fundings'),
     ])),
     
-    # Agenda Management
+    # Agenda
     path('dashboard/agenda/', include([
         path('', views.AgendaAdminListView.as_view(), name='agenda_list'),
-        path('add/', views.agenda_create, name='agenda_create'),
         path('<int:pk>/edit/', views.agenda_edit, name='agenda_edit'),
         path('<int:pk>/delete/', views.agenda_delete, name='agenda_delete'),
-        # Alternative delete URL for compatibility
-        path('delete/<int:pk>/', delete_agenda_item, name='delete_agenda_item'),
     ])),
+
     
     # Attendees Management - NEW CRUD operations
     path('dashboard/attendees/', include([
         path('', views.AttendeeListView.as_view(), name='attendee_list'),
         path('<int:pk>/', views.AttendeeDetailView.as_view(), name='attendee_detail'),
         path('<int:pk>/edit/', views.AttendeeUpdateView.as_view(), name='attendee_edit'),
-        path('<int:pk>/delete/', delete_attendee, name='delete_attendee'),
+        path('delete/<int:pk>', delete_attendee, name='delete_attendee'),
     ])),
     
     # Attendee Types Management
     path('dashboard/attendee-types/', include([
         path('add/', views.attendee_type_create, name='attendee_type_create'),
         path('<int:pk>/edit/', views.attendee_type_edit, name='attendee_type_edit'),
-        path('<int:pk>/delete/', delete_attendee_type, name='delete_attendee_type'),
+        path('<int:pk>/delete/', views.delete_attendee_type, name='delete_attendee_type'),
     ])),
     
     # Partners Management
@@ -102,6 +104,8 @@ urlpatterns = [
         path('add/', views.partner_create, name='partner_create'),
         path('<int:pk>/edit/', views.partner_edit, name='partner_edit'),
         path('<int:pk>/delete/', views.partner_delete, name='partner_delete'),
+        path('api/partners/<int:partner_id>/', views.get_partner_data, name='api_partner_data'),
+        path('download-pdf/', views.download_partners_pdf, name='download_partners_pdf'),    
     ])),
     
     # Locations Management
@@ -113,20 +117,27 @@ urlpatterns = [
         # Alternative management URL
         path('manage/', views.manage_intervention_locations, name='manage_intervention_locations'),
         # Alternative delete URL for compatibility
-        path('delete/<int:pk>/', delete_intervention_location, name='delete_intervention_location'),
+        path('delete/<int:pk>/', views.delete_intervention_location, name='delete_intervention_location'),
     ])),
     
-    # Session Organizers Management - NEW UPDATE operations
+    # Session Organizers Management - CLEANED UP
     path('dashboard/organizers/', include([
-        path('<int:pk>/edit/', views.SessionOrganizerUpdateView.as_view(), name='organizer_edit'),
-        path('<int:pk>/delete/', delete_session_organizer, name='delete_session_organizer'),
+        path('<int:session_id>/', views.organizer_list, name='organizer_list'),
+        path('<int:session_id>/add/', views.organizer_create, name='organizer_create'),
+        path('<int:pk>/edit/', views.organizer_edit, name='organizer_edit'),
+        path('<int:pk>/delete/', views.organizer_delete, name='organizer_delete'),
+        path('<int:pk>/update/', views.SessionOrganizerUpdateView.as_view(), name='organizer_update'),
+        path('<int:pk>/remove/', views.delete_session_organizer, name='delete_session_organizer'),
     ])),
     
     # Session Fundings Management - NEW UPDATE operations
     path('dashboard/fundings/', include([
-        path('<int:pk>/edit/', views.SessionFundingUpdateView.as_view(), name='funding_edit'),
-        path('<int:pk>/delete/', delete_session_funding, name='delete_session_funding'),
+        path('<int:session_id>/', views.funding_list, name='funding_list'),
+        path('<int:session_id>/add/', views.funding_create, name='funding_create'),
+        path('<int:pk>/edit/', views.funding_edit, name='funding_edit'),
+        path('<int:pk>/delete/', views.delete_session_funding, name='funding_delete'),
     ])),
+
 
     # Django Admin
     path('admin/', admin.site.urls),

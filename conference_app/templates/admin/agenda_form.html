@@ -1,11 +1,11 @@
 {% extends 'conference_app/base.html' %}
 
-{% block title %}{{ title|default:"Gérer l'agenda" }} - Conference 2025{% endblock %}
+{% block title %}Modifier Élément d'Agenda - Conference 2025{% endblock %}
 
 {% block content %}
 <section class="py-5 bg-primary-dark text-white">
     <div class="container">
-        <h1>{% if agenda_item %}Modifier{% else %}Ajouter{% endif %} un élément d'agenda</h1>
+        <h1>Modifier Élément d'Agenda</h1>
     </div>
 </section>
 
@@ -15,78 +15,74 @@
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
+                        {% if errors.general %}
+                        <div class="alert alert-danger mb-4">{{ errors.general }}</div>
+                        {% endif %}
                         <form method="post">
                             {% csrf_token %}
-                            
                             <div class="mb-4">
-                                <label class="form-label">Session</label>
-                                {{ form.session }}
-                                {% if form.session.errors %}
-                                <div class="text-danger">{{ form.session.errors }}</div>
+                                <label class="form-label" for="title">Titre*</label>
+                                <input type="text" name="title" id="title" class="form-control {% if errors.title %}is-invalid{% endif %}" value="{{ agenda_item.title|default:request.POST.title|default:'' }}" required>
+                                {% if errors.title %}
+                                <div class="invalid-feedback">{{ errors.title }}</div>
                                 {% endif %}
                             </div>
-                            
                             <div class="mb-4">
-                                <label class="form-label">Titre</label>
-                                {{ form.title }}
-                                {% if form.title.errors %}
-                                <div class="text-danger">{{ form.title.errors }}</div>
+                                <label class="form-label" for="item_type">Type*</label>
+                                <select name="item_type" id="item_type" class="form-control {% if errors.item_type %}is-invalid{% endif %}" required>
+                                    <option value="">Sélectionner un type</option>
+                                    {% for value, label in item_types %}
+                                    <option value="{{ value }}" {% if agenda_item.item_type == value or request.POST.item_type == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if errors.item_type %}
+                                <div class="invalid-feedback">{{ errors.item_type }}</div>
                                 {% endif %}
                             </div>
-                            
                             <div class="mb-4">
-                                <label class="form-label">Description</label>
-                                {{ form.description }}
-                                {% if form.description.errors %}
-                                <div class="text-danger">{{ form.description.errors }}</div>
+                                <label class="form-label" for="date">Date*</label>
+                                <input type="date" name="date" id="date" class="form-control {% if errors.date %}is-invalid{% endif %}" value="{{ agenda_item.date|date:'Y-m-d'|default:request.POST.date|default:'' }}" required>
+                                {% if errors.date %}
+                                <div class="invalid-feedback">{{ errors.date }}</div>
+                                {% endif %}
+                                <small class="text-muted">Entre {{ session.start_date|date:"d F Y" }} et {{ session.end_date|date:"d F Y" }}</small>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label" for="start_time">Heure de début*</label>
+                                <input type="time" name="start_time" id="start_time" class="form-control {% if errors.start_time %}is-invalid{% endif %}" value="{{ agenda_item.start_time|time:'H:i'|default:request.POST.start_time|default:'' }}" required>
+                                {% if errors.start_time %}
+                                <div class="invalid-feedback">{{ errors.start_time }}</div>
                                 {% endif %}
                             </div>
-                            
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <label class="form-label">Date</label>
-                                    {{ form.date }}
-                                    {% if form.date.errors %}
-                                    <div class="text-danger">{{ form.date.errors }}</div>
-                                    {% endif %}
-                                    <small class="text-muted">La date doit être dans la période de la session</small>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Heure de début</label>
-                                    {{ form.start_time }}
-                                    {% if form.start_time.errors %}
-                                    <div class="text-danger">{{ form.start_time.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Heure de fin</label>
-                                    {{ form.end_time }}
-                                    {% if form.end_time.errors %}
-                                    <div class="text-danger">{{ form.end_time.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            
                             <div class="mb-4">
-                                <label class="form-label">Type</label>
-                                {{ form.item_type }}
-                                {% if form.item_type.errors %}
-                                <div class="text-danger">{{ form.item_type.errors }}</div>
+                                <label class="form-label" for="end_time">Heure de fin*</label>
+                                <input type="time" name="end_time" id="end_time" class="form-control {% if errors.end_time %}is-invalid{% endif %}" value="{{ agenda_item.end_time|time:'H:i'|default:request.POST.end_time|default:'' }}" required>
+                                {% if errors.end_time %}
+                                <div class="invalid-feedback">{{ errors.end_time }}</div>
                                 {% endif %}
                             </div>
-                            
                             <div class="mb-4">
-                                <label class="form-label">Lieu</label>
-                                {{ form.location }}
-                                {% if form.location.errors %}
-                                <div class="text-danger">{{ form.location.errors }}</div>
+                                <label class="form-label" for="location">Lieu</label>
+                                <select name="location" id="location" class="form-control {% if errors.location %}is-invalid{% endif %}">
+                                    <option value="">Sélectionner un lieu (optionnel)</option>
+                                    {% for loc in locations %}
+                                    <option value="{{ loc.id }}" {% if agenda_item.location.id == loc.id or request.POST.location|add:'0' == loc.id %}selected{% endif %}>{{ loc }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if errors.location %}
+                                <div class="invalid-feedback">{{ errors.location }}</div>
                                 {% endif %}
-                                <small class="text-muted">Sélectionnez un lieu d'intervention pour cet élément d'agenda</small>
                             </div>
-                            
+                            <div class="mb-4">
+                                <label class="form-label" for="description">Description</label>
+                                <textarea name="description" id="description" class="form-control {% if errors.description %}is-invalid{% endif %}" rows="5">{{ agenda_item.description|default:request.POST.description|default:'' }}</textarea>
+                                {% if errors.description %}
+                                <div class="invalid-feedback">{{ errors.description }}</div>
+                                {% endif %}
+                            </div>
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary-custom">Enregistrer</button>
-                                <a href="{% url 'agenda_list' %}" class="btn btn-outline-secondary">Annuler</a>
+                                <button type="submit" class="btn btn-primary-custom">Mettre à jour</button>
+                                <a href="{% url 'session_detail' session.id %}" class="btn btn-outline-secondary">Annuler</a>
                             </div>
                         </form>
                     </div>

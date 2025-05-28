@@ -1,0 +1,37 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}{{ title }} - Conference 2025{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <h1>{{ title }}</h1>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4">Are you sure you want to delete this funding?</h5>
+                        <div class="alert alert-warning">
+                            <p><strong>Warning:</strong> This action is irreversible.</p>
+                            <p>You are about to delete the funding: <strong>{{ funding.partner.name }} - {{ funding.get_funding_type_display }}</strong></p>
+                            <p>from the session: <strong>{{ funding.session.title }}</strong></p>
+                        </div>
+                        <div class="d-flex gap-2 mt-4">
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Confirm Deletion</button>
+                            </form>
+                            <a href="{% url 'funding_list' session_id=funding.session.id %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

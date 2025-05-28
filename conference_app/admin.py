@@ -65,11 +65,11 @@ class SessionAdmin(admin.ModelAdmin):
 
 @admin.register(AgendaItem)
 class AgendaItemAdmin(admin.ModelAdmin):
-    list_display = ('title', 'date', 'start_time', 'end_time', 'item_type', 'location', 'session', 'speaker')
+    list_display = ('title', 'date', 'start_time', 'end_time', 'item_type', 'location', 'session')
     list_filter = ('date', 'item_type', 'location', 'session')
     search_fields = ('title', 'description')
     date_hierarchy = 'date'
-    autocomplete_fields = ['speaker', 'session', 'location']
+    autocomplete_fields = ['session', 'location']
     list_per_page = 25
     
     fieldsets = (
@@ -80,12 +80,12 @@ class AgendaItemAdmin(admin.ModelAdmin):
             'fields': ('date', 'start_time', 'end_time')
         }),
         ('Associations', {
-            'fields': ('session', 'speaker', 'location')
+            'fields': ('session', 'location')
         }),
     )
     
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('session', 'speaker', 'location')
+        return super().get_queryset(request).select_related('session', 'location')
 
 @admin.register(Attendee)
 class AttendeeAdmin(admin.ModelAdmin):

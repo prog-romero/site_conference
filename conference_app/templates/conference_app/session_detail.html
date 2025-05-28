@@ -343,7 +343,7 @@
                                                 </td>
                                                 <td>{{ funding.country }}</td>
                                                 <td>
-                                                    <form method="post" action="{% url 'delete_session_funding' funding.id %}" style="display: inline;">
+                                                    <form method="post" action="{% url 'funding_delete' funding.id %}" style="display: inline;">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce financement?');">
                                                             <i class="fas fa-trash"></i>
@@ -401,15 +401,11 @@
                     </div>
 
                     <!-- Agenda Tab -->
-                    <div class="tab-pane fade" id="agenda">
+                    <!-- Agenda Tab -->
+                    <div class="tab-pane fade show active" id="agenda" role="tabpanel">
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-header bg-white py-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Agenda</h5>
-                                    <a href="{% url 'agenda_create' %}?session={{ session.id }}" class="btn btn-primary-custom btn-sm">
-                                        <i class="fas fa-plus me-1"></i> Ajouter un élément
-                                    </a>
-                                </div>
+                                <h5 class="mb-0">Agenda</h5>
                             </div>
                             <div class="card-body">
                                 {% if agenda_items %}
@@ -434,15 +430,15 @@
                                                         <td>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</td>
                                                         <td>{{ item.title }}</td>
                                                         <td>{{ item.get_item_type_display }}</td>
-                                                        <td>{{ item.location.name }}</td>
+                                                        <td>{{ item.location.name|default:"-" }}</td>
                                                         <td>{{ item.speaker.name|default:"-" }}</td>
                                                         <td>
                                                             <a href="{% url 'agenda_edit' item.id %}" class="btn btn-sm btn-outline-primary me-1">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <form method="post" action="{% url 'delete_agenda_item' item.id %}" style="display: inline;">
+                                                            <form method="post" action="{% url 'agenda_delete' item.id %}" style="display: inline;">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément d\'agenda?');">
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément d\'agenda ?');">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
                                                             </form>
@@ -455,10 +451,85 @@
                                     {% endfor %}
                                 {% else %}
                                     <div class="alert alert-info">
-                                        Aucun élément d'agenda n'a été défini pour cette session.
-                                        <a href="{% url 'agenda_create' %}?session={{ session.id }}" class="alert-link">Ajouter un élément</a>
+                                        Aucun élément d’agenda n’a été défini pour cette session.
                                     </div>
                                 {% endif %}
+
+                                <hr class="my-4">
+                                <h6 class="mb-3">Ajouter un élément d’agenda</h6>
+                                {% if errors.general %}
+                                <div class="alert alert-danger mb-3">{{ errors.general }}</div>
+                                {% endif %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="add_agenda" value="1">
+                                    <div class="row g-3">
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="title">Titre*</label>
+                                            <input type="text" name="title" id="title" class="form-control {% if errors.title %}is-invalid{% endif %}" value="{{ request.POST.title|default:'' }}" required>
+                                            {% if errors.title %}
+                                            <div class="invalid-feedback">{{ errors.title }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="item_type">Type*</label>
+                                            <select name="item_type" id="item_type" class="form-control {% if errors.item_type %}is-invalid{% endif %}" required>
+                                                <option value="">Sélectionner un type</option>
+                                                {% for value, label in item_types %}
+                                                <option value="{{ value }}" {% if request.POST.item_type == value %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {% if errors.item_type %}
+                                            <div class="invalid-feedback">{{ errors.item_type }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4 mb-4">
+                                            <label class="form-label" for="date">Date*</label>
+                                            <input type="date" name="date" id="date" class="form-control {% if errors.date %}is-invalid{% endif %}" value="{{ request.POST.date|default:'' }}" required>
+                                            {% if errors.date %}
+                                            <div class="invalid-feedback">{{ errors.date }}</div>
+                                            {% endif %}
+                                            <small class="text-muted">Entre {{ session.start_date|date:"d F Y" }} et {{ session.end_date|date:"d F Y" }}</small>
+                                        </div>
+                                        <div class="col-md-4 mb-4">
+                                            <label class="form-label" for="start_time">Heure de début*</label>
+                                            <input type="time" name="start_time" id="start_time" class="form-control {% if errors.start_time %}is-invalid{% endif %}" value="{{ request.POST.start_time|default:'' }}" required>
+                                            {% if errors.start_time %}
+                                            <div class="invalid-feedback">{{ errors.start_time }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4 mb-4">
+                                            <label class="form-label" for="end_time">Heure de fin*</label>
+                                            <input type="time" name="end_time" id="end_time" class="form-control {% if errors.end_time %}is-invalid{% endif %}" value="{{ request.POST.end_time|default:'' }}" required>
+                                            {% if errors.end_time %}
+                                            <div class="invalid-feedback">{{ errors.end_time }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="location">Lieu</label>
+                                            <select name="location" id="location" class="form-control {% if errors.location %}is-invalid{% endif %}">
+                                                <option value="">Sélectionner un lieu (optionnel)</option>
+                                                {% for loc in locations %}
+                                                <option value="{{ loc.id }}" {% if request.POST.location == loc.id|stringformat:"s" %}selected{% endif %}>{{ loc }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {% if errors.location %}
+                                            <div class="invalid-feedback">{{ errors.location }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="description">Description</label>
+                                            <textarea name="description" id="description" class="form-control {% if errors.description %}is-invalid{% endif %}" rows="3">{{ request.POST.description|default:'' }}</textarea>
+                                            {% if errors.description %}
+                                            <div class="invalid-feedback">{{ errors.description }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter</button>
+                                        <a href="{% url 'session_detail' session.id %}" class="btn btn-outline-secondary">Annuler</a>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>

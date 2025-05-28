@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from .models import (
     Session, SpeakersInterventions, AgendaItem, AttendeeType, Attendee, 
     Partner, InterventionLocation, SessionFunding, SessionOrganizer
@@ -79,7 +80,7 @@ class AgendaItemForm(forms.ModelForm):
         model = AgendaItem
         fields = [
             'title', 'description', 'date', 'start_time', 'end_time',
-            'item_type', 'location', 'session', 'speaker'
+            'item_type', 'location', 'session'
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -90,21 +91,20 @@ class AgendaItemForm(forms.ModelForm):
             'item_type': forms.Select(attrs={'class': 'form-select'}),
             'location': forms.Select(attrs={'class': 'form-select'}),
             'session': forms.Select(attrs={'class': 'form-select'}),
-            'speaker': forms.Select(attrs={'class': 'form-select'}),
         }
     
     def clean(self):
         cleaned_data = super().clean()
-        session = cleaned_data.get('session')
-        date = cleaned_data.get('date')
+        start_time = cleaned_data.get('start_time')
+        end_time = cleaned_data.get('end_time')
         
-        if session and date:
-            if date < session.start_date or date > session.end_date:
-                raise forms.ValidationError(
-                    "La date de l'agenda doit être dans la période de la session (du %(start)s au %(end)s)",
-                    params={'start': session.start_date, 'end': session.end_date},
-                )
+        # Validate start_time <= end_time
+        if start_time and end_time and start_time > end_time:
+            raise ValidationError("The start time must be before or equal to the end time.")
         
+        # Call model's clean method for session date validation
+        instance = self.instance or AgendaItem(**cleaned_data)
+        instance.clean()
         return cleaned_data
 
 class AttendeeTypeForm(forms.ModelForm):
@@ -154,12 +154,11 @@ class SessionOrganizerForm(forms.ModelForm):
 class SessionFundingForm(forms.ModelForm):
     class Meta:
         model = SessionFunding
-        fields = ['partner', 'funding_type', 'description', 'amount', 'country', 'covers_participants']
+        fields = ['partner', 'funding_type', 'description', 'amount', 'country']
         widgets = {
             'partner': forms.Select(attrs={'class': 'form-select'}),
             'funding_type': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'country': forms.TextInput(attrs={'class': 'form-control'}),
-            'covers_participants': forms.NumberInput(attrs={'class': 'form-control'}),
         }

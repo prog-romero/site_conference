@@ -16,7 +16,7 @@
 <section class="py-5">
     <div class="container">
         <div class="row">
-            <!-- Sidebar Navigation - Sessions List -->
+            <!-- Sidebar Navigation -->
             <div class="col-lg-3">
                 <!-- Quick Stats -->
                 <div class="card border-0 shadow-sm mb-4">
@@ -46,11 +46,6 @@
                             <span>Hybrid Sessions:</span>
                             <strong>{{ hybrid_sessions }}</strong>
                         </div>
-
-                        <div class="d-flex justify-content-between">
-                            <span>Total Fundings:</span>
-                            <strong>{{ total_fundings }}</strong>
-                        </div>
                     </div>   
                 </div>
 
@@ -58,27 +53,28 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Sessions</h5>
+                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2 text-primary"></i>Sessions</h5>
                             <a href="{% url 'session_create' %}" class="btn btn-primary-custom btn-sm">
-                                <i class="fas fa-plus me-1"></i> Add Session
+                                <i class="fas fa-plus me-1"></i> Add
                             </a>
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        <div class="list-group list-group-flush">
+                        <div class="list-group list-group-flush" id="sessions-container">
                             {% for session in sessions %}
-                            <a href="#" class="list-group-item list-group-item-action session-item" 
+                            <a href="#" class="list-group-item list-group-item-action session-item {% if forloop.counter > 4 %}d-none{% endif %}" 
                                data-session-id="{{ session.id }}"
                                data-session-title="{{ session.title }}"
                                data-session-track="{{ session.get_track_display }}"
-                               data-session-date="{{ session.date|date:'M d, Y' }}"
-                               data-session-time="{{ session.start_time|time:'H:i' }} - {{ session.end_time|time:'H:i' }}">
+                               data-session-start-date="{{ session.start_date|date:'M d, Y' }}"
+                               data-session-end-date="{{ session.end_date|date:'M d, Y' }}"
+                               data-session-duration="{{ session.duration_days }}">
                                 <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ session.title }}</h6>
-                                    <small class="text-muted">{{ session.date|date:"M d" }}</small>
+                                    <h6 class="mb-1">{{ session.title|truncatechars:25 }}</h6>
+                                    <small class="text-muted">{{ session.start_date|date:"M d" }}</small>
                                 </div>
                                 <p class="mb-1 text-muted small">{{ session.get_track_display }}</p>
-                                <small class="text-muted">{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</small>
+                                <small class="text-muted">{{ session.start_date|date:"M d" }} - {{ session.end_date|date:"M d, Y" }}</small>
                             </a>
                             {% empty %}
                             <div class="list-group-item text-center text-muted">
@@ -86,13 +82,88 @@
                             </div>
                             {% endfor %}
                         </div>
+                        {% if sessions|length > 4 %}
+                        <div class="card-footer bg-white text-center">
+                            <button class="btn btn-outline-primary btn-sm" id="toggle-sessions-btn" onclick="toggleSessionsList()">
+                                <i class="fas fa-chevron-down me-1"></i> <span id="sessions-btn-text">Show More ({{ sessions|length|add:"-4" }} more)</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Partners List -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-handshake me-2 text-success"></i>Partners</h5>
+                            <div>
+                                <a href="#" class="btn btn-outline-success btn-sm me-1" onclick="downloadPartnersPDF()">
+                                    <i class="fas fa-download me-1"></i> PDF
+                                </a>
+                                <a href="{% url 'partner_create' %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-plus me-1"></i> Add
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" id="partners-container">
+                            {% for partner in partners %}
+                            <a href="#" class="list-group-item list-group-item-action partner-item {% if forloop.counter > 4 %}d-none{% endif %}" 
+                               onclick="showPartnerDetails({{ partner.id }}); return false;">
+                                <div class="d-flex align-items-center">
+                                    {% if partner.logo %}
+                                    <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="me-3 rounded" style="max-height: 40px; max-width: 40px; object-fit: contain;">
+                                    {% else %}
+                                    <div class="me-3 d-flex align-items-center justify-content-center bg-light rounded" style="width: 40px; height: 40px;">
+                                        {% if partner.partner_type == 'academic' %}
+                                            <i class="fas fa-university text-info"></i>
+                                        {% elif partner.partner_type == 'government' %}
+                                            <i class="fas fa-landmark text-warning"></i>
+                                        {% elif partner.partner_type == 'ngo' %}
+                                            <i class="fas fa-heart text-danger"></i>
+                                        {% else %}
+                                            <i class="fas fa-building text-primary"></i>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ partner.name|truncatechars:20 }}</h6>
+                                        <small class="text-muted">
+                                            {% if partner.website %}
+                                                {{ partner.website|truncatechars:25 }}
+                                            {% else %}
+                                                {{ partner.get_partner_type_display }}
+                                            {% endif %}
+                                        </small>
+                                        <br>
+                                        <span class="badge {{ partner.is_active|yesno:'bg-success,bg-secondary' }} badge-sm">
+                                            {{ partner.is_active|yesno:'Active,Inactive' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                            {% empty %}
+                            <div class="list-group-item text-center text-muted">
+                                No partners found
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if partners|length > 4 %}
+                        <div class="card-footer bg-white text-center">
+                            <button class="btn btn-outline-success btn-sm" id="toggle-partners-btn" onclick="togglePartnersList()">
+                                <i class="fas fa-chevron-down me-1"></i> <span id="partners-btn-text">Show More ({{ partners|length|add:"-4" }} more)</span>
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Quick Actions -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3">
-                        <h6 class="mb-0">Quick Actions</h6>
+                        <h6 class="mb-0"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h6>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
@@ -102,9 +173,12 @@
                             <a href="{% url 'speaker_create' %}" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-microphone me-1"></i> Add Speaker
                             </a>
-                            <a href="{% url 'partner_create' %}" class="btn btn-outline-secondary btn-sm">
+                            <a href="{% url 'partner_create' %}" class="btn btn-outline-success btn-sm">
                                 <i class="fas fa-handshake me-1"></i> Add Partner
                             </a>
+                            <button class="btn btn-outline-info btn-sm" onclick="downloadPartnersPDF()">
+                                <i class="fas fa-download me-1"></i> Download Partners PDF
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -118,13 +192,13 @@
                         <div class="card-body text-center py-5">
                             <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
                             <h4 class="text-muted">Select a session to view details</h4>
-                            <p class="text-muted">Choose a session from the sidebar to manage its speakers, registrations, agenda, and partners.</p>
+                            <p class="text-muted">Choose a session from the sidebar to manage its speakers, organizers, fundings, and agenda.</p>
                         </div>
                     </div>
 
                     <!-- Recent Activities -->
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="card border-0 shadow-sm">
                                 <div class="card-header bg-white py-3">
                                     <h6 class="mb-0">Recent Registrations</h6>
@@ -135,14 +209,19 @@
                                         <div>
                                             <strong>{{ registration.name }}</strong>
                                             <br><small class="text-muted">{{ registration.company }}</small>
+                                            {% if registration.session %}
+                                            <br><span class="badge bg-info">{{ registration.session.title|truncatechars:20 }}</span>
+                                            {% endif %}
                                         </div>
                                         <small class="text-muted">{{ registration.registration_date|date:"M d" }}</small>
                                     </div>
+                                    {% empty %}
+                                    <p class="text-muted">No recent registrations</p>
                                     {% endfor %}
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="card border-0 shadow-sm">
                                 <div class="card-header bg-white py-3">
                                     <h6 class="mb-0">Recent Speakers</h6>
@@ -153,9 +232,35 @@
                                         <div>
                                             <strong>{{ speaker.name }}</strong>
                                             <br><small class="text-muted">{{ speaker.organization }}</small>
+                                            {% if speaker.session %}
+                                            <br><span class="badge bg-success">{{ speaker.session.title|truncatechars:20 }}</span>
+                                            {% endif %}
                                         </div>
-                                        <small class="text-muted">{{ speaker.sessions.count }} sessions</small>
+                                        <small class="text-muted">{{ speaker.get_intervention_type_display }}</small>
                                     </div>
+                                    {% empty %}
+                                    <p class="text-muted">No speakers found</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white py-3">
+                                    <h6 class="mb-0">Recent Sessions</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% for session in recent_sessions|slice:":5" %}
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <strong>{{ session.title|truncatechars:25 }}</strong>
+                                            <br><small class="text-muted">{{ session.get_track_display }}</small>
+                                            <br><span class="badge bg-primary">{{ session.start_date|date:"M d, Y" }}</span>
+                                        </div>
+                                        <small class="text-muted">{{ session.duration_days }} day{{ session.duration_days|pluralize }}</small>
+                                    </div>
+                                    {% empty %}
+                                    <p class="text-muted">No sessions found</p>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -173,8 +278,8 @@
                                     <h2 id="session-title">Session Title</h2>
                                     <p class="text-muted mb-2">
                                         <span id="session-track">Track</span> • 
-                                        <span id="session-date">Date</span> • 
-                                        <span id="session-time">Time</span>
+                                        <span id="session-dates">Dates</span> • 
+                                        <span id="session-duration">Duration</span>
                                     </p>
                                 </div>
                                 <div>
@@ -204,99 +309,26 @@
                                 </div>
                                 <div class="card-body">
                                     <div id="session-speakers">
-                                        {% for speaker in speakers %}
-                                        <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
-                                            <div>
-                                                <strong>{{ speaker.name }}</strong>
-                                                <br><small class="text-muted">{{ speaker.title }} - {{ speaker.organization }}</small>
-                                            </div>
-                                            <div>
-                                                <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form method="post" action="{% url 'delete_speaker_intervention' speaker.id %}" style="display: inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
+                                        <p class="text-muted">Select a session to view speakers</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Registrations for this session -->
+                        <!-- Organizers for this session -->
                         <div class="col-lg-6 mb-4">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white py-3">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0"><i class="fas fa-users me-2"></i>Registrations</h6>
-                                        <a href="{% url 'admin:conference_app_attendee_add' %}" class="btn btn-primary-custom btn-sm">
-                                            <i class="fas fa-plus me-1"></i> Add Registration
-                                        </a>
+                                        <h6 class="mb-0"><i class="fas fa-users me-2"></i>Organizers</h6>
+                                        <button class="btn btn-primary-custom btn-sm" id="add-organizer-btn">
+                                            <i class="fas fa-plus me-1"></i> Add Organizer
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <div id="session-registrations">
-                                        {% for registration in recent_registrations %}
-                                        <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
-                                            <div>
-                                                <strong>{{ registration.name }}</strong>
-                                                <br><small class="text-muted">{{ registration.company }} - {{ registration.attendee_type }}</small>
-                                            </div>
-                                            <div>
-                                                <a href="{% url 'admin:conference_app_attendee_change' registration.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form method="post" action="{% url 'delete_attendee' registration.id %}" style="display: inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Agenda for this session -->
-                        <div class="col-lg-6 mb-4">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-header bg-white py-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Agenda Items</h6>
-                                        <a href="{% url 'agenda_create' %}" class="btn btn-primary-custom btn-sm">
-                                            <i class="fas fa-plus me-1"></i> Add Item
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div id="session-agenda">
-                                        {% for item in agenda_items %}
-                                        <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
-                                            <div>
-                                                <strong>{{ item.title }}</strong>
-                                                <br><small class="text-muted">{{ item.get_item_type_display }} - {{ item.start_time|time:"H:i" }} to {{ item.end_time|time:"H:i" }}</small>
-                                            </div>
-                                            <div>
-                                                <a href="{% url 'agenda_edit' item.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form method="post" action="{% url 'delete_agenda_item' item.id %}" style="display: inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
+                                    <div id="session-organizers">
+                                        <p class="text-muted">Select a session to view organizers</p>
                                     </div>
                                 </div>
                             </div>
@@ -308,116 +340,118 @@
                                 <div class="card-header bg-white py-3">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h6 class="mb-0"><i class="fas fa-handshake me-2"></i>Partners</h6>
-                                        <div>
-                                            <a href="{% url 'download_partners_pdf' %}" class="btn btn-outline-secondary btn-sm me-2">
-                                                <i class="fas fa-download me-1"></i> Export
-                                            </a>
-                                            <a href="{% url 'partner_create' %}" class="btn btn-primary-custom btn-sm">
-                                                <i class="fas fa-plus me-1"></i> Add Partner
-                                            </a>
-                                        </div>
+                                        <a href="{% url 'partner_create' %}" class="btn btn-primary-custom btn-sm">
+                                            <i class="fas fa-plus me-1"></i> Add Partner
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="card-body">
                                     <div id="session-partners">
-                                        {% for partner in partners %}
-                                        <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
-                                            <div class="d-flex align-items-center">
-                                                {% if partner.logo %}
-                                                <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" style="max-height: 30px; margin-right: 10px;">
-                                                {% endif %}
-                                                <div>
-                                                    <strong>{{ partner.name }}</strong>
-                                                    <br><small class="text-muted">
-                                                        {% if partner.website %}
-                                                        <a href="{{ partner.website }}" target="_blank">{{ partner.website }}</a>
-                                                        {% else %}
-                                                        No website
-                                                        {% endif %}
-                                                    </small>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <span class="badge {% if partner.is_active %}bg-success{% else %}bg-secondary{% endif %} me-2">
-                                                    {{ partner.is_active|yesno:"Active,Inactive" }}
-                                                </span>
-                                                <a href="{% url 'partner_edit' partner.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="{% url 'partner_delete' partner.id %}" class="btn btn-sm btn-outline-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
+                                        <p class="text-muted">Select a session to view partners</p>
+                                    </div>
+                                    <div id="partners-show-more" class="text-center mt-3" style="display: none;">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="toggleSessionPartnersList()">
+                                            <i class="fas fa-chevron-down me-1"></i> <span id="session-partners-btn-text">Show More</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Locations -->
-                        <div class="col-lg-12 mb-4">
-                            <div class="card border-0 shadow-sm">
+                        <!-- Fundings for this session -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white py-3">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Intervention Locations</h6>
-                                        <a href="{% url 'manage_intervention_locations' %}" class="btn btn-primary-custom btn-sm">
-                                            <i class="fas fa-plus me-1"></i> Manage Locations
-                                        </a>
+                                        <h6 class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Session Fundings</h6>
+                                        <button class="btn btn-primary-custom btn-sm" id="add-funding-btn">
+                                            <i class="fas fa-plus me-1"></i> Add Funding
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row">
-                                        {% for location in locations %}
-                                        <div class="col-md-4 mb-2">
-                                            <div class="p-2 border rounded">
-                                                <strong>{{ location.name }}</strong>
-                                                <br><small class="text-muted">{{ location.country }}</small>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
+                                    <div id="session-fundings">
+                                        <p class="text-muted">Select a session to view fundings</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Attendee Types -->
-                        <div class="col-lg-12 mb-4">
-                            <div class="card border-0 shadow-sm">
+                        <!-- Agenda for this session -->
+                        <!-- Agenda for this session -->
+                        <div class="content" id="content">
+                            <div class="col-lg-6 mb-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-white py-3">
+                                        <div class="d-flex justify-content-between align-items-center ">
+                                            <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Session Agenda</h6>
+                                            <a href="{% if selected_session %}{% url 'session_detail' selected_session.id %}#agenda{% else %}#{% endif %}" class="btn btn-primary-custom btn-sm {% if not selected_session %}disabled{% endif %}" title="{% if not selected_session %}Sélectionnez une session pour ajouter un élément d’agenda{% endif %}">
+                                                <i class="fas fa-plus me-1"></i> Add Agenda
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="session-agenda">
+                                            {% if selected_session and agenda_items %}
+                                                {% regroup agenda_items by date as agenda_by_date %}
+                                                {% for date_group in agenda_by_date %}
+                                                    <h6 class="mb-3">{{ date_group.grouper|date:"l d F Y" }}</h6>
+                                                    <div class="table-responsive mb-4">
+                                                        <table class="table table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Heure</th>
+                                                                    <th>Titre</th>
+                                                                    <th>Type</th>
+                                                                    <th>Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for item in date_group.list %}
+                                                                <tr>
+                                                                    <td>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</td>
+                                                                    <td>{{ item.title }}</td>
+                                                                    <td>{{ item.get_item_type_display }}</td>
+                                                                    <td>
+                                                                        <a href="{% url 'agenda_edit' item.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                                                            <i class="fas fa-edit"></i>
+                                                                        </a>
+                                                                        <form method="post" action="{% url 'agenda_delete' item.id %}" style="display: inline;">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément d\'agenda ?');">
+                                                                                <i class="fas fa-trash"></i>
+                                                                            </button>
+                                                                        </form>
+                                                                    </td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <p class="text-muted">Sélectionnez une session pour voir l’agenda</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Registrations for this session -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white py-3">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0"><i class="fas fa-tags me-2"></i>Attendee Types</h6>
-                                        <a href="{% url 'attendee_type_create' %}" class="btn btn-primary-custom btn-sm">
-                                            <i class="fas fa-plus me-1"></i> Add Type
+                                        <h6 class="mb-0"><i class="fas fa-user-check me-2"></i>Session Registrations</h6>
+                                        <a href="{% url 'register' %}" class="btn btn-primary-custom btn-sm">
+                                            <i class="fas fa-plus me-1"></i> Add Registration
                                         </a>
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row">
-                                        {% for type in attendee_types %}
-                                        <div class="col-md-4 mb-3">
-                                            <div class="p-3 border rounded">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <div>
-                                                        <strong>{{ type.name }}</strong>
-                                                        <br><small class="text-muted">{{ type.description|truncatewords:8 }}</small>
-                                                        <br><span class="badge bg-primary">{{ type.attendee_set.count }} registrations</span>
-                                                    </div>
-                                                    <div>
-                                                        <a href="{% url 'attendee_type_edit' type.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <form method="post" action="{% url 'delete_attendee_type' type.id %}" style="display: inline;">
-                                                            {% csrf_token %}
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
+                                    <div id="session-registrations">
+                                        <p class="text-muted">Select a session to view registrations</p>
                                     </div>
                                 </div>
                             </div>
@@ -429,13 +463,84 @@
     </div>
 </section>
 
+<!-- Partner Details Modal -->
+<div class="modal fade" id="partnerDetailsModal" tabindex="-1" aria-labelledby="partnerDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="partnerDetailsModalLabel">
+                    <i class="fas fa-handshake me-2"></i>Partner Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="partnerDetailsContent">
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                    <p class="mt-2 text-muted">Loading partner details...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-outline-success" id="downloadPartnerPdfBtn">
+                    <i class="fas fa-download me-1"></i> Download PDF
+                </a>
+                <a href="#" class="btn btn-outline-primary" id="editPartnerBtn">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sessionRows = document.querySelectorAll('#session-list tr[data-session-id]');
+    const addAgendaButton = document.querySelector('.btn-primary-custom.btn-sm');
+
+    sessionRows.forEach(row => {
+        row.addEventListener('click', function() {
+            const sessionId = this.getAttribute('data-session-id');
+            addAgendaButton.href = `/dashboard/session/${sessionId}/#agenda`;
+            addAgendaButton.classList.remove('disabled');
+            window.location.search = `?session_id=${sessionId}`;
+        });
+    });
+});
+
+/*Js pour agenda : 
+document.addEventListener('DOMContentLoaded', function() {
+    const sessionRows = document.querySelectorAll('#session-list tr[data-session-id]');
+    const agendaContainer = document.getElementById('session-agenda');
+    const addItemButton = document.querySelector('.btn-primary-custom.btn-sm');
+
+    sessionRows.forEach(row => {
+        row.addEventListener('click', function() {
+            const sessionId = this.getAttribute('data-session-id');
+            // Mettre à jour l'URL du bouton
+            addItemButton.href = `/dashboard/session/${sessionId}/#agenda`;
+            addItemButton.classList.remove('disabled');
+            // Charger les agenda items via AJAX ou mettre à jour via GET
+            window.location.search = `?session_id=${sessionId}`;
+        });
+    });
+});
+*/
+
+
+
+
+
+
 // JavaScript pour gérer la sélection des sessions
 document.addEventListener('DOMContentLoaded', function() {
     const sessionItems = document.querySelectorAll('.session-item');
     const defaultView = document.getElementById('default-view');
     const sessionDetails = document.getElementById('session-details');
-    
+    let currentSessionId = null;
+    let allSessionPartnersData = [];
+    let showingAllSessionPartners = false;
+
     sessionItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -450,20 +555,38 @@ document.addEventListener('DOMContentLoaded', function() {
             const sessionId = this.dataset.sessionId;
             const sessionTitle = this.dataset.sessionTitle;
             const sessionTrack = this.dataset.sessionTrack;
-            const sessionDate = this.dataset.sessionDate;
-            const sessionTime = this.dataset.sessionTime;
+            const sessionStartDate = this.dataset.sessionStartDate;
+            const sessionEndDate = this.dataset.sessionEndDate;
+            const sessionDuration = this.dataset.sessionDuration;
+            
+            currentSessionId = sessionId;
             
             // Update session details
             document.getElementById('session-title').textContent = sessionTitle;
             document.getElementById('session-track').textContent = sessionTrack;
-            document.getElementById('session-date').textContent = sessionDate;
-            document.getElementById('session-time').textContent = sessionTime;
+            document.getElementById('session-dates').textContent = sessionStartDate + ' - ' + sessionEndDate;
+            document.getElementById('session-duration').textContent = sessionDuration + ' day(s)';
             
             // Update edit button href
             const editBtn = document.getElementById('edit-session-btn');
             editBtn.onclick = function() {
-                window.location.href = `/session/edit/${sessionId}/`; // Adjust URL as needed
+                window.location.href = `/dashboard/sessions/${sessionId}/edit/`;
             };
+            
+            // Update add organizer button
+            const addOrganizerBtn = document.getElementById('add-organizer-btn');
+            addOrganizerBtn.onclick = function() {
+                window.location.href = `/dashboard/organizers/${sessionId}/add/`;
+            };
+            
+            // Update add funding button
+            const addFundingBtn = document.getElementById('add-funding-btn');
+            addFundingBtn.onclick = function() {
+                window.location.href = `/dashboard/sessions/${sessionId}/fundings/`;
+            };
+            
+            // Load session-specific data via AJAX
+            loadSessionData(sessionId);
             
             // Show session details and hide default view
             defaultView.style.display = 'none';
@@ -472,14 +595,452 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Toggle sessions list in sidebar (limit changed to 4)
+function toggleSessionsList() {
+    const hiddenSessions = document.querySelectorAll('.session-item.d-none');
+    const btn = document.getElementById('toggle-sessions-btn');
+    const btnText = document.getElementById('sessions-btn-text');
+    const btnIcon = btn.querySelector('i');
+    
+    if (hiddenSessions.length > 0) {
+        // Show all sessions
+        hiddenSessions.forEach(session => session.classList.remove('d-none'));
+        btnIcon.className = 'fas fa-chevron-up me-1';
+        btnText.textContent = 'Show Less';
+    } else {
+        // Hide sessions beyond first 4
+        const allSessions = document.querySelectorAll('.session-item');
+        allSessions.forEach((session, index) => {
+            if (index >= 4) {
+                session.classList.add('d-none');
+            }
+        });
+        btnIcon.className = 'fas fa-chevron-down me-1';
+        const hiddenCount = allSessions.length - 4;
+        btnText.textContent = `Show More (${hiddenCount} more)`;
+    }
+}
+
+// Toggle partners list in sidebar (limit of 4)
+function togglePartnersList() {
+    const hiddenPartners = document.querySelectorAll('.partner-item.d-none');
+    const btn = document.getElementById('toggle-partners-btn');
+    const btnText = document.getElementById('partners-btn-text');
+    const btnIcon = btn.querySelector('i');
+    
+    if (hiddenPartners.length > 0) {
+        // Show all partners
+        hiddenPartners.forEach(partner => partner.classList.remove('d-none'));
+        btnIcon.className = 'fas fa-chevron-up me-1';
+        btnText.textContent = 'Show Less';
+    } else {
+        // Hide partners beyond first 4
+        const allPartners = document.querySelectorAll('.partner-item');
+        allPartners.forEach((partner, index) => {
+            if (index >= 4) {
+                partner.classList.add('d-none');
+            }
+        });
+        btnIcon.className = 'fas fa-chevron-down me-1';
+        const hiddenCount = allPartners.length - 4;
+        btnText.textContent = `Show More (${hiddenCount} more)`;
+    }
+}
+
+// Toggle session partners list (in session details)
+function toggleSessionPartnersList() {
+    const btn = document.querySelector('#partners-show-more button');
+    const btnText = document.getElementById('session-partners-btn-text');
+    const btnIcon = btn.querySelector('i');
+    
+    if (showingAllSessionPartners) {
+        // Show only first 4 partners
+        updateSessionPartners(allSessionPartnersData.slice(0, 4));
+        btnIcon.className = 'fas fa-chevron-down me-1';
+        btnText.textContent = `Show More (${allSessionPartnersData.length - 4} more)`;
+        showingAllSessionPartners = false;
+    } else {
+        // Show all partners
+        updateSessionPartners(allSessionPartnersData);
+        btnIcon.className = 'fas fa-chevron-up me-1';
+        btnText.textContent = 'Show Less';
+        showingAllSessionPartners = true;
+    }
+}
+
+// Show partner details in modal
+function showPartnerDetails(partnerId) {
+    // Fetch partner details via AJAX
+    fetch(`/api/partners/${partnerId}/`)
+        .then(response => response.json())
+        .then(partner => {
+            const content = `
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        ${partner.logo ? 
+                            `<img src="${partner.logo}" alt="${partner.name}" class="img-fluid rounded mb-3" style="max-height: 150px;">` :
+                            `<div class="bg-light rounded d-flex align-items-center justify-content-center mb-3" style="height: 150px;">
+                                <i class="fas ${getPartnerTypeIcon(partner.partner_type)} fa-3x text-muted"></i>
+                            </div>`
+                        }
+                        <h5>${partner.name}</h5>
+                        <span class="badge ${partner.is_active ? 'bg-success' : 'bg-secondary'} mb-2">
+                            ${partner.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                        <br>
+                        <span class="badge ${getPartnerTypeBadgeClass(partner.partner_type)}">${partner.partner_type_display}</span>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <strong><i class="fas fa-globe me-2"></i>Website:</strong>
+                            ${partner.website ? 
+                                `<br><a href="${partner.website}" target="_blank" class="text-decoration-none">
+                                    ${partner.website} <i class="fas fa-external-link-alt ms-1"></i>
+                                </a>` :
+                                '<span class="text-muted">No website provided</span>'
+                            }
+                        </div>
+                        
+                        ${partner.country ? 
+                            `<div class="mb-3">
+                                <strong><i class="fas fa-map-marker-alt me-2"></i>Country:</strong>
+                                <span class="text-muted">${partner.country}</span>
+                            </div>` : ''
+                        }
+                        
+                        ${partner.description ? 
+                            `<div class="mb-3">
+                                <strong><i class="fas fa-info-circle me-2"></i>Description:</strong>
+                                <p class="text-muted mt-2">${partner.description}</p>
+                            </div>` : ''
+                        }
+                        
+                        <div class="mb-3">
+                            <strong><i class="fas fa-calendar me-2"></i>Created:</strong>
+                            <span class="text-muted">${partner.created_at}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('partnerDetailsContent').innerHTML = content;
+            document.getElementById('editPartnerBtn').href = `/dashboard/partners/${partnerId}/edit/`;
+            document.getElementById('downloadPartnerPdfBtn').href = `/dashboard/partners/download-pdf/?id=${partnerId}`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('partnerDetailsModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error loading partner details:', error);
+            document.getElementById('partnerDetailsContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error loading partner details. Please try again.
+                </div>
+            `;
+        });
+}
+
+// Helper function to get partner type icon
+function getPartnerTypeIcon(partnerType) {
+    switch(partnerType) {
+        case 'academic': return 'fa-university';
+        case 'government': return 'fa-landmark';
+        case 'ngo': return 'fa-heart';
+        default: return 'fa-building';
+    }
+}
+
+// Helper function to get partner type badge class
+function getPartnerTypeBadgeClass(partnerType) {
+    switch(partnerType) {
+        case 'academic': return 'bg-info';
+        case 'government': return 'bg-warning';
+        case 'ngo': return 'bg-danger';
+        default: return 'bg-primary';
+    }
+}
+
+// Download partners PDF
+function downloadPartnersPDF() {
+    window.location.href = '/dashboard/partners/download-pdf/';
+}
+
+function loadSessionData(sessionId) {
+    // Show loading state
+    document.getElementById('session-speakers').innerHTML = '<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading speakers...</p>';
+    document.getElementById('session-organizers').innerHTML = '<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading organizers...</p>';
+    document.getElementById('session-partners').innerHTML = '<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading partners...</p>';
+    document.getElementById('session-fundings').innerHTML = '<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading fundings...</p>';
+    document.getElementById('session-agenda').innerHTML = '<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading agenda...</p>';
+    document.getElementById('session-registrations').innerHTML = '<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading registrations...</p>';
+    
+    // Fetch session data via AJAX
+    fetch(`/api/session/${sessionId}/data/`)
+        .then(response => response.json())
+        .then(data => {
+            // Update speakers
+            updateSpeakers(data.speakers);
+            // Update organizers
+            updateOrganizers(data.organizers);
+            // Update session partners
+            allSessionPartnersData = data.partners || [];
+            showingAllSessionPartners = false;
+            updateSessionPartners(allSessionPartnersData.slice(0, 4));
+            // Show/hide "Show More" button for session partners
+            const showMoreBtn = document.getElementById('partners-show-more');
+            if (allSessionPartnersData.length > 4) {
+                showMoreBtn.style.display = 'block';
+                document.getElementById('session-partners-btn-text').textContent = `Show More (${allSessionPartnersData.length - 4} more)`;
+            } else {
+                showMoreBtn.style.display = 'none';
+            }
+            // Update fundings
+            updateFundings(data.fundings);
+            // Update agenda
+            updateAgenda(data.agenda_items);
+            // Update registrations
+            updateRegistrations(data.attendees);
+        })
+        .catch(error => {
+            console.error('Error loading session data:', error);
+            document.getElementById('session-speakers').innerHTML = '<p class="text-danger">Error loading speakers</p>';
+            document.getElementById('session-organizers').innerHTML = '<p class="text-danger">Error loading organizers</p>';
+            document.getElementById('session-partners').innerHTML = '<p class="text-danger">Error loading partners</p>';
+            document.getElementById('session-fundings').innerHTML = '<p class="text-danger">Error loading fundings</p>';
+            document.getElementById('session-agenda').innerHTML = '<p class="text-danger">Error loading agenda</p>';
+            document.getElementById('session-registrations').innerHTML = '<p class="text-danger">Error loading registrations</p>';
+        });
+}
+
+function updateSpeakers(speakers) {
+    const container = document.getElementById('session-speakers');
+    if (speakers.length === 0) {
+        container.innerHTML = '<p class="text-muted">No speakers for this session</p>';
+        return;
+    }
+    
+    let html = '';
+    speakers.forEach(speaker => {
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                <div>
+                    <strong>${speaker.name}</strong>
+                    <br><small class="text-muted">${speaker.title} - ${speaker.organization}</small>
+                    <br><span class="badge bg-info">${speaker.intervention_type}</span>
+                </div>
+                <div>
+                    <a href="/dashboard/speakers/${speaker.id}/edit/" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form method="post" action="/dashboard/speakers/${speaker.id}/delete/" style="display: inline;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${getCookie('csrftoken')}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function updateOrganizers(organizers) {
+    const container = document.getElementById('session-organizers');
+    if (organizers.length === 0) {
+        container.innerHTML = '<p class="text-muted">No organizers for this session</p>';
+        return;
+    }
+    
+    let html = '';
+    organizers.forEach(organizer => {
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                <div>
+                    <strong>${organizer.name}</strong>
+                    <br><small class="text-muted">${organizer.organization}</small>
+                    ${organizer.is_primary ? '<br><span class="badge bg-warning">Primary Organizer</span>' : ''}
+                </div>
+                <div>
+                    <a href="/dashboard/organizers/${organizer.id}/edit/" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form method="post" action="/dashboard/organizers/${organizer.id}/delete/" style="display: inline;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${getCookie('csrftoken')}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this organizer?');">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function updateSessionPartners(partners) {
+    const container = document.getElementById('session-partners');
+    if (partners.length === 0) {
+        container.innerHTML = '<p class="text-muted">No partners for this session</p>';
+        return;
+    }
+    
+    let html = '';
+    partners.forEach(partner => {
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                <div class="d-flex align-items-center">
+                    ${partner.logo ? `<img src="${partner.logo}" alt="${partner.name}" style="max-height: 30px; margin-right: 10px;">` : ''}
+                    <div>
+                        <strong>${partner.name}</strong>
+                        <br><small class="text-muted">
+                            ${partner.website ? `<a href="${partner.website}" target="_blank">${partner.website}</a>` : 'No website'}
+                        </small>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge ${partner.is_active ? 'bg-success' : 'bg-secondary'} me-2">
+                        ${partner.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                    <a href="#" class="btn btn-sm btn-outline-info me-1" onclick="showPartnerDetails(${partner.id}); return false;">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/dashboard/partners/${partner.id}/edit/" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function updateFundings(fundings) {
+    const container = document.getElementById('session-fundings');
+    if (fundings.length === 0) {
+        container.innerHTML = '<p class="text-muted">No fundings for this session</p>';
+        return;
+    }
+    
+    let html = '';
+    fundings.forEach(funding => {
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                <div>
+                    <strong>${funding.partner_name}</strong>
+                    <br><small class="text-muted">${funding.funding_type}</small>
+                    ${funding.amount ? `<br><span class="badge bg-success">$${funding.amount}</span>` : ''}
+                    ${funding.country ? `<br><small class="text-muted">${funding.country}</small>` : ''}
+                </div>
+                <div>
+                    <a href="/dashboard/fundings/${funding.id}/edit/" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form method="post" action="/dashboard/fundings/${funding.id}/delete/" style="display: inline;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${getCookie('csrftoken')}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function updateAgenda(agendaItems) {
+    const container = document.getElementById('session-agenda');
+    if (agendaItems.length === 0) {
+        container.innerHTML = '<p class="text-muted">No agenda items for this session</p>';
+        return;
+    }
+    
+    let html = '';
+    agendaItems.forEach(item => {
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                <div>
+                    <strong>${item.title}</strong>
+                    <br><small class="text-muted">${item.item_type} - ${item.start_time} to ${item.end_time}</small>
+                    <br><small class="text-muted">${item.date}</small>
+                </div>
+                <div>
+                    <a href="/dashboard/agenda/${item.id}/edit/" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form method="post" action="/dashboard/agenda/delete/${item.id}/" style="display: inline;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${getCookie('csrftoken')}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function updateRegistrations(attendees) {
+    const container = document.getElementById('session-registrations');
+    if (attendees.length === 0) {
+        container.innerHTML = '<p class="text-muted">No registrations for this session</p>';
+        return;
+    }
+    
+    let html = '';
+    attendees.forEach(attendee => {
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                <div>
+                    <strong>${attendee.name}</strong>
+                    <br><small class="text-muted">${attendee.company} - ${attendee.attendee_type}</small>
+                    <br><small class="text-muted">Registered: ${attendee.registration_date}</small>
+                </div>
+                <div>
+                    <a href="/dashboard/attendees/${attendee.id}/edit/" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form method="post" action="/dashboard/attendees/${attendee.id}/delete/" style="display: inline;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${getCookie('csrftoken')}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
 function hideSessionDetails() {
     document.getElementById('default-view').style.display = 'block';
     document.getElementById('session-details').style.display = 'none';
-    
+    currentSessionId = null;
+
     // Remove active class from all session items
     document.querySelectorAll('.session-item').forEach(item => {
         item.classList.remove('active');
     });
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 </script>
 
@@ -489,7 +1050,7 @@ function hideSessionDetails() {
     border-left: 4px solid #2196f3 !important;
 }
 
-.session-item:hover {
+.session-item:hover, .partner-item:hover {
     background-color: #f5f5f5;
 }
 
@@ -500,6 +1061,23 @@ function hideSessionDetails() {
 .card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.badge-sm {
+    font-size: 0.7em;
+}
+
+.partner-item {
+    transition: all 0.2s ease;
+}
+
+.partner-item:hover {
+    transform: translateX(2px);
+}
+
+.modal-body img {
+    max-height: 200px;
+    object-fit: contain;
 }
 </style>
 
