@@ -4,6 +4,10 @@ from .models import (
     Partner, InterventionLocation, SessionFunding, SessionOrganizer
 )
 
+import pycountry
+
+
+
 class RegistrationForm(forms.ModelForm):
     class Meta:
         model = Attendee
@@ -72,32 +76,22 @@ class AttendeeForm(forms.ModelForm):
         return cleaned_data
     
 
+from django import forms
+from .models import SpeakersInterventions
+
 class SpeakersInterventionsForm(forms.ModelForm):
     class Meta:
         model = SpeakersInterventions
-        fields = [
-            'name', 'title', 'organization', 'bio', 'photo', 'gender',
-            'session', 'intervention_type', 'location', 'is_remote',
-            'countries'
-        ]
+        fields = ['name', 'title', 'organization', 'intervention_type', 'photo', 'session']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'organization': forms.TextInput(attrs={'class': 'form-control'}),
-            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
-            'photo': forms.FileInput(attrs={'class': 'form-control'}),
-            'gender': forms.Select(attrs={'class': 'form-select'}),
-            'session': forms.Select(attrs={'class': 'form-select'}),
-            'intervention_type': forms.Select(attrs={'class': 'form-select'}),
-            'location': forms.Select(attrs={'class': 'form-select'}),
-            'is_remote': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'countries': forms.SelectMultiple(attrs={'class': 'form-select'}),
+            'session': forms.HiddenInput(),  # Rendre le champ caché
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        # Ajoute ici d'autres vérifications si besoin, par exemple en fonction du type d'intervention
-        return cleaned_data
+    def __init__(self, *args, session=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if session:
+            self.fields['session'].initial = session  # Définir la session par défaut
+            self.fields['session'].disabled = True  # Empêcher la modification
 
 class AgendaItemForm(forms.ModelForm):
     class Meta:
@@ -153,14 +147,23 @@ class PartnerForm(forms.ModelForm):
             'country': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+
 class InterventionLocationForm(forms.ModelForm):
+    # Définir les choix pour le champ country
+    COUNTRY_CHOICES = [(country.alpha_2, country.name) for country in pycountry.countries]
+    
+    country = forms.ChoiceField(
+        choices=COUNTRY_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=True,
+    )
+
     class Meta:
         model = InterventionLocation
         fields = ['name', 'country', 'is_primary']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'country': forms.TextInput(attrs={'class': 'form-control'}),
-            'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_primary': forms.CheckboxInput(),
         }
 
 class SessionOrganizerForm(forms.ModelForm):

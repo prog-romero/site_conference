@@ -121,9 +121,10 @@ def get_session_data(request, session_id):
             {
                 'id': attendee.id,
                 'name': attendee.name,
+                'email': attendee.email,
                 'company': attendee.company,
-                'attendee_type': attendee.attendee_type.name if attendee.attendee_type else '',
-                'registration_date': attendee.registration_date.strftime('%M %d, %Y'),
+                
+                'registration_date': attendee.registration_date.strftime('%Y-%m-%d'),
             } for attendee in attendees
         ]
     }
@@ -168,19 +169,23 @@ def speaker_list(request, session_id):
     
 
 @login_required
-def speaker_intervention_create(request):
+def speaker_intervention_create(request, session_id):
+    session = get_object_or_404(Session, pk=session_id)
     if request.method == 'POST':
-        form = SpeakersInterventionsForm(request.POST, request.FILES)
+        form = SpeakersInterventionsForm(request.POST, request.FILES, session=session)
         if form.is_valid():
-            speaker = form.save()
-            messages.success(request, 'Intervenant ajouté avec succès.')
-            return redirect('speaker_list')
+            speaker = form.save(commit=False)
+            speaker.session = session  # Assuré que la session est liée
+            speaker.save()
+            messages.success(request, "Intervenant ajouté avec succès.")
+            return redirect('session_detail', pk=session_id)
     else:
-        form = SpeakersInterventionsForm()
-    
+        form = SpeakersInterventionsForm(session=session)
+
     context = {
         'form': form,
-        'title': 'Ajouter un intervenant',
+        'session': session,
+        'title': f"Ajouter un intervenant à : {session.title}",
     }
     return render(request, 'admin/speaker_form.html', context)
 
@@ -316,22 +321,12 @@ def session_detail(request, pk):
     speakers = session.speakers.all()
     
     # Formulaires
-    organizer_form = SessionOrganizerForm()
     funding_form = SessionFundingForm()
     speaker_form = SpeakersInterventionsForm(initial={'session': session})
     errors = {}
 
     if request.method == 'POST':
-        if 'add_organizer' in request.POST:
-            organizer_form = SessionOrganizerForm(request.POST)
-            if organizer_form.is_valid():
-                organizer = organizer_form.save(commit=False)
-                organizer.session = session
-                organizer.save()
-                messages.success(request, 'Organisateur ajouté avec succès.')
-                return redirect('session_detail', pk=session.id)
-        
-        elif 'add_funding' in request.POST:
+        if 'add_funding' in request.POST:
             funding_form = SessionFundingForm(request.POST)
             if funding_form.is_valid():
                 funding = funding_form.save(commit=False)
@@ -425,7 +420,6 @@ def session_detail(request, pk):
         'fundings': fundings,
         'agenda_items': agenda_items,
         'speakers': speakers,
-        'organizer_form': organizer_form,
         'funding_form': funding_form,
         'speaker_form': speaker_form,
         'partners': Partner.objects.filter(is_active=True),
@@ -1031,51 +1025,19 @@ def get_partner_data(request, partner_id):
 
 
 # === SESSION ORGANIZERS VIEWS ===
-@login_required
-def manage_session_organizers(request, session_id):
-    session = get_object_or_404(Session, pk=session_id)
-    
-    if request.method == 'POST':
-        if 'add_organizer' in request.POST:
-            SessionOrganizer.objects.create(
-                session=session,
-                name=request.POST['name'],
-                organization=request.POST['organization'],
-                order=request.POST.get('order', 0),
-                is_primary='is_primary' in request.POST
-            )
-            messages.success(request, "Organizer added successfully.")
-        elif 'remove_organizer' in request.POST:
-            get_object_or_404(SessionOrganizer, pk=request.POST['organizer_id']).delete()
-            messages.success(request, "Organizer removed successfully.")
-        return redirect('manage_session_organizers', session_id=session.id)
-    
-    return render(request, 'conference_app/admin/manage_organizers.html', {
-        'session': session,
-        'organizers': session.organizers.order_by('order')
-    })
-
 class SessionOrganizerUpdateView(LoginRequiredMixin, UpdateView):
     model = SessionOrganizer
     form_class = SessionOrganizerForm
     template_name = 'admin/organizer_form.html'
     
     def get_success_url(self):
-        return reverse_lazy('session_detail', kwargs={'pk': self.object.session.pk})
+        return reverse_lazy('organizer_list', kwargs={'session_id': self.object.session.id})  # Modifié pour rediriger vers organizer_list
     
     def form_valid(self, form):
         messages.success(self.request, 'Organisateur mis à jour avec succès.')
         return super().form_valid(form)
 
-@login_required
-def delete_session_organizer(request, pk):
-    organizer = get_object_or_404(SessionOrganizer, pk=pk)
-    session_id = organizer.session.id
-    if request.method == 'POST':
-        organizer.delete()
-        messages.success(request, 'Organisateur supprimé avec succès.')
-    return redirect('dashboard')
-
+# Ligne 967-1016 : Vérification des vues CRUD pour SessionOrganizer (déjà correctes)
 @login_required
 def organizer_list(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
@@ -1139,35 +1101,7 @@ def organizer_delete(request, pk):
     })
 
 # === SESSION FUNDINGS VIEWS ===
-@login_required
-def manage_session_fundings(request, session_id):
-    session = get_object_or_404(Session, pk=session_id)
-    
-    if request.method == 'POST':
-        if 'add_funding' in request.POST:
-            form = SessionFundingForm(request.POST)
-            if form.is_valid():
-                funding = form.save(commit=False)
-                funding.session = session
-                funding.save()
-                messages.success(request, "Funding added successfully.")
-            else:
-                messages.error(request, "Error adding funding. Please check the form.")
-        elif 'remove_funding' in request.POST:
-            get_object_or_404(SessionFunding, pk=request.POST['funding_id']).delete()
-            messages.success(request, "Funding removed successfully.")
-        return redirect('manage_session_fundings', session_id=session.id)
-    
-    return render(request, 'admin/manage_fundings.html', {
-        'session': session,
-        'fundings': session.fundings.all(),
-        'partners': Partner.objects.filter(is_active=True),
-        'funding_types': SessionFunding.FUNDING_TYPES,
-        'form': SessionFundingForm()
-    })
-
-
-
+# Ligne 1083-1142 : Mise à jour des vues CRUD pour SessionFunding
 @login_required
 def funding_list(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
@@ -1175,7 +1109,7 @@ def funding_list(request, session_id):
     return render(request, 'admin/funding_list.html', {
         'session': session,
         'fundings': fundings,
-        'title': f"Fundings for Session: {session.title}",
+        'title': f"Financements pour la session : {session.title}",  # Traduit en français
     })
 
 @login_required
@@ -1187,14 +1121,16 @@ def funding_create(request, session_id):
             funding = form.save(commit=False)
             funding.session = session
             funding.save()
-            messages.success(request, "Funding added successfully.")
+            messages.success(request, "Financement ajouté avec succès.")  # Traduit
             return redirect('funding_list', session_id=session.id)
+        else:
+            messages.error(request, "Erreur lors de l’ajout du financement. Veuillez vérifier les champs.")  # Traduit
     else:
         form = SessionFundingForm()
     return render(request, 'admin/funding_form.html', {
         'form': form,
         'session': session,
-        'title': f"Add Funding to: {session.title}",
+        'title': f"Ajouter un financement à : {session.title}",  # Traduit
     })
 
 @login_required
@@ -1204,27 +1140,29 @@ def funding_edit(request, pk):
         form = SessionFundingForm(request.POST, instance=funding)
         if form.is_valid():
             form.save()
-            messages.success(request, "Funding updated successfully.")
+            messages.success(request, "Financement mis à jour avec succès.")  # Traduit
             return redirect('funding_list', session_id=funding.session.id)
+        else:
+            messages.error(request, "Erreur lors de la mise à jour du financement. Veuillez vérifier les champs.")  # Traduit
     else:
         form = SessionFundingForm(instance=funding)
     return render(request, 'admin/funding_form.html', {
         'form': form,
         'funding': funding,
-        'title': f"Edit: {funding.partner.name} - {funding.get_funding_type_display()}",
+        'title': f"Modifier : {funding.partner.name} - {funding.get_funding_type_display()}",  # Traduit
     })
 
 @login_required
-def delete_session_funding(request, pk):
+def funding_delete(request, pk):  # Renommé de delete_session_funding à funding_delete
     funding = get_object_or_404(SessionFunding, pk=pk)
     session_id = funding.session.id
     if request.method == 'POST':
         funding.delete()
-        messages.success(request, "Funding deleted successfully.")
+        messages.success(request, "Financement supprimé avec succès.")  # Traduit
         return redirect('funding_list', session_id=session_id)
     return render(request, 'admin/funding_confirm_delete.html', {
         'funding': funding,
-        'title': f"Delete: {funding.partner.name}",
+        'title': f"Supprimer : {funding.partner.name}",  # Traduit
     })
 
 class SessionFundingUpdateView(LoginRequiredMixin, UpdateView):
@@ -1236,7 +1174,7 @@ class SessionFundingUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('funding_list', kwargs={'session_id': self.object.session.id})
 
     def form_valid(self, form):
-        messages.success(self.request, "Funding updated successfully.")
+        messages.success(self.request, "Financement mis à jour avec succès.")  # Traduit
         return super().form_valid(form)
 
 
@@ -1244,13 +1182,17 @@ class SessionFundingUpdateView(LoginRequiredMixin, UpdateView):
 # === INTERVENTION LOCATIONS VIEWS ===
 class LocationAdminListView(LoginRequiredMixin, ListView):
     model = InterventionLocation
-    template_name = 'conference_app/admin/location_list.html'
+    template_name = 'admin/location_list.html'
     context_object_name = 'locations'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Gestion des lieux d'intervention"
         return context
+
+import pycountry  # Ajouté pour la liste des pays
+
+# ... (autres imports inchangés)
 
 @login_required
 def location_create(request):
@@ -1263,11 +1205,15 @@ def location_create(request):
     else:
         form = InterventionLocationForm()
     
+    # Liste des pays pour le menu déroulant
+    countries = [(country.alpha_2, country.name) for country in pycountry.countries]
+    
     context = {
         'form': form,
         'title': "Ajouter un lieu d'intervention",
+        'countries': countries,  # Ajouté
     }
-    return render(request, 'conference_app/admin/location_form.html', context)
+    return render(request, 'admin/location_form.html', context)
 
 @login_required
 def location_edit(request, pk):
@@ -1281,12 +1227,16 @@ def location_edit(request, pk):
     else:
         form = InterventionLocationForm(instance=location)
     
+    # Liste des pays pour le menu déroulant
+    countries = [(country.alpha_2, country.name) for country in pycountry.countries]
+    
     context = {
         'form': form,
         'location': location,
         'title': f"Modifier le lieu d'intervention: {location.name}",
+        'countries': countries,  # Ajouté
     }
-    return render(request, 'conference_app/admin/location_form.html', context)
+    return render(request, 'admin/location_form.html', context)
 
 @login_required
 def location_delete(request, pk):
@@ -1300,7 +1250,7 @@ def location_delete(request, pk):
         'location': location,
         'title': f"Supprimer le lieu d'intervention: {location.name}",
     }
-    return render(request, 'conference_app/admin/location_confirm_delete.html', context)
+    return render(request, 'admin/location_confirm_delete.html', context)
 
 @login_required
 def manage_intervention_locations(request):

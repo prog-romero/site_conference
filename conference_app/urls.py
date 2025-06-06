@@ -6,10 +6,10 @@ from .views import (
     delete_speaker_intervention, 
     delete_session, agenda_delete, agenda_edit,
     delete_attendee_type, partner_delete,
-    delete_intervention_location, delete_session_organizer,
-    delete_session_funding,
+    delete_intervention_location,
     attendee_create, attendee_update, attendee_delete,
     organizer_list, organizer_create, organizer_edit, organizer_delete,funding_list,
+    funding_delete, funding_create, funding_edit,
 )
 
 urlpatterns = [
@@ -56,15 +56,14 @@ urlpatterns = [
     # AJAX endpoint for session data
     path('api/session/<int:session_id>/data/', views.get_session_data, name='get_session_data'),
     
+
     # Speakers Management
     path('dashboard/speakers/', include([
         path('', views.SpeakersInterventionsAdminListView.as_view(), name='speaker_list'),
-        path('add/', views.speaker_intervention_create, name='speaker_create'),
+        path('<int:session_id>/add/', views.speaker_intervention_create, name='speaker_create'),  # Modifié : ajout de <int:session_id>
         path('<int:pk>/edit/', views.speaker_intervention_edit, name='speaker_edit'),
         path('<int:pk>/delete/', delete_speaker_intervention, name='delete_speaker_intervention'),
-        
     ])),
-    
     
     # Sessions Management
     path('dashboard/sessions/', include([
@@ -73,10 +72,12 @@ urlpatterns = [
         path('<int:pk>/', views.session_detail, name='session_detail'),
         path('<int:pk>/edit/', views.session_edit, name='session_edit'),
         path('<int:pk>/delete/', delete_session, name='delete_session'),
-        # Session organizers and fundings
-        path('<int:session_id>/organizers/', views.manage_session_organizers, name='manage_session_organizers'),
-        path('<int:session_id>/fundings/', views.manage_session_fundings, name='manage_session_fundings'),
+        # Ajout de l'URL pour les organisateurs (redirection vers organizer_list)
+        path('<int:session_id>/organizers/', views.organizer_list, name='session_organizers'),
+        # Ajout de l'URL pour les financements (redirection vers funding_list)
+        path('<int:session_id>/fundings/', views.funding_list, name='session_fundings'),
     ])),
+    
     
     # Agenda
     path('dashboard/agenda/', include([
@@ -140,15 +141,14 @@ urlpatterns = [
         path('<int:pk>/edit/', views.organizer_edit, name='organizer_edit'),
         path('<int:pk>/delete/', views.organizer_delete, name='organizer_delete'),
         path('<int:pk>/update/', views.SessionOrganizerUpdateView.as_view(), name='organizer_update'),
-        path('<int:pk>/remove/', views.delete_session_organizer, name='delete_session_organizer'),
     ])),
     
-    # Session Fundings Management - NEW UPDATE operations
+    # Session Fundings Management
     path('dashboard/fundings/', include([
         path('<int:session_id>/', views.funding_list, name='funding_list'),
         path('<int:session_id>/add/', views.funding_create, name='funding_create'),
         path('<int:pk>/edit/', views.funding_edit, name='funding_edit'),
-        path('<int:pk>/delete/', views.delete_session_funding, name='funding_delete'),
+        path('<int:pk>/delete/', views.funding_delete, name='funding_delete'),  # Modifié : delete_session_funding -> funding_delete
     ])),
 
 

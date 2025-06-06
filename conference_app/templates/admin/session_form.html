@@ -5,7 +5,12 @@
 {% block content %}
 <section class="py-5 bg-primary-dark text-white">
     <div class="container">
-        <h1>{{ title }}</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>{{ title }}</h1>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Retour au tableau de bord
+            </a>
+        </div>
     </div>
 </section>
 
@@ -15,57 +20,128 @@
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
-                        <form method="post">
+                        <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             
-                            <div class="mb-4">
-                                <label class="form-label">Titre</label>
-                                {{ form.title }}
-                            </div>
+                            <h5 class="mb-3">Informations personnelles</h5>
                             
-                            <div class="mb-4">
-                                <label class="form-label">Description</label>
-                                {{ form.description }}
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nom</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Genre</label>
+                                    {{ form.gender }}
+                                    {% if form.gender.errors %}
+                                    <div class="text-danger">{{ form.gender.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
                             
                             <div class="row mb-4">
                                 <div class="col-md-6">
-                                    <label class="form-label">Date de début</label>
-                                    {{ form.start_date }}
+                                    <label class="form-label">Titre</label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Date de fin</label>
-                                    {{ form.end_date }}
+                                    <label class="form-label">Organisation</label>
+                                    {{ form.organization }}
+                                    {% if form.organization.errors %}
+                                    <div class="text-danger">{{ form.organization.errors }}</div>
+                                    {% endif %}
                                 </div>
                             </div>
                             
                             <div class="mb-4">
-                                <label class="form-label">Catégorie</label>
-                                {{ form.track }}
+                                <label class="form-label">Biographie</label>
+                                {{ form.bio }}
+                                {% if form.bio.errors %}
+                                <div class="text-danger">{{ form.bio.errors }}</div>
+                                {% endif %}
                             </div>
                             
                             <div class="mb-4">
-                                <label class="form-label">Lieux d'intervention</label>
-                                {{ form.locations }}
-                                <small class="text-muted">Maintenez Ctrl/Cmd pour sélectionner plusieurs lieux</small>
+                                <label class="form-label">Photo</label>
+                                {{ form.photo }}
+                                {% if form.photo.errors %}
+                                <div class="text-danger">{{ form.photo.errors }}</div>
+                                {% endif %}
+                                {% if speaker.photo %}
+                                <div class="mt-2">
+                                    <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="img-thumbnail" style="max-height: 100px;">
+                                </div>
+                                {% endif %}
                             </div>
                             
+                            <h5 class="mb-3 mt-5">Informations d'intervention</h5>
+                            
+                            {% if session %}
                             <div class="mb-4">
-                                <label class="form-label">Intervenants</label>
-                                {{ form.speakers }}
-                                <small class="text-muted">Maintenez Ctrl/Cmd pour sélectionner plusieurs intervenants</small>
+                                <label class="form-label">Session</label>
+                                <input type="text" class="form-control" value="{{ session.title }}" readonly>
+                                {{ form.session.as_hidden }}
+                            </div>
+                            {% else %}
+                            <div class="mb-4">
+                                <label class="form-label">Session</label>
+                                {% if session %}
+                                    <input type="hidden" name="session" value="{{ session.id }}">
+                                    <p class="form-control-static">{{ session.title }}</p>
+                                {% else %}
+                                    {{ form.session }}
+                                    {% if form.session.errors %}
+                                    <div class="text-danger">{{ form.session.errors }}</div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Type d'intervention</label>
+                                    {{ form.intervention_type }}
+                                    {% if form.intervention_type.errors %}
+                                    <div class="text-danger">{{ form.intervention_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Lieu d'intervention</label>
+                                    {{ form.location }}
+                                    {% if form.location.errors %}
+                                    <div class="text-danger">{{ form.location.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
                             
                             <div class="mb-4 form-check">
-                                {{ form.is_hybrid }}
-                                <label class="form-check-label" for="{{ form.is_hybrid.id_for_label }}">
-                                    Session hybride (présentiel et distanciel)
+                                {{ form.is_remote }}
+                                <label class="form-check-label" for="{{ form.is_remote.id_for_label }}">
+                                    Intervention à distance
                                 </label>
+                                {% if form.is_remote.errors %}
+                                <div class="text-danger">{{ form.is_remote.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Pays d'origine</label>
+                                {{ form.countries }}
+                                {% if form.countries.errors %}
+                                <div class="text-danger">{{ form.countries.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Maintenez Ctrl/Cmd pour sélectionner plusieurs pays</small>
                             </div>
                             
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary-custom">Enregistrer</button>
-                                <a href="{% url 'session_list' %}" class="btn btn-outline-secondary">Annuler</a>
+                                <a href="{% url 'speaker_list' %}" class="btn btn-outline-secondary">Annuler</a>
                             </div>
                         </form>
                     </div>
@@ -75,3 +151,4 @@
     </div>
 </section>
 {% endblock %}
+```
