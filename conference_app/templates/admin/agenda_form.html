@@ -1,11 +1,16 @@
 {% extends 'conference_app/base.html' %}
 
-{% block title %}Modifier Élément d'Agenda - Conference 2025{% endblock %}
+{% block title %}{{ title }} - Conférence IA Cameroun-France{% endblock %}
 
 {% block content %}
 <section class="py-5 bg-primary-dark text-white">
     <div class="container">
-        <h1>Modifier Élément d'Agenda</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>{{ title }}</h1>
+            <a href="{% url 'agenda_list' session.id %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+            </a>
+        </div>
     </div>
 </section>
 
@@ -15,74 +20,66 @@
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
-                        {% if errors.general %}
-                        <div class="alert alert-danger mb-4">{{ errors.general }}</div>
-                        {% endif %}
                         <form method="post">
                             {% csrf_token %}
+                            {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-4">
+                                {{ form.non_field_errors }}
+                            </div>
+                            {% endif %}
                             <div class="mb-4">
-                                <label class="form-label" for="title">Titre*</label>
-                                <input type="text" name="title" id="title" class="form-control {% if errors.title %}is-invalid{% endif %}" value="{{ agenda_item.title|default:request.POST.title|default:'' }}" required>
-                                {% if errors.title %}
-                                <div class="invalid-feedback">{{ errors.title }}</div>
+                                <label class="form-label" for="{{ form.title.id_for_label }}">Titre*</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">{{ form.title.errors }}</div>
                                 {% endif %}
                             </div>
                             <div class="mb-4">
-                                <label class="form-label" for="item_type">Type*</label>
-                                <select name="item_type" id="item_type" class="form-control {% if errors.item_type %}is-invalid{% endif %}" required>
-                                    <option value="">Sélectionner un type</option>
-                                    {% for value, label in item_types %}
-                                    <option value="{{ value }}" {% if agenda_item.item_type == value or request.POST.item_type == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                                {% if errors.item_type %}
-                                <div class="invalid-feedback">{{ errors.item_type }}</div>
+                                <label class="form-label" for="{{ form.item_type.id_for_label }}">Type*</label>
+                                {{ form.item_type }}
+                                {% if form.item_type.errors %}
+                                <div class="invalid-feedback d-block">{{ form.item_type.errors }}</div>
                                 {% endif %}
                             </div>
                             <div class="mb-4">
-                                <label class="form-label" for="date">Date*</label>
-                                <input type="date" name="date" id="date" class="form-control {% if errors.date %}is-invalid{% endif %}" value="{{ agenda_item.date|date:'Y-m-d'|default:request.POST.date|default:'' }}" required>
-                                {% if errors.date %}
-                                <div class="invalid-feedback">{{ errors.date }}</div>
+                                <label class="form-label" for="{{ form.date.id_for_label }}">Date*</label>
+                                {{ form.date }}
+                                {% if form.date.errors %}
+                                <div class="invalid-feedback d-block">{{ form.date.errors }}</div>
                                 {% endif %}
                                 <small class="text-muted">Entre {{ session.start_date|date:"d F Y" }} et {{ session.end_date|date:"d F Y" }}</small>
                             </div>
                             <div class="mb-4">
-                                <label class="form-label" for="start_time">Heure de début*</label>
-                                <input type="time" name="start_time" id="start_time" class="form-control {% if errors.start_time %}is-invalid{% endif %}" value="{{ agenda_item.start_time|time:'H:i'|default:request.POST.start_time|default:'' }}" required>
-                                {% if errors.start_time %}
-                                <div class="invalid-feedback">{{ errors.start_time }}</div>
+                                <label class="form-label" for="{{ form.start_time.id_for_label }}">Heure de début*</label>
+                                {{ form.start_time }}
+                                {% if form.start_time.errors %}
+                                <div class="invalid-feedback d-block">{{ form.start_time.errors }}</div>
                                 {% endif %}
                             </div>
                             <div class="mb-4">
-                                <label class="form-label" for="end_time">Heure de fin*</label>
-                                <input type="time" name="end_time" id="end_time" class="form-control {% if errors.end_time %}is-invalid{% endif %}" value="{{ agenda_item.end_time|time:'H:i'|default:request.POST.end_time|default:'' }}" required>
-                                {% if errors.end_time %}
-                                <div class="invalid-feedback">{{ errors.end_time }}</div>
+                                <label class="form-label" for="{{ form.end_time.id_for_label }}">Heure de fin*</label>
+                                {{ form.end_time }}
+                                {% if form.end_time.errors %}
+                                <div class="invalid-feedback d-block">{{ form.end_time.errors }}</div>
                                 {% endif %}
                             </div>
                             <div class="mb-4">
-                                <label class="form-label" for="location">Lieu</label>
-                                <select name="location" id="location" class="form-control {% if errors.location %}is-invalid{% endif %}">
-                                    <option value="">Sélectionner un lieu (optionnel)</option>
-                                    {% for loc in locations %}
-                                    <option value="{{ loc.id }}" {% if agenda_item.location.id == loc.id or request.POST.location|add:'0' == loc.id %}selected{% endif %}>{{ loc }}</option>
-                                    {% endfor %}
-                                </select>
-                                {% if errors.location %}
-                                <div class="invalid-feedback">{{ errors.location }}</div>
+                                <label class="form-label" for="{{ form.location.id_for_label }}">Lieu</label>
+                                {{ form.location }}
+                                {% if form.location.errors %}
+                                <div class="invalid-feedback d-block">{{ form.location.errors }}</div>
                                 {% endif %}
                             </div>
                             <div class="mb-4">
-                                <label class="form-label" for="description">Description</label>
-                                <textarea name="description" id="description" class="form-control {% if errors.description %}is-invalid{% endif %}" rows="5">{{ agenda_item.description|default:request.POST.description|default:'' }}</textarea>
-                                {% if errors.description %}
-                                <div class="invalid-feedback">{{ errors.description }}</div>
+                                <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">{{ form.description.errors }}</div>
                                 {% endif %}
                             </div>
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary-custom">Mettre à jour</button>
-                                <a href="{% url 'session_detail' session.id %}" class="btn btn-outline-secondary">Annuler</a>
+                                <button type="submit" class="btn btn-primary-custom">Enregistrer</button>
+                                <a href="{% url 'agenda_list' session.id %}" class="btn btn-outline-secondary">Annuler</a>
                             </div>
                         </form>
                     </div>

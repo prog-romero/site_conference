@@ -40,7 +40,7 @@
                             <a href="{% url 'session_edit' session.id %}" class="btn btn-primary-custom">
                                 <i class="fas fa-edit me-2"></i> Modifier la session
                             </a>
-                            <a href="{% url 'agenda_create' %}?session={{ session.id }}" class="btn btn-outline-primary">
+                            <a href="{% url 'agenda_create' session.id %}" class="btn btn-outline-primary">
                                 <i class="fas fa-plus me-2"></i> Ajouter un agenda
                             </a>
                             <form method="post" action="{% url 'delete_session' session.id %}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette session?');">

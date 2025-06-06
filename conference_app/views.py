@@ -8,7 +8,7 @@ from .models import SpeakersInterventions, Session, AgendaItem, AttendeeType, At
 from .forms import RegistrationForm, ContactForm, SpeakersInterventionsForm
 from django.db.models import Q
 from datetime import datetime
-from .forms import SubscribeForm, PartnerForm, SessionForm, SessionOrganizerForm, SessionFundingForm, InterventionLocationForm, AgendaItemForm
+from .forms import SubscribeForm, PartnerForm, SessionForm, SessionOrganizerForm, SessionFundingForm, InterventionLocationForm, AgendaItemForm, AttendeeForm
 
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
@@ -33,7 +33,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
 from django.core.exceptions import ValidationError
-
+from django import forms
+from django.core.paginator import Paginator
 
 def home(request):
     # Récupérer les intervenants mis en avant
@@ -147,13 +148,24 @@ class SpeakersInterventionsDetailView(DetailView):
 
 class SpeakersInterventionsAdminListView(LoginRequiredMixin, ListView):
     model = SpeakersInterventions
-    template_name = 'conference_app/admin/speaker_list.html'
+    template_name = 'conference_app/speaker_list.html'
     context_object_name = 'speakers'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Gestion des intervenants"
         return context
+    
+@login_required
+def speaker_list(request, session_id):
+    session = get_object_or_404(Session, pk=session_id)
+    speakers = SpeakersInterventions.objects.filter(session=session)
+    return render(request, 'conference_app/speaker_list.html', {
+        'session': session,
+        'speakers': speakers,
+        'title': f"Intervenants de la session : {session.title}",
+    })
+    
 
 @login_required
 def speaker_intervention_create(request):
@@ -162,7 +174,7 @@ def speaker_intervention_create(request):
         if form.is_valid():
             speaker = form.save()
             messages.success(request, 'Intervenant ajouté avec succès.')
-            return redirect('dashboard')
+            return redirect('speaker_list')
     else:
         form = SpeakersInterventionsForm()
     
@@ -200,6 +212,7 @@ def delete_speaker_intervention(request, pk):
         messages.success(request, f"Intervenant {speaker_name} supprimé avec succès.")
         return redirect('dashboard')
     return redirect('dashboard')
+
 
 # === SESSIONS VIEWS ===
 class SessionListView(ListView):
@@ -423,6 +436,9 @@ def session_detail(request, pk):
     }
     return render(request, 'conference_app/session_detail.html', context)
 
+
+
+# === AGENDA VIEWS ===
 # === AGENDA VIEWS ===
 class AgendaView(TemplateView):
     template_name = 'conference_app/agenda.html'
@@ -444,125 +460,139 @@ class AgendaView(TemplateView):
         
         context['agenda_days'] = agenda_by_date.values()
         return context
-
-# Agenda Views
-class AgendaAdminListView(LoginRequiredMixin, ListView):
-    model = AgendaItem
-    template_name = 'admin/agenda_list.html'
-    context_object_name = 'agenda_items'
-    ordering = ['date', 'start_time']
-    paginate_by = 10
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = 'Gestion des Agenda Items'
-        return context
+
+class AgendaItemForm(forms.ModelForm):
+    class Meta:
+        model = AgendaItem
+        fields = ['title', 'description', 'date', 'start_time', 'end_time', 'item_type', 'location']  # Retiré 'speaker'
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time'}),
+            'description': forms.Textarea(attrs={'rows': 5}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        start_time = cleaned_data.get('start_time')
+        end_time = cleaned_data.get('end_time')
+        session = self.instance.session if self.instance.pk else None
+
+        if session and date:
+            if date < session.start_date or date > session.end_date:
+                self.add_error('date', f'La date doit être entre {session.start_date.strftime("%d %B %Y")} et {session.end_date.strftime("%d %B %Y")}.')
+
+        if start_time and end_time and start_time >= end_time:
+            self.add_error('end_time', 'L’heure de fin doit être postérieure à l’heure de début.')
+
+        return cleaned_data
+    
+
+@login_required
+def agenda_list(request, session_id):
+    session = get_object_or_404(Session, pk=session_id)
+    agenda_items = AgendaItem.objects.filter(session=session).order_by('date', 'start_time')
+    return render(request, 'admin/agenda_list.html', {
+        'session': session,
+        'agenda_items': agenda_items,
+        'title': f"Agenda de la session : {session.title}",
+    })
+
+class AgendaItemForm(forms.ModelForm):
+    class Meta:
+        model = AgendaItem
+        fields = ['title', 'description', 'date', 'start_time', 'end_time', 'item_type', 'location']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time'}),
+            'description': forms.Textarea(attrs={'rows': 5}),
+        }
+
+    def __init__(self, *args, session=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.session = session
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        start_time = cleaned_data.get('start_time')
+        end_time = cleaned_data.get('end_time')
+        session = self.session or (self.instance.session if self.instance.pk else None)
+
+        if session and date:
+            if not (session.start_date and session.end_date):
+                self.add_error('date', 'La session n’a pas de dates définies.')
+            elif date < session.start_date or date > session.end_date:
+                self.add_error('date', f'La date doit être entre {session.start_date.strftime("%d %B %Y")} et {session.end_date.strftime("%d %B %Y")}.')
+
+        if start_time and end_time and start_time >= end_time:
+            self.add_error('end_time', 'L’heure de fin doit être postérieure à l’heure de début.')
+
+        return cleaned_data
+    
+
+@login_required
+def agenda_create(request, session_id):
+    session = get_object_or_404(Session, pk=session_id)
+    if request.method == 'POST':
+        form = AgendaItemForm(request.POST, session=session)
+        if form.is_valid():
+            agenda_item = form.save(commit=False)
+            agenda_item.session = session
+            agenda_item.save()
+            messages.success(request, "Élément d’agenda ajouté avec succès.")
+            return redirect('agenda_list', session_id=session.id)  # Corrigé : utiliser session_id
+        else:
+            messages.error(request, "Erreur lors de l’ajout de l’élément d’agenda. Veuillez vérifier les champs.")
+    else:
+        form = AgendaItemForm(session=session)
+    return render(request, 'admin/agenda_form.html', {
+        'form': form,
+        'session': session,
+        'title': f"Ajouter un élément d’agenda à : {session.title}",
+        'item_types': AgendaItem.ITEM_TYPE_CHOICES,
+        'locations': InterventionLocation.objects.all(),
+    })
 
 @login_required
 def agenda_edit(request, pk):
     agenda_item = get_object_or_404(AgendaItem, pk=pk)
     session = agenda_item.session
-    errors = {}
-
     if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
-        description = request.POST.get('description', '').strip()
-        date = request.POST.get('date')
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
-        item_type = request.POST.get('item_type')
-        location_id = request.POST.get('location')
-
-        # Validate required fields
-        if not title:
-            errors['title'] = 'Titre requis.'
-        if not date:
-            errors['date'] = 'Date requise.'
-        if not start_time:
-            errors['start_time'] = 'Heure de début requise.'
-        if not end_time:
-            errors['end_time'] = 'Heure de fin requise.'
-        if not item_type:
-            errors['item_type'] = 'Type requis.'
-
-        # Validate location
-        location = None
-        if location_id:
-            try:
-                location = InterventionLocation.objects.get(pk=location_id)
-            except InterventionLocation.DoesNotExist:
-                errors['location'] = 'Lieu invalide.'
-
-        # Validate date
-        try:
-            date_obj = datetime.strptime(date, '%Y-%m-%d').date() if date else None
-            if date_obj and (date_obj < session.start_date or date_obj > session.end_date):
-                errors['date'] = f'La date doit être entre {session.start_date.strftime("%d %B %Y")} et {session.end_date.strftime("%d %B %Y")}.'
-        except ValueError:
-            errors['date'] = 'Format de date invalide.'
-
-        # Validate times
-        try:
-            start_time_obj = datetime.strptime(start_time, '%H:%M').time() if start_time else None
-            end_time_obj = datetime.strptime(end_time, '%H:%M').time() if end_time else None
-            if start_time_obj and end_time_obj and start_time_obj > end_time_obj:
-                errors['end_time'] = 'L’heure de fin doit être postérieure ou égale à l’heure de début.'
-        except ValueError:
-            errors['start_time'] = 'Format d’heure invalide.' if not errors.get('start_time') else errors['start_time']
-            errors['end_time'] = 'Format d’heure invalide.' if not errors.get('end_time') else errors['end_time']
-
-        # Validate item_type
-        if item_type and item_type not in dict(AgendaItem.ITEM_TYPE_CHOICES).keys():
-            errors['item_type'] = 'Type invalide.'
-
-        if not errors:
-            try:
-                agenda_item.title = title
-                agenda_item.description = description or None
-                agenda_item.date = date_obj
-                agenda_item.start_time = start_time_obj
-                agenda_item.end_time = end_time_obj
-                agenda_item.item_type = item_type
-                agenda_item.location = location
-                agenda_item.session = session
-                agenda_item.clean()
-                agenda_item.save()
-                messages.success(request, 'Agenda item mis à jour avec succès.')
-                return redirect('session_detail', pk=session.id)
-            except ValidationError as e:
-                errors['general'] = str(e)
+        form = AgendaItemForm(request.POST, instance=agenda_item, session=session)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Élément d’agenda modifié avec succès.")
+            return redirect('agenda_list', session_id=session.id)
+    else:
+        form = AgendaItemForm(instance=agenda_item, session=session)
 
     return render(request, 'admin/agenda_form.html', {
+        'form': form,
         'agenda_item': agenda_item,
         'session': session,
-        'errors': errors,
+        'title': f"Modifier : {agenda_item.title}",
         'item_types': AgendaItem.ITEM_TYPE_CHOICES,
         'locations': InterventionLocation.objects.all(),
-        'title': f'Modifier l’élément d’agenda: {agenda_item.title}',
     })
 
 @login_required
 def agenda_delete(request, pk):
     agenda_item = get_object_or_404(AgendaItem, pk=pk)
-    session = agenda_item.session
+    session_id = agenda_item.session.id
     if request.method == 'POST':
         agenda_item.delete()
-        messages.success(request, 'Élément d’agenda supprimé avec succès.')
-        return redirect('session_detail', pk=session.id)
+        messages.success(request, "Élément d’agenda supprimé avec succès.")
+        return redirect('agenda_list', session_id=session_id)
+
     return render(request, 'admin/agenda_confirm_delete.html', {
-        'item': agenda_item,
-        'session': session,
-        'title': f'Supprimer l’élément d’agenda: {agenda_item.title}',
+        'agenda_item': agenda_item,
+        'title': f"Supprimer : {agenda_item.title}",
     })
 
-@login_required
-def partner_delete(request, pk):
-    partner = get_object_or_404(Partner, pk=pk)
-    if request.method == 'POST':
-        partner.delete()
-        messages.success(request, 'Partner deleted successfully.')
-        return redirect('dashboard')
-    return render(request, 'admin/partner_confirm_delete.html', {'partner': partner})
 
 
 def download_agenda(request):
@@ -659,6 +689,7 @@ def download_agenda(request):
     response['Content-Disposition'] = 'attachment; filename="conference_agenda.pdf"'
     return response
 
+
 # === REGISTRATION VIEWS ===
 def register(request):
     if request.method == 'POST':
@@ -709,6 +740,7 @@ def register(request):
 def registration_success(request):
     return render(request, 'conference_app/registration_success.html')
 
+
 # === ATTENDEE VIEWS ===
 class AttendeeListView(LoginRequiredMixin, ListView):
     model = Attendee
@@ -729,21 +761,79 @@ class AttendeeDetailView(LoginRequiredMixin, DetailView):
 class AttendeeUpdateView(LoginRequiredMixin, UpdateView):
     model = Attendee
     form_class = RegistrationForm
-    template_name = 'conference_app/admin/attendee_form.html'
+    template_name = 'admin/attendee_form.html'
     success_url = reverse_lazy('attendee_list')
     
     def form_valid(self, form):
         messages.success(self.request, 'Inscription mise à jour avec succès.')
         return super().form_valid(form)
 
+login_required
+def attendee_list(request, session_id):
+    session = get_object_or_404(Session, pk=session_id)
+    attendees = Attendee.objects.filter(session=session).order_by('name')
+    paginator = Paginator(attendees, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'admin/attendee_list.html', {
+        'session': session,
+        'attendees': page_obj,
+        'page_obj': page_obj,
+        'title': f"Inscriptions pour : {session.title}",
+    })
+
 @login_required
-def delete_attendee(request, pk):
+@login_required
+def attendee_create(request, session_id):
+    session = get_object_or_404(Session, pk=session_id)
+    if request.method == 'POST':
+        form = AttendeeForm(request.POST, session=session)
+        if form.is_valid():
+            attendee = form.save(commit=False)
+            attendee.session = session
+            attendee.save()
+            messages.success(request, f"Inscription de {attendee.name} ajoutée.")
+            return redirect('attendee_list', session_id=session.id)
+        else:
+            messages.error(request, "Erreur lors de l’ajout. Vérifiez les champs.")
+    else:
+        form = AttendeeForm(session=session)
+    return render(request, 'admin/attendee_form.html', {
+        'form': form,
+        'session': session,
+        'title': f'Ajouter une inscription à : {session.title}',
+        'is_create': True,
+    })
+
+@login_required
+def attendee_update(request, pk):
+    attendee = get_object_or_404(Attendee, pk=pk)
+    session = attendee.session
+    if request.method == 'POST':
+        form = AttendeeForm(request.POST, instance=attendee, session=session)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Inscription de {attendee.name} mise à jour.")
+            return redirect('attendee_list', session_id=session.id)
+        else:
+            messages.error(request, "Erreur lors de la mise à jour. Vérifiez les champs.")
+    else:
+        form = AttendeeForm(instance=attendee, session=session)
+    return render(request, 'admin/attendee_form.html', {
+        'form': form,
+        'session': session,
+        'title': f"Modifier : {attendee.name}",
+    })
+
+@login_required
+def attendee_delete(request, pk, session_id):
     attendee = get_object_or_404(Attendee, pk=pk)
     if request.method == 'POST':
         attendee.delete()
-        messages.success(request, f"Registration for {attendee.name} has been deleted successfully.")
-        return redirect('dashboard')
-    return redirect('dashboard')
+        messages.success(request, f"Inscription de {attendee.name} supprimée.")
+        return redirect('attendee_list', session_id=session_id)
+    return redirect('attendee_list', session_id=session_id)
+
 
 # === ATTENDEE TYPE VIEWS ===
 class AttendeeTypeListView(ListView):
@@ -782,6 +872,7 @@ def delete_attendee_type(request, pk):
         messages.success(request, f"Attendee type '{type_name}' has been deleted successfully.")
         return redirect('dashboard')
     return redirect('dashboard')
+
 
 # === PARTNERS VIEWS ===
 class PartnerListView(ListView):
@@ -936,6 +1027,7 @@ def get_partner_data(request, partner_id):
     }
     
     return JsonResponse(data)
+
 
 
 # === SESSION ORGANIZERS VIEWS ===
@@ -1247,13 +1339,12 @@ def dashboard_view(request):
     # Gestion de la session sélectionnée
     selected_session = None
     agenda_items = []
+    attendees = []
     session_id = request.GET.get('session_id')
     if session_id:
-        try:
-            selected_session = Session.objects.get(pk=session_id)
-            agenda_items = AgendaItem.objects.filter(session=selected_session).order_by('date', 'start_time')
-        except Session.DoesNotExist:
-            pass
+        selected_session = get_object_or_404(Session, pk=session_id)  # Utilise get_object_or_404 pour plus de robustesse
+        agenda_items = AgendaItem.objects.filter(session=selected_session).order_by('date', 'start_time')
+        attendees = Attendee.objects.filter(session=selected_session).order_by('name')  # Ajouté pour les inscriptions
 
     context = {
         'total_registrations': Attendee.objects.count(),
@@ -1263,8 +1354,9 @@ def dashboard_view(request):
         
         'speakers': SpeakersInterventions.objects.all(),
         'sessions': Session.objects.all().order_by('start_date'),
-        'agenda_items': agenda_items,  # Filtré pour la session sélectionnée
-        'selected_session': selected_session,  # Ajouté
+        'agenda_items': agenda_items,
+        'attendees': attendees,  # Ajouté pour #session-registrations
+        'selected_session': selected_session,
         'attendee_types': AttendeeType.objects.all(),
 
         'partner_count': partner_count,

@@ -89,11 +89,11 @@ class AgendaItemAdmin(admin.ModelAdmin):
 
 @admin.register(Attendee)
 class AttendeeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'company', 'job_title', 'attendee_type', 'session', 'registration_date')
+    list_display = ('name', 'email', 'company', 'job_title',  'session', 'registration_date')
     list_filter = ('attendee_type', 'registration_date', 'session')
     search_fields = ('name', 'email', 'company', 'job_title')
     date_hierarchy = 'registration_date'
-    autocomplete_fields = ['session', 'attendee_type']
+    autocomplete_fields = ['session']
     list_per_page = 25
     readonly_fields = ('registration_date',)
     
@@ -102,7 +102,7 @@ class AttendeeAdmin(admin.ModelAdmin):
             'fields': ('name', 'email', 'company', 'job_title')
         }),
         ('Inscription', {
-            'fields': ('attendee_type', 'session', 'registration_date')
+            'fields': ('session', 'registration_date')
         }),
     )
     

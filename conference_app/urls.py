@@ -3,11 +3,12 @@ from django.contrib import admin
 from . import views
 from django.urls import path, include
 from .views import (
-    delete_attendee, delete_speaker_intervention, 
+    delete_speaker_intervention, 
     delete_session, agenda_delete, agenda_edit,
     delete_attendee_type, partner_delete,
     delete_intervention_location, delete_session_organizer,
     delete_session_funding,
+    attendee_create, attendee_update, attendee_delete,
     organizer_list, organizer_create, organizer_edit, organizer_delete,funding_list,
 )
 
@@ -61,7 +62,9 @@ urlpatterns = [
         path('add/', views.speaker_intervention_create, name='speaker_create'),
         path('<int:pk>/edit/', views.speaker_intervention_edit, name='speaker_edit'),
         path('<int:pk>/delete/', delete_speaker_intervention, name='delete_speaker_intervention'),
+        
     ])),
+    
     
     # Sessions Management
     path('dashboard/sessions/', include([
@@ -77,20 +80,30 @@ urlpatterns = [
     
     # Agenda
     path('dashboard/agenda/', include([
-        path('', views.AgendaAdminListView.as_view(), name='agenda_list'),
+        path('<int:session_id>/', views.agenda_list, name='agenda_list'),
+        path('create/<int:session_id>/', views.agenda_create, name='agenda_create'),
         path('<int:pk>/edit/', views.agenda_edit, name='agenda_edit'),
         path('<int:pk>/delete/', views.agenda_delete, name='agenda_delete'),
     ])),
 
+  
     
     # Attendees Management - NEW CRUD operations
+    #path('dashboard/attendees/', include([
+     #   path('', views.AttendeeListView.as_view(), name='attendee_list'),
+      #  path('<int:pk>/', views.AttendeeDetailView.as_view(), name='attendee_detail'),
+       # path('<int:pk>/edit/', views.AttendeeUpdateView.as_view(), name='attendee_edit'),
+        #path('delete/<int:pk>', delete_attendee, name='delete_attendee'),
+    #]#)),
+
     path('dashboard/attendees/', include([
-        path('', views.AttendeeListView.as_view(), name='attendee_list'),
-        path('<int:pk>/', views.AttendeeDetailView.as_view(), name='attendee_detail'),
-        path('<int:pk>/edit/', views.AttendeeUpdateView.as_view(), name='attendee_edit'),
-        path('delete/<int:pk>', delete_attendee, name='delete_attendee'),
+        path('<int:session_id>/', views.attendee_list, name='attendee_list'),
+        path('<int:session_id>/add/', views.attendee_create, name='attendee_create'),
+        path('<int:pk>/edit/', views.attendee_update, name='attendee_edit'),
+        path('<int:pk>/delete/<int:session_id>/', views.attendee_delete, name='attendee_delete'),
     ])),
-    
+
+
     # Attendee Types Management
     path('dashboard/attendee-types/', include([
         path('add/', views.attendee_type_create, name='attendee_type_create'),

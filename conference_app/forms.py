@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from .models import (
     Session, SpeakersInterventions, AgendaItem, AttendeeType, Attendee, 
     Partner, InterventionLocation, SessionFunding, SessionOrganizer
@@ -48,6 +47,31 @@ class SessionForm(forms.ModelForm):
             'is_hybrid': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
+class AttendeeForm(forms.ModelForm):
+    class Meta:
+        model = Attendee
+        fields = ['name', 'email', 'company']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'company': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, session=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.session = session
+        self.fields['name'].label = "Nom complet"
+        self.fields['email'].label = "Adresse email"
+        self.fields['company'].label = "Entreprise (facultatif)"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        if email and Attendee.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            self.add_error('email', 'Cet email est déjà utilisé.')
+        return cleaned_data
+    
+
 class SpeakersInterventionsForm(forms.ModelForm):
     class Meta:
         model = SpeakersInterventions
@@ -78,33 +102,32 @@ class SpeakersInterventionsForm(forms.ModelForm):
 class AgendaItemForm(forms.ModelForm):
     class Meta:
         model = AgendaItem
-        fields = [
-            'title', 'description', 'date', 'start_time', 'end_time',
-            'item_type', 'location', 'session'
-        ]
+        fields = ['title', 'description', 'date', 'start_time', 'end_time', 'item_type', 'location']
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'start_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
-            'end_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
-            'item_type': forms.Select(attrs={'class': 'form-select'}),
-            'location': forms.Select(attrs={'class': 'form-select'}),
-            'session': forms.Select(attrs={'class': 'form-select'}),
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time'}),
+            'description': forms.Textarea(attrs={'rows': 5}),
         }
-    
+
+    def __init__(self, *args, session=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.session = session
+
     def clean(self):
         cleaned_data = super().clean()
+        date = cleaned_data.get('date')
         start_time = cleaned_data.get('start_time')
         end_time = cleaned_data.get('end_time')
-        
-        # Validate start_time <= end_time
-        if start_time and end_time and start_time > end_time:
-            raise ValidationError("The start time must be before or equal to the end time.")
-        
-        # Call model's clean method for session date validation
-        instance = self.instance or AgendaItem(**cleaned_data)
-        instance.clean()
+        session = self.session or (self.instance.session if self.instance.pk else None)
+
+        if session and date:
+            if date < session.start_date or date > session.end_date:
+                self.add_error('date', f'La date doit être entre {session.start_date.strftime("%d %B %Y")} et {session.end_date.strftime("%d %B %Y")}.')
+
+        if start_time and end_time and start_time >= end_time:
+            self.add_error('end_time', 'L’heure de fin doit être postérieure à l’heure de début.')
+
         return cleaned_data
 
 class AttendeeTypeForm(forms.ModelForm):

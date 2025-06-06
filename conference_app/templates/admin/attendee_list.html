@@ -1,0 +1,123 @@
+{% extends 'conference_app/base.html' %}
+{% load static %}
+
+{% block title %}Gestion des inscriptions - Conférence IA Cameroun-France{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>Gestion des inscriptions</h1>
+                <p class="mb-0">Session: {{ session.title }}</p>
+            </div>
+            <a href="{% url 'dashboard' %}?session_id={{ session.id }}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Retour à la session
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Liste des inscriptions</h5>
+                    <a href="{% url 'attendee_create' session.id %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i> Ajouter une inscription
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if attendees %}
+                <div class="list-group list-group-flush">
+                    {% for attendee in attendees %}
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ attendee.name }}</h6>
+                                <p class="mb-1 text-muted small">
+                                    <strong>Email:</strong> {{ attendee.email }}
+                                    
+                                </p>
+                                <p class="mb-1 text-muted small">
+                                    <strong>Entreprise:</strong> {{ attendee.company|default:"Non spécifié" }}
+                                </p>
+                                <p class="mb-0 text-muted small">
+                                    <strong>Inscrit le:</strong> {{ attendee.registration_date|date:"d F Y"|default:"N/A" }}
+                                </p>
+                            </div>
+                            <div class="btn-group">
+                                <a href="{% url 'attendee_edit' attendee.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ attendee.id }}">
+                                    <i class="fas fa-trash-alt"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal de confirmation -->
+                    <div class="modal fade" id="deleteModal{{ attendee.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ attendee.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel{{ attendee.id }}">Confirmer la suppression</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Êtes-vous sûr de vouloir supprimer l’inscription de <strong>{{ attendee.name }}</strong> ?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <form action="{% url 'attendee_delete' attendee.id session.id %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if is_paginated %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                            </li>
+                        {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Aucune inscription pour cette session.</p>
+                    <a href="{% url 'attendee_create' session.id %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Ajouter la première inscription
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .list-group-item { transition: all 0.2s ease; }
+    .list-group-item:hover { background-color: #f8f9fa; }
+</style>
+{% endblock %}
