@@ -2,13 +2,77 @@ from django.db import models
 from django.utils import timezone
 from django.db.models import Count
 
+# ============================================================================
+# AGENDA MODELS - Modèles pour la gestion de l'agenda
+# ============================================================================
+
+class AgendaItem(models.Model):
+    ITEM_TYPE_CHOICES = [
+        ('break', 'Break'),
+        ('keynote', 'Keynote'),
+        ('lunch', 'Lunch'),
+        ('networking', 'Networking'),
+        ('registration', 'Registration'),
+        ('session', 'Session'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    item_type = models.CharField(max_length=20, choices=ITEM_TYPE_CHOICES)
+    location = models.ForeignKey('InterventionLocation', on_delete=models.SET_NULL, null=True, blank=True, related_name='agenda_items')
+    session = models.ForeignKey('Session', on_delete=models.SET_NULL, blank=True, null=True, related_name='agenda_items')
+    
+    class Meta:
+        ordering = ['date', 'start_time']
+    
+    def __str__(self):
+        return f"{self.title} - {self.date} {self.start_time}"
+    
+    def clean(self):
+        if self.session and self.date:
+            if self.date < self.session.start_date or self.date > self.session.end_date:
+                from django.core.exceptions import ValidationError
+                raise ValidationError("The agenda item date must be within the session period.")
+
+# ============================================================================
+# ATTENDEE MODELS - Modèles pour la gestion des participants
+# ============================================================================
+
+class Attendee(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    company = models.CharField(max_length=100)
+    job_title = models.CharField(max_length=100)
+    attendee_type = models.ForeignKey('AttendeeType', on_delete=models.SET_NULL, null=True)
+    session = models.ForeignKey('Session', on_delete=models.CASCADE, related_name='attendees', null=True, blank=True)
+    registration_date = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        unique_together = ('email', 'session')
+    
+    def __str__(self):
+        return f"{self.name} - {self.email} ({self.session.title if self.session else 'No session'})"
+    
+    def save(self, *args, **kwargs):
+        # Auto-assigner la session courante si aucune session n'est spécifiée
+        if not self.session_id:
+            self.session = Session.get_current_session()
+        super().save(*args, **kwargs)
+
 class AttendeeType(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     
     def __str__(self):
         return self.name
-    
+
+# ============================================================================
+# LOCATION MODELS - Modèles pour la gestion des lieux
+# ============================================================================
+
 class InterventionLocation(models.Model):
     name = models.CharField(max_length=100)
     country = models.CharField(max_length=100)
@@ -20,12 +84,40 @@ class InterventionLocation(models.Model):
     def __str__(self):
         return f"{self.name}, {self.country}"
 
+# ============================================================================
+# PARTNER MODELS - Modèles pour la gestion des partenaires
+# ============================================================================
+
+class Partner(models.Model):
+    PARTNER_TYPES = [
+        ('academic', 'Academic'),
+        ('corporate', 'Corporate'),
+        ('government', 'Government'),
+        ('ngo', 'Non-Profit'),
+    ]
+    
+    name = models.CharField(max_length=100)
+    logo = models.ImageField(upload_to='partners/', blank=True, null=True)
+    website = models.URLField(blank=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    partner_type = models.CharField(max_length=20, choices=PARTNER_TYPES, default='corporate')
+    country = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+# ============================================================================
+# SESSION MODELS - Modèles pour la gestion des sessions
+# ============================================================================
+
 class Session(models.Model):
     TRACK_CHOICES = [
-        ('technical', 'Technical'),
         ('business', 'Business'),
-        ('workshop', 'Workshop'),
         ('general', 'General'),
+        ('technical', 'Technical'),
+        ('workshop', 'Workshop'),
     ]
     
     title = models.CharField(max_length=200)
@@ -77,17 +169,54 @@ class Session(models.Model):
         # En dernier recours, retourner la session la plus récente
         return cls.objects.order_by('-start_date').first()
 
+class SessionFunding(models.Model):
+    FUNDING_TYPES = [
+        ('banquet', 'Banquet'),
+        ('equipment', 'Equipment'),
+        ('mission', 'Mission'),
+        ('other', 'Other'),
+    ]
+    
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='fundings')
+    partner = models.ForeignKey('Partner', on_delete=models.CASCADE, related_name='fundings')
+    funding_type = models.CharField(max_length=20, choices=FUNDING_TYPES)
+    description = models.TextField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    country = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    covers_participants = models.PositiveIntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.partner.name} - {self.get_funding_type_display()}"
+
+class SessionOrganizer(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='organizers')
+    name = models.CharField(max_length=200)
+    organization = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+    is_primary = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.name} ({self.organization})"
+
+# ============================================================================
+# SPEAKER MODELS - Modèles pour la gestion des intervenants
+# ============================================================================
+
 class SpeakersInterventions(models.Model):
     GENDER_CHOICES = [
-        ('M', 'Male'),
         ('F', 'Female'),
+        ('M', 'Male'),
     ]
     
     INTERVENTION_TYPES = [
-        ('presentation', 'Presentation'),
         ('keynote', 'Keynote'),
-        ('panel', 'Panel Discussion'),
         ('moderation', 'Moderation'),
+        ('panel', 'Panel Discussion'),
+        ('presentation', 'Presentation'),
         ('workshop', 'Workshop'),
     ]
     
@@ -116,114 +245,13 @@ class SpeakersInterventions(models.Model):
     def __str__(self):
         return f"{self.name} - {self.session.title} ({self.get_intervention_type_display()})"
 
-class AgendaItem(models.Model):
-    ITEM_TYPE_CHOICES = [
-        ('break', 'Break'),
-        ('lunch', 'Lunch'),
-        ('keynote', 'Keynote'),
-        ('registration', 'Registration'),
-        ('networking', 'Networking'),
-        ('session', 'Session'),
-    ]
-    
-    title = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
-    date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    item_type = models.CharField(max_length=20, choices=ITEM_TYPE_CHOICES)
-    location = models.ForeignKey(InterventionLocation, on_delete=models.SET_NULL, null=True, blank=True, related_name='agenda_items')
-    session = models.ForeignKey(Session, on_delete=models.SET_NULL, blank=True, null=True, related_name='agenda_items')
-    
-    class Meta:
-        ordering = ['date', 'start_time']
-    
-    def __str__(self):
-        return f"{self.title} - {self.date} {self.start_time}"
-    
-    def clean(self):
-        if self.session and self.date:
-            if self.date < self.session.start_date or self.date > self.session.end_date:
-                from django.core.exceptions import ValidationError
-                raise ValidationError("The agenda item date must be within the session period.")
+# ============================================================================
+# SUBSCRIPTION MODELS - Modèles pour les abonnements
+# ============================================================================
 
-class Attendee(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    company = models.CharField(max_length=100)
-    job_title = models.CharField(max_length=100)
-    attendee_type = models.ForeignKey(AttendeeType, on_delete=models.SET_NULL, null=True)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='attendees', null=True, blank=True)
-    registration_date = models.DateTimeField(default=timezone.now)
-    
-    class Meta:
-        unique_together = ('email', 'session')
-    
-    def __str__(self):
-        return f"{self.name} - {self.email} ({self.session.title if self.session else 'No session'})"
-    
-    def save(self, *args, **kwargs):
-        # Auto-assigner la session courante si aucune session n'est spécifiée
-        if not self.session_id:
-            self.session = Session.get_current_session()
-        super().save(*args, **kwargs)
-    
 class Subscriber(models.Model):
     email = models.EmailField(unique=True)
     date_subscribed = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.email
-
-class Partner(models.Model):
-    PARTNER_TYPES = [
-        ('academic', 'Academic'),
-        ('corporate', 'Corporate'),
-        ('government', 'Government'),
-        ('ngo', 'Non-Profit'),
-    ]
-    
-    name = models.CharField(max_length=100)
-    logo = models.ImageField(upload_to='partners/', blank=True, null=True)
-    website = models.URLField(blank=True)
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    partner_type = models.CharField(max_length=20, choices=PARTNER_TYPES, default='corporate')
-    country = models.CharField(max_length=100, blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-class SessionOrganizer(models.Model):
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='organizers')
-    name = models.CharField(max_length=200)
-    organization = models.CharField(max_length=200)
-    order = models.PositiveIntegerField(default=0)
-    is_primary = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['order']
-
-    def __str__(self):
-        return f"{self.name} ({self.organization})"
-
-class SessionFunding(models.Model):
-    FUNDING_TYPES = [
-        ('mission', 'Mission'),
-        ('equipment', 'Equipment'),
-        ('banquet', 'Banquet'),
-        ('other', 'Other'),
-    ]
-    
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='fundings')
-    partner = models.ForeignKey('Partner', on_delete=models.CASCADE, related_name='fundings')
-    funding_type = models.CharField(max_length=20, choices=FUNDING_TYPES)
-    description = models.TextField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    country = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-    covers_participants = models.PositiveIntegerField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.partner.name} - {self.get_funding_type_display()}"

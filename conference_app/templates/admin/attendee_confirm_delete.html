@@ -1,0 +1,43 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}{{ title }} - Conférence IA Cameroun-France{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <h1>{{ title }}</h1>
+    </div>
+</section>
+
+<!-- Dashboard Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-4">Êtes-vous sûr de vouloir supprimer cette inscription?</h5>
+                        
+                        <div class="alert alert-warning">
+                            <p><strong>Attention:</strong> Cette action est irréversible.</p>
+                            <p>Vous êtes sur le point de supprimer l'inscription de: <strong>{{ attendee.name }}</strong></p>
+                            <p>pour la session: <strong>{{ attendee.session.title }}</strong></p>
+                            <p>Email: <strong>{{ attendee.email|default:'Non spécifié' }}</strong></p>
+                            <p>Date d'inscription: <strong>{{ attendee.registration_date|date:"d/m/Y" }}</strong></p>
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                            </form>
+                            <a href="{% url 'attendee_list' session_id=attendee.session.id %}" class="btn btn-outline-secondary">Annuler</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
