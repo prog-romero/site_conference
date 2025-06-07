@@ -149,7 +149,7 @@ class SpeakersInterventionsDetailView(DetailView):
 
 class SpeakersInterventionsAdminListView(LoginRequiredMixin, ListView):
     model = SpeakersInterventions
-    template_name = 'conference_app/speaker_list.html'
+    template_name = 'admin/speaker_list.html'
     context_object_name = 'speakers'
     
     def get_context_data(self, **kwargs):
@@ -186,7 +186,7 @@ def speaker_list(request, session_id):
         elif is_remote_filter.lower() == 'false':
             speakers = speakers.filter(is_remote=False)
 
-    return render(request, 'conference_app/speaker_list.html', {
+    return render(request, 'admin/speaker_list.html', {
         'session': session,
         'speakers': speakers,
         'title': f"Intervenants de la session : {session.title}",
