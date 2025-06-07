@@ -30,31 +30,49 @@
                 </div>
             </div>
             <div class="card-body p-0">
+                <!-- Filtre -->
+                <div class="p-3 border-bottom">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <input type="text" name="name" class="form-control" placeholder="Rechercher par nom..." value="{{ request.GET.name|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="email" name="email" class="form-control" placeholder="Rechercher par email..." value="{{ request.GET.email|default:'' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" name="company" class="form-control" placeholder="Rechercher par entreprise..." value="{{ request.GET.company|default:'' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" name="registration_date" class="form-control" value="{{ request.GET.registration_date|default:'' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Fin Filtre -->
                 {% if attendees %}
-                <div class="list-group list-group-flush">
+                <div class="row g-4 p-3">
                     {% for attendee in attendees %}
-                    <div class="list-group-item list-group-item-action">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">{{ attendee.name }}</h6>
-                                <p class="mb-1 text-muted small">
-                                    <strong>Email:</strong> {{ attendee.email }}
-                                    
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ attendee.name }}</h5>
+                                <p class="card-text text-muted mb-2">
+                                    <strong>Email :</strong> {{ attendee.email }}
                                 </p>
-                                <p class="mb-1 text-muted small">
-                                    <strong>Entreprise:</strong> {{ attendee.company|default:"Non spécifié" }}
-                                </p>
-                                <p class="mb-0 text-muted small">
-                                    <strong>Inscrit le:</strong> {{ attendee.registration_date|date:"d F Y"|default:"N/A" }}
-                                </p>
+                                <p class="card-text"><strong>Entreprise :</strong> {{ attendee.company|default:"Non spécifié" }}</p>
+                                <p class="card-text"><strong>Inscrit le :</strong> {{ attendee.registration_date|date:"d F Y"|default:"N/A" }}</p>
                             </div>
-                            <div class="btn-group">
-                                <a href="{% url 'attendee_edit' attendee.id %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-edit"></i> Modifier
-                                </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ attendee.id }}">
-                                    <i class="fas fa-trash-alt"></i> Supprimer
-                                </button>
+                            <div class="card-footer bg-white border-top-0 d-flex justify-content-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'attendee_edit' attendee.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ attendee.id }}">
+                                        <i class="fas fa-trash-alt"></i> Supprimer
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -82,7 +100,7 @@
                     {% endfor %}
                 </div>
                 {% if is_paginated %}
-                <nav aria-label="Page navigation">
+                <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         {% if page_obj.has_previous %}
                             <li class="page-item">
@@ -117,7 +135,21 @@
 </section>
 
 <style>
-    .list-group-item { transition: all 0.2s ease; }
-    .list-group-item:hover { background-color: #f8f9fa; }
+    .card {
+        border-radius: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .card-text {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
 </style>
 {% endblock %}

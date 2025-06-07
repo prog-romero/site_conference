@@ -1,6 +1,6 @@
 {% extends 'conference_app/base.html' %}
 
-{% block title %}{{ title }} - Conference 2025{% endblock %}
+{% block title %}{{ title }} - Conférence IA Cameroun-France{% endblock %}
 
 {% block content %}
 <section class="py-5 bg-primary-dark text-white">
@@ -17,17 +17,53 @@
         </div>
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                {% if fundings %}
-                <div class="list-group">
-                    {% for funding in fundings %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>{{ funding.partner.name }} - {{ funding.get_funding_type_display }}</strong>
-                            <p class="mb-0 text-muted">{{ funding.description }} | {{ funding.country }} | {% if funding.amount %}{{ funding.amount }}€{% else %}No amount specified{% endif %}</p>
+                <!-- Filtre -->
+                <div class="p-3 border-bottom">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <input type="text" name="partner_name" class="form-control" placeholder="Rechercher par partenaire..." value="{{ request.GET.partner_name|default:'' }}">
                         </div>
-                        <div class="d-flex gap-2">
-                            <a href="{% url 'funding_edit' pk=funding.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                            <a href="{% url 'funding_delete' pk=funding.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        <div class="col-md-3">
+                            <select name="funding_type" class="form-select">
+                                <option value="">Tous les types</option>
+                                {% for type_code, type_name in funding_type_choices %}
+                                    <option value="{{ type_code }}" {% if request.GET.funding_type == type_code %}selected{% endif %}>{{ type_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="country" class="form-control" placeholder="Rechercher par pays..." value="{{ request.GET.country|default:'' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" name="amount" class="form-control" placeholder="Montant..." value="{{ request.GET.amount|default:'' }}" min="0">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Fin Filtre -->
+                {% if fundings %}
+                <div class="row g-4 p-3">
+                    {% for funding in fundings %}
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ funding.partner.name }} - {{ funding.get_funding_type_display }}</h5>
+                                <p class="card-text text-muted mb-2">{{ funding.description|default:'-' }}</p>
+                                <p class="card-text"><strong>Pays :</strong> {{ funding.country|default:'Non spécifié' }}</p>
+                                <p class="card-text"><strong>Montant :</strong> {% if funding.amount %}{{ funding.amount }}€{% else %}Non spécifié{% endif %}</p>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 d-flex justify-content-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'funding_edit' pk=funding.id %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="{% url 'funding_delete' pk=funding.id %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
@@ -39,4 +75,23 @@
         </div>
     </div>
 </section>
+
+<style>
+    .card {
+        border-radius: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .card-text {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
 {% endblock %}

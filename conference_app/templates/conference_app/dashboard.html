@@ -432,6 +432,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM fully loaded'); // Debug
 
+    const closeButton = document.querySelector('#session-details button[onclick="hideSessionDetails()"]');
+    if (closeButton) {
+        closeButton.onclick = hideSessionDetails; // Lier la fonction au clic
+        console.log('Close button event listener attached');
+    } else {
+        console.warn('Close button not found in session-details');
+    }
+
     // Vérifier si un session_id est présent dans l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
@@ -866,11 +874,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function hideSessionDetails() {
-        console.log('hideSessionDetails called'); // Debug
-        defaultView.style.display = 'block';
-        sessionDetails.style.display = 'none';
-        sessionItems.forEach(item => item.classList.remove('active'));
-        currentSessionId = null;
+        console.log('hideSessionDetails called'); // Log pour vérifier l'exécution
+        const defaultView = document.getElementById('default-view');
+        const sessionDetails = document.getElementById('session-details');
+        const sessionItems = document.querySelectorAll('.session-item');
+
+        // Vérifier si les éléments existent
+        if (defaultView && sessionDetails) {
+            console.log('Toggling views: defaultView to block, sessionDetails to none');
+            defaultView.style.display = 'block';
+            sessionDetails.style.display = 'none';
+            sessionItems.forEach(item => item.classList.remove('active'));
+            currentSessionId = null; // Réinitialiser l'ID de la session
+        } else {
+            console.error('One or more DOM elements not found:', { defaultView, sessionDetails });
+        }
     }
 });
 

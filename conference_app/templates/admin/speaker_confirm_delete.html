@@ -17,12 +17,12 @@
             <div class="col-lg-6 mx-auto">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
-                        <h5 class="card-title mb-4">Êtes-vous sûr de vouloir supprimer cet élément d’agenda?</h5>
+                        <h5 class="card-title mb-4">Êtes-vous sûr de vouloir supprimer cet intervenant?</h5>
                         
                         <div class="alert alert-warning">
                             <p><strong>Attention:</strong> Cette action est irréversible.</p>
-                            <p>Vous êtes sur le point de supprimer l’élément d’agenda: <strong>{{ agenda_item.title }}</strong></p>
-                            <p>de la session: <strong>{{ agenda_item.session.title }}</strong></p>
+                            <p>Vous êtes sur le point de supprimer l'intervenant: <strong>{{ speaker.name }}</strong></p>
+                            <p>de la session: <strong>{{ speaker.session.title }}</strong></p>
                         </div>
                         
                         <div class="d-flex gap-2 mt-4">
@@ -30,7 +30,7 @@
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
                             </form>
-                            <a href="{% url 'agenda_list' session_id=agenda_item.session.id %}" class="btn btn-outline-secondary">Annuler</a>
+                            <a href="{% url 'session_speakers' session_id=speaker.session.id %}" class="btn btn-outline-secondary">Annuler</a>
                         </div>
                     </div>
                 </div>

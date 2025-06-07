@@ -39,7 +39,7 @@ class SessionForm(forms.ModelForm):
         model = Session
         fields = [
             'title', 'description', 'start_date', 'end_date', 
-            'track', 'locations', 'is_hybrid'
+            'track', 'location', 'locations', 'is_hybrid'
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -47,9 +47,16 @@ class SessionForm(forms.ModelForm):
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'track': forms.Select(attrs={'class': 'form-select'}),
+            'location': forms.TextInput(attrs={'class': 'form-control'}),
             'locations': forms.SelectMultiple(attrs={'class': 'form-select'}),
             'is_hybrid': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make duration_days read-only if needed (optional)
+        if 'duration_days' in self.fields:
+            self.fields['duration_days'].widget.attrs['readonly'] = True
 
 class AttendeeForm(forms.ModelForm):
     class Meta:

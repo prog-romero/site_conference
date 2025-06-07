@@ -157,16 +157,43 @@ class SpeakersInterventionsAdminListView(LoginRequiredMixin, ListView):
         context['title'] = "Gestion des intervenants"
         return context
     
+from django.shortcuts import render, get_object_or_404
+from .models import Session, SpeakersInterventions, InterventionLocation
+
 @login_required
 def speaker_list(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     speakers = SpeakersInterventions.objects.filter(session=session)
+
+    # Appliquer les filtres basés sur les paramètres GET
+    name_filter = request.GET.get('name', '')
+    organization_filter = request.GET.get('organization', '')
+    intervention_type_filter = request.GET.get('intervention_type', '')
+    location_filter = request.GET.get('location', '')
+    is_remote_filter = request.GET.get('is_remote', '')
+
+    if name_filter:
+        speakers = speakers.filter(name__icontains=name_filter)
+    if organization_filter:
+        speakers = speakers.filter(organization__icontains=organization_filter)
+    if intervention_type_filter:
+        speakers = speakers.filter(intervention_type=intervention_type_filter)
+    if location_filter:
+        speakers = speakers.filter(location_id=location_filter)
+    if is_remote_filter:
+        if is_remote_filter.lower() == 'true':
+            speakers = speakers.filter(is_remote=True)
+        elif is_remote_filter.lower() == 'false':
+            speakers = speakers.filter(is_remote=False)
+
     return render(request, 'conference_app/speaker_list.html', {
         'session': session,
         'speakers': speakers,
         'title': f"Intervenants de la session : {session.title}",
+        'intervention_type_choices': SpeakersInterventions.INTERVENTION_TYPES,  # Ajout des choix de type
+        'locations': InterventionLocation.objects.all(),  # Ajout des lieux
     })
-    
+   
 
 @login_required
 def speaker_intervention_create(request, session_id):
@@ -197,7 +224,7 @@ def speaker_intervention_edit(request, pk):
         if form.is_valid():
             speaker = form.save()
             messages.success(request, 'Intervenant mis à jour avec succès.')
-            return redirect('dashboard')
+            return redirect('session_speakers', session_id=speaker.session.id)
     else:
         form = SpeakersInterventionsForm(instance=speaker)
     
@@ -215,8 +242,11 @@ def delete_speaker_intervention(request, pk):
         speaker_name = speaker.name
         speaker.delete()
         messages.success(request, f"Intervenant {speaker_name} supprimé avec succès.")
-        return redirect('dashboard')
-    return redirect('dashboard')
+        return redirect('session_speakers', session_id=speaker.session.id)
+    return render(request, 'admin/speaker_confirm_delete.html', {
+        'speaker': speaker,
+        'title': f"Supprimer : {speaker.name}",
+    })
 
 
 # === SESSIONS VIEWS ===
@@ -488,10 +518,28 @@ class AgendaItemForm(forms.ModelForm):
 def agenda_list(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     agenda_items = AgendaItem.objects.filter(session=session).order_by('date', 'start_time')
+
+    # Appliquer les filtres basés sur les paramètres GET
+    title_filter = request.GET.get('title', '')
+    date_filter = request.GET.get('date', '')
+    item_type_filter = request.GET.get('item_type', '')
+    location_filter = request.GET.get('location', '')
+
+    if title_filter:
+        agenda_items = agenda_items.filter(title__icontains=title_filter)
+    if date_filter:
+        agenda_items = agenda_items.filter(date=date_filter)
+    if item_type_filter:
+        agenda_items = agenda_items.filter(item_type=item_type_filter)
+    if location_filter:
+        agenda_items = agenda_items.filter(location_id=location_filter)
+
     return render(request, 'admin/agenda_list.html', {
         'session': session,
         'agenda_items': agenda_items,
         'title': f"Agenda de la session : {session.title}",
+        'locations': InterventionLocation.objects.all(),
+        'item_type_choices': AgendaItem.ITEM_TYPE_CHOICES,  # Ajout des choix de type
     })
 
 class AgendaItemForm(forms.ModelForm):
@@ -762,13 +810,31 @@ class AttendeeUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, 'Inscription mise à jour avec succès.')
         return super().form_valid(form)
 
-login_required
+@login_required
 def attendee_list(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     attendees = Attendee.objects.filter(session=session).order_by('name')
+
+    # Appliquer les filtres basés sur les paramètres GET
+    name_filter = request.GET.get('name', '')
+    email_filter = request.GET.get('email', '')
+    company_filter = request.GET.get('company', '')
+    registration_date_filter = request.GET.get('registration_date', '')
+
+    if name_filter:
+        attendees = attendees.filter(name__icontains=name_filter)
+    if email_filter:
+        attendees = attendees.filter(email__icontains=email_filter)
+    if company_filter:
+        attendees = attendees.filter(company__icontains=company_filter)
+    if registration_date_filter:
+        attendees = attendees.filter(registration_date__date=registration_date_filter)
+
+    # Pagination
     paginator = Paginator(attendees, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
     return render(request, 'admin/attendee_list.html', {
         'session': session,
         'attendees': page_obj,
@@ -1037,11 +1103,26 @@ class SessionOrganizerUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, 'Organisateur mis à jour avec succès.')
         return super().form_valid(form)
 
-# Ligne 967-1016 : Vérification des vues CRUD pour SessionOrganizer (déjà correctes)
 @login_required
 def organizer_list(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     organizers = session.organizers.order_by('order')
+
+    # Appliquer les filtres basés sur les paramètres GET
+    name_filter = request.GET.get('name', '')
+    organization_filter = request.GET.get('organization', '')
+    is_primary_filter = request.GET.get('is_primary', '')
+
+    if name_filter:
+        organizers = organizers.filter(name__icontains=name_filter)
+    if organization_filter:
+        organizers = organizers.filter(organization__icontains=organization_filter)
+    if is_primary_filter:
+        if is_primary_filter.lower() == 'true':
+            organizers = organizers.filter(is_primary=True)
+        elif is_primary_filter.lower() == 'false':
+            organizers = organizers.filter(is_primary=False)
+
     return render(request, 'admin/organizer_list.html', {
         'session': session,
         'organizers': organizers,
@@ -1101,15 +1182,31 @@ def organizer_delete(request, pk):
     })
 
 # === SESSION FUNDINGS VIEWS ===
-# Ligne 1083-1142 : Mise à jour des vues CRUD pour SessionFunding
 @login_required
 def funding_list(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     fundings = session.fundings.all()
+
+    # Appliquer les filtres basés sur les paramètres GET
+    partner_name_filter = request.GET.get('partner_name', '')
+    funding_type_filter = request.GET.get('funding_type', '')
+    country_filter = request.GET.get('country', '')
+    amount_filter = request.GET.get('amount', '')
+
+    if partner_name_filter:
+        fundings = fundings.filter(partner__name__icontains=partner_name_filter)
+    if funding_type_filter:
+        fundings = fundings.filter(funding_type=funding_type_filter)
+    if country_filter:
+        fundings = fundings.filter(country__icontains=country_filter)
+    if amount_filter:
+        fundings = fundings.filter(amount=amount_filter)
+
     return render(request, 'admin/funding_list.html', {
         'session': session,
         'fundings': fundings,
-        'title': f"Financements pour la session : {session.title}",  # Traduit en français
+        'title': f"Financements pour la session : {session.title}",
+        'funding_type_choices': SessionFunding.FUNDING_TYPES,  # Ajout des choix de type
     })
 
 @login_required

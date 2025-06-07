@@ -29,28 +29,52 @@
                 </div>
             </div>
             <div class="card-body p-0">
+                <!-- Filtre -->
+                <div class="p-3 border-bottom">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="name" class="form-control" placeholder="Rechercher par nom..." value="{{ request.GET.name|default:'' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="organization" class="form-control" placeholder="Rechercher par organisation..." value="{{ request.GET.organization|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="is_primary" class="form-select">
+                                <option value="">Tous</option>
+                                <option value="true" {% if request.GET.is_primary == 'true' %}selected{% endif %}>Principal</option>
+                                <option value="false" {% if request.GET.is_primary == 'false' %}selected{% endif %}>Non principal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Fin Filtre -->
                 {% if organizers %}
-                <div class="list-group list-group-flush">
+                <div class="row g-4 p-3">
                     {% for organizer in organizers %}
-                    <div class="list-group-item list-group-item-action">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="card-title">
                                     {{ organizer.name }}
                                     {% if organizer.is_primary %}
                                     <span class="badge bg-primary ms-2">Principal</span>
                                     {% endif %}
-                                </h6>
-                                <p class="mb-0 text-muted small">{{ organizer.organization }}</p>
+                                </h5>
+                                <p class="card-text text-muted mb-2">{{ organizer.organization }}</p>
                             </div>
-                            <div class="btn-group">
-                                <a href="{% url 'organizer_edit' organizer.id %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-edit"></i> Modifier
-                                </a>
-                                <a href="{% url 'organizer_delete' organizer.id %}" class="btn btn-sm btn-outline-danger" 
-                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet organisateur?');">
-                                    <i class="fas fa-trash-alt"></i> Supprimer
-                                </a>
+                            <div class="card-footer bg-white border-top-0 d-flex justify-content-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'organizer_edit' organizer.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <a href="{% url 'organizer_delete' organizer.id %}" class="btn btn-sm btn-outline-danger" 
+                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet organisateur?');">
+                                        <i class="fas fa-trash-alt"></i> Supprimer
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -79,11 +103,21 @@
 </section>
 
 <style>
-    .list-group-item {
-        transition: all 0.2s ease;
+    .card {
+        border-radius: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .list-group-item:hover {
-        background-color: #f8f9fa;
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .card-text {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
     }
 </style>
 {% endblock %}

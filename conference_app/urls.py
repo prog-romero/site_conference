@@ -60,6 +60,7 @@ urlpatterns = [
     # Speakers Management
     path('dashboard/speakers/', include([
         path('', views.SpeakersInterventionsAdminListView.as_view(), name='speaker_list'),
+        path('<int:session_id>/', views.speaker_list, name='session_speakers'),
         path('<int:session_id>/add/', views.speaker_intervention_create, name='speaker_create'),  # Modifié : ajout de <int:session_id>
         path('<int:pk>/edit/', views.speaker_intervention_edit, name='speaker_edit'),
         path('<int:pk>/delete/', delete_speaker_intervention, name='delete_speaker_intervention'),

@@ -1,74 +1,154 @@
 {% extends 'conference_app/base.html' %}
 
-{% block title %}{{ title }} - Conference 2025{% endblock %}
+{% block title %}{{ session.title }} - Gestion des intervenants - Conférence IA Cameroun-France{% endblock %}
 
 {% block content %}
+<!-- Dashboard Header -->
 <section class="py-5 bg-primary-dark text-white">
     <div class="container">
-        <h1>{{ title }}</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>Gestion des intervenants</h1>
+                <p class="mb-0">Session: {{ session.title }}</p>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i> Retour à la session
+            </a>
+        </div>
     </div>
 </section>
 
+<!-- Dashboard Content -->
 <section class="py-5">
     <div class="container">
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white py-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Intervenants</h5>
-                    <a href="{% url 'speaker_create' %}" class="btn btn-primary-custom btn-sm">
+                    <h5 class="mb-0">Liste des intervenants</h5>
+                    <a href="{% url 'speaker_create' session_id=session.id %}" class="btn btn-primary-custom btn-sm">
                         <i class="fas fa-plus me-1"></i> Ajouter un intervenant
                     </a>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nom</th>
-                                <th>Organisation</th>
-                                <th>Session</th>
-                                <th>Type d'intervention</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for speaker in speakers %}
-                            <tr>
-                                <td>{{ speaker.name }}</td>
-                                <td>{{ speaker.organization }}</td>
-                                <td>{{ speaker.session.title }}</td>
-                                <td>{{ speaker.get_intervention_type_display }}</td>
-                                <td>
-                                    {% if speaker.intervention_date %}
-                                    {{ speaker.intervention_date|date:"d/m/Y" }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form method="post" action="{% url 'delete_speaker_intervention' speaker.id %}" style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet intervenant?');">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center">Aucun intervenant trouvé</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="card-body p-0">
+                <!-- Filtre -->
+                <div class="p-3 border-bottom">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <input type="text" name="name" class="form-control" placeholder="Rechercher par nom..." value="{{ request.GET.name|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="organization" class="form-control" placeholder="Rechercher par organisation..." value="{{ request.GET.organization|default:'' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="intervention_type" class="form-select">
+                                <option value="">Tous les types</option>
+                                {% for type_code, type_name in intervention_type_choices %}
+                                    <option value="{{ type_code }}" {% if request.GET.intervention_type == type_code %}selected{% endif %}>{{ type_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="location" class="form-select">
+                                <option value="">Tous les lieux</option>
+                                {% for loc in locations %}
+                                    <option value="{{ loc.id }}" {% if request.GET.location == loc.id|stringformat:"s" %}selected{% endif %}>{{ loc.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <select name="is_remote" class="form-select">
+                                <option value="">Tous</option>
+                                <option value="true" {% if request.GET.is_remote == 'true' %}selected{% endif %}>À distance</option>
+                                <option value="false" {% if request.GET.is_remote == 'false' %}selected{% endif %}>Présentiel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                        </div>
+                    </form>
                 </div>
+                <!-- Fin Filtre -->
+                {% if speakers %}
+                <div class="row g-4 p-3">
+                    {% for speaker in speakers %}
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <!-- Ajout de la photo -->
+                                {% if speaker.photo %}
+                                <div class="text-center mb-3">
+                                    <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}'s photo" class="img-fluid rounded-circle" style="max-width: 100px; max-height: 100px; object-fit: cover;">
+                                </div>
+                                {% endif %}
+                                <h5 class="card-title">
+                                    {{ speaker.name }}
+                                    <small class="text-muted">({{ speaker.get_intervention_type_display }})</small>
+                                </h5>
+                                <p class="card-text text-muted mb-2">{{ speaker.organization|default:'-' }}</p>
+                                <p class="card-text"><strong>Titre :</strong> {{ speaker.title }}</p>
+                                <p class="card-text"><strong>Lieu :</strong> {{ speaker.location.name|default:'Non spécifié' }}</p>
+                                <p class="card-text"><strong>Mode :</strong> {% if speaker.is_remote %}À distance{% else %}Présentiel{% endif %}</p>
+                            </div>
+                            <div class="card-footer bg-white border-top-0 d-flex justify-content-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'speaker_edit' pk=speaker.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <a href="{% url 'delete_speaker_intervention' pk=speaker.id %}" class="btn btn-sm btn-outline-danger" 
+                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet intervenant?');">
+                                        <i class="fas fa-trash-alt"></i> Supprimer
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-microphone fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Aucun intervenant n'a été ajouté pour cette session.</p>
+                    <a href="{% url 'speaker_create' session_id=session.id %}" class="btn btn-primary-custom">
+                        <i class="fas fa-plus me-1"></i> Ajouter le premier intervenant
+                    </a>
+                </div>
+                {% endif %}
             </div>
+            {% if speakers %}
+            <div class="card-footer bg-white py-3">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i> 
+                    Les intervenants sont affichés par ordre d'ajout (du plus ancien au plus récent).
+                </small>
+            </div>
+            {% endif %}
         </div>
     </div>
 </section>
+
+<style>
+    .list-group-item {
+        transition: all 0.2s ease;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    .card {
+        border-radius: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .card-text {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
 {% endblock %}
