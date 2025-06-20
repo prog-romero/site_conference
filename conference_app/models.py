@@ -195,6 +195,7 @@ class SessionOrganizer(models.Model):
     organization = models.CharField(max_length=200)
     order = models.PositiveIntegerField(default=0)
     is_primary = models.BooleanField(default=False)
+    photo = models.ImageField(upload_to='organizer_photos/', null=True, blank=True)
 
     class Meta:
         ordering = ['order']

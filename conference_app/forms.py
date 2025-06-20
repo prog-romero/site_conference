@@ -186,12 +186,13 @@ class SessionFundingForm(forms.ModelForm):
 class SessionOrganizerForm(forms.ModelForm):
     class Meta:
         model = SessionOrganizer
-        fields = ['name', 'organization', 'order', 'is_primary']
+        fields = ['name', 'organization', 'order', 'is_primary', 'photo']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'organization': forms.TextInput(attrs={'class': 'form-control'}),
             'order': forms.NumberInput(attrs={'class': 'form-control'}),
             'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
 # ============================================================================

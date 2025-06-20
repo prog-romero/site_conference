@@ -57,17 +57,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+
+
 # Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'conferencebd',
-        'USER':'postgres',
-        'PASSWORD':'cpasBIEN',
+        'NAME': 'conference_bd',
+        'USER':'romero1',
+        'PASSWORD':'romerotchiaze',
         'HOST':'localhost',
         'PORT':'5432'
     }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

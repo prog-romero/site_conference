@@ -29,10 +29,15 @@
     max-width: 100%;
     object-fit: contain;
   }
+  .organizer-img,
+  .speaker-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+  }
 </style>
-
-
-
 
 <!-- Hero Section -->
 <section class="hero-section">
@@ -69,72 +74,113 @@
     </div>
 </section>
 
-<!-- Who Should Attend Section -->
+<!-- Organizers Section -->
 <section class="py-5 bg-primary-dark text-white">
     <div class="container">
-        <h2 class="section-title section-title-center text-center text-white mb-5">Who Should Attend?</h2>
-        <p class="text-center mb-5">Find sessions tailored to your role, experience level, and goals.</p>
+        <h2 class="section-title section-title-center text-center text-white mb-5">
+            {% if latest_session %}
+                Organizers for {{ latest_session.title }}
+            {% else %}
+                Meet Our Organizers
+            {% endif %}
+        </h2>
+        <p class="text-center mb-5">Discover the team behind {% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %}, dedicated to making this event unforgettable.</p>
         
         <div class="row g-4">
-            {% for type in attendee_types %}
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
-                            <i class="fas fa-user-gear"></i>
+            {% if latest_session and latest_session.organizers.all %}
+                {% for organizer in latest_session.organizers.all|slice:":4" %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
+                        {% if organizer.photo %}
+                        <img src="{{ organizer.photo.url }}" alt="{{ organizer.name }}" class="organizer-img">
+                        {% else %}
+                        <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ organizer.name }}" class="organizer-img">
+                        {% endif %}
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">{{ organizer.name }}</h4>
+                            <p class="card-text text-muted mb-2">Organizer</p>
+                            <p class="card-text fw-bold">{{ organizer.organization }}</p>
                         </div>
-                        <h4 class="card-title mb-3">{{ type.name }}</h4>
-                        <p class="card-text text-muted">{{ type.description }}</p>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="{% url 'session_detail' latest_session.id %}" class="btn btn-primary-custom">View Session</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            {% empty %}
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
-                            <i class="fas fa-user-tie"></i>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback when no latest_session or no organizers -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
+                        <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="John Smith" class="organizer-img">
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">John Smith</h4>
+                            <p class="card-text text-muted mb-2">Organizer</p>
+                            <p class="card-text fw-bold">Tech Events Inc.</p>
                         </div>
-                        <h4 class="card-title mb-3">System Administrators</h4>
-                        <p class="card-text text-muted">Seeking proactive monitoring solutions and automation strategies</p>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-primary-custom">View Session</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
-                            <i class="fas fa-chart-line"></i>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
+                        <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Jane Doe" class="organizer-img">
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">Jane Doe</h4>
+                            <p class="card-text text-muted mb-2">Organizer</p>
+                            <p class="card-text fw-bold">Conference Solutions</p>
                         </div>
-                        <h4 class="card-title mb-3">IT Directors & Managers</h4>
-                        <p class="card-text text-muted">Wanting to get more value from your tools and demonstrate their impact on business</p>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-primary-custom">View Session</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
-                            <i class="fas fa-handshake"></i>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
+                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Alice Brown" class="organizer-img">
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">Alice Brown</h4>
+                            <p class="card-text text-muted mb-2">Organizer</p>
+                            <p class="card-text fw-bold">Event Masters</p>
                         </div>
-                        <h4 class="card-title mb-3">Partners & Resellers</h4>
-                        <p class="card-text text-muted">Connecting with technical decision-makers and enhancing product knowledge</p>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-primary-custom">View Session</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle feature-icon bg-primary-dark mx-auto">
-                            <i class="fas fa-code"></i>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
+                        <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Bob Wilson" class="organizer-img">
+                        <div class="card-body pb-2">
+                            <h4 class="card-title">Bob Wilson</h4>
+                            <p class="card-text text-muted mb-2">Organizer</p>
+                            <p class="card-text fw-bold">Global Conferences</p>
                         </div>
-                        <h4 class="card-title mb-3">Developers & Engineers</h4>
-                        <p class="card-text text-muted">Looking to improve performance, security, and scalability</p>
+                        <div class="card-footer bg-white border-0 pt-0 pb-4">
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-primary-custom">View Session</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+            {% endif %}
         </div>
+        
+        {% if latest_session and latest_session.organizers.all.count > 4 %}
+        <div class="text-center mt-4">
+            <a href="{% url 'organizer_list' latest_session.id %}" class="btn btn-outline-primary-custom">
+                View All {{ latest_session.organizers.all.count }} Organizers for This Session
+            </a>
+        </div>
+        {% endif %}
     </div>
 </section>
 
@@ -241,7 +287,6 @@
                     </div>
                 </div>
                 {% endfor %}
-            
             {% else %}
                 <!-- Fallback when no latest_session or no speakers -->
                 <div class="col-md-6 col-lg-3">
@@ -285,7 +330,7 @@
                             <p class="card-text fw-bold">Monitoring Solutions</p>
                         </div>
                         <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-center gap-2">
+                            <div class="d-flex justify-content-between gap-2">
                                 <a href="#" class="btn btn-primary-custom">View Session</a>
                                 <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
                             </div>
@@ -336,7 +381,7 @@
                     <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <h5 class="mb-2">{{ session.title }}</h5>
-                            <small class="text-muted">{{ session.date|date:"F d, Y" }} | {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</small>
+                            <small class="text-muted">{{ session.start_date|date:"F d, Y" }}</small>
                         </div>
                         <div class="mb-3">
                             <span class="badge bg-primary-dark me-2">{{ session.get_track_display }}</span>
@@ -358,7 +403,7 @@
                     <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <h5 class="mb-2">Advanced Monitoring Techniques</h5>
-                            <small class="text-muted">June 15, 2025 | 10:00 AM - 11:30 AM</small>
+                            <small class="text-muted">June 15, 2025</small>
                         </div>
                         <div class="mb-3">
                             <span class="badge bg-primary-dark me-2">Technical</span>
@@ -375,7 +420,7 @@
                     <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <h5 class="mb-2">Scaling Monitoring Infrastructure</h5>
-                            <small class="text-muted">June 15, 2025 | 1:00 PM - 2:30 PM</small>
+                            <small class="text-muted">June 15, 2025</small>
                         </div>
                         <div class="mb-3">
                             <span class="badge bg-primary-dark me-2">Technical</span>
@@ -392,7 +437,7 @@
                     <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <h5 class="mb-2">Monitoring for Business Impact</h5>
-                            <small class="text-muted">June 16, 2025 | 9:00 AM - 10:30 AM</small>
+                            <small class="text-muted">June 16, 2025</small>
                         </div>
                         <div class="mb-3">
                             <span class="badge bg-primary-dark me-2">Business</span>
@@ -412,8 +457,6 @@
         </div>
     </div>
 </section>
-
-
 
 <!-- Partners Section -->
 <section class="py-5 bg-light">
@@ -449,15 +492,6 @@
   </div>
 </section>
 
-
-
-
-
-
-
-
-
-
 <!-- CTA Section -->
 <section class="py-5 bg-primary-dark text-white text-center">
     <div class="container">
@@ -466,6 +500,5 @@
         <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Today</a>
     </div>
 </section>
-
 
 {% endblock %}
