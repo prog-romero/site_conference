@@ -1,0 +1,572 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}{{ title }} - Conference 2025{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <h1>{{ session.title }}</h1>
+        <p class="lead">{{ session.start_date|date:"d/m/Y" }} - {{ session.end_date|date:"d/m/Y" }}</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3">
+                <div class="list-group mb-4">
+                    <a href="#details" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                        <i class="fas fa-info-circle me-2"></i> Détails
+                    </a>
+                    <a href="#speakers" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-microphone me-2"></i> Intervenants
+                    </a>
+                    <a href="#organizers" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-users me-2"></i> Organisateurs
+                    </a>
+                    <a href="#fundings" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-money-bill me-2"></i> Financements
+                    </a>
+                    <a href="#agenda" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-calendar-alt me-2"></i> Agenda
+                    </a>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Actions</h5>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'session_edit' session.id %}" class="btn btn-primary-custom">
+                                <i class="fas fa-edit me-2"></i> Modifier la session
+                            </a>
+                            <a href="{% url 'agenda_create' session.id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-plus me-2"></i> Ajouter un agenda
+                            </a>
+                            <form method="post" action="{% url 'session_delete' session.id %}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette session?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-trash me-2"></i> Supprimer la session
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="col-lg-9">
+                <div class="tab-content">
+                    <!-- Details Tab -->
+                    <div class="tab-pane fade show active" id="details">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Informations générales</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Description:</div>
+                                    <div class="col-md-9">{{ session.description|linebreaks }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Catégorie:</div>
+                                    <div class="col-md-9">{{ session.get_track_display }}</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Durée:</div>
+                                    <div class="col-md-9">{{ session.duration_days }} jour(s)</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Type:</div>
+                                    <div class="col-md-9">
+                                        {% if session.is_hybrid %}
+                                        <span class="badge bg-info">Hybride</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Présentiel uniquement</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Lieux d'intervention</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Pays</th>
+                                                <th>Principal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for location in session.locations.all %}
+                                            <tr>
+                                                <td>{{ location.name }}</td>
+                                                <td>{{ location.country }}</td>
+                                                <td>
+                                                    {% if location.is_primary %}
+                                                    <span class="badge bg-success">Oui</span>
+                                                    {% else %}
+                                                    <span class="badge bg-secondary">Non</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="3" class="text-center">Aucun lieu d'intervention défini</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speakers Tab (Corrected & Uniformized) -->
+                    <div class="tab-pane fade" id="speakers">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <!-- Le bouton "Ajouter" a été retiré pour uniformiser avec les autres onglets -->
+                                <h5 class="mb-0">Intervenants</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Organisation</th>
+                                                <th>Type d'intervention</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for speaker in speakers %}
+                                            <tr>
+                                                <td>{{ speaker.name }}</td>
+                                                <td>{{ speaker.organization }}</td>
+                                                <td>{{ speaker.get_intervention_type_display }}</td>
+                                                <td>
+                                                    {% if speaker.intervention_date %}
+                                                    {{ speaker.intervention_date|date:"d/m/Y" }}
+                                                    {% else %}
+                                                    -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-sm btn-outline-primary me-1" title="Modifier">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form method="post" action="{% url 'speaker_delete' speaker.id %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet intervenant?');" title="Supprimer">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center">Aucun intervenant défini</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Ajouter un intervenant</h6>
+                                <!-- Le formulaire est maintenant le seul moyen d'ajouter, comme pour les autres onglets -->
+                                <!-- La gestion des erreurs est ajoutée, comme sur l'onglet Agenda -->
+                                <form method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="add_speaker" value="1">
+                                    
+                                    {% if speaker_form.non_field_errors %}
+                                        <div class="alert alert-danger">
+                                            {% for error in speaker_form.non_field_errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ speaker_form.name.id_for_label }}" class="form-label">Nom*</label>
+                                            {{ speaker_form.name }}
+                                            {% if speaker_form.name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ speaker_form.organization.id_for_label }}" class="form-label">Organisation</label>
+                                            {{ speaker_form.organization }}
+                                            {% if speaker_form.organization.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.organization.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ speaker_form.intervention_type.id_for_label }}" class="form-label">Type d'intervention*</label>
+                                            {{ speaker_form.intervention_type }}
+                                            {% if speaker_form.intervention_type.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.intervention_type.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ speaker_form.intervention_date.id_for_label }}" class="form-label">Date d'intervention</label>
+                                            {{ speaker_form.intervention_date }}
+                                            {% if speaker_form.intervention_date.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.intervention_date.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label for="{{ speaker_form.bio.id_for_label }}" class="form-label">Biographie</label>
+                                            {{ speaker_form.bio }}
+                                            {% if speaker_form.bio.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.bio.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter l'intervenant</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organizers Tab -->
+                    <div class="tab-pane fade" id="organizers">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Organisateurs</h5>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Organisation</th>
+                                                <th>Principal</th>
+                                                <th>Ordre</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for organizer in organizers %}
+                                            <tr>
+                                                <td>{{ organizer.name }}</td>
+                                                <td>{{ organizer.organization }}</td>
+                                                <td>
+                                                    {% if organizer.is_primary %}
+                                                    <span class="badge bg-success">Oui</span>
+                                                    {% else %}
+                                                    <span class="badge bg-secondary">Non</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ organizer.order }}</td>
+                                                <td>
+                                                    <form method="post" action="{% url 'organizer_delete' organizer.id %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet organisateur?');">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center">Aucun organisateur défini</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Ajouter un organisateur</h6>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="add_organizer" value="1">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Nom</label>
+                                            {{ organizer_form.name }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Organisation</label>
+                                            {{ organizer_form.organization }}
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Ordre</label>
+                                            {{ organizer_form.order }}
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label d-block">&nbsp;</label>
+                                            <div class="form-check">
+                                                {{ organizer_form.is_primary }}
+                                                <label class="form-check-label" for="{{ organizer_form.is_primary.id_for_label }}">
+                                                    Principal
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fundings Tab -->
+                    <div class="tab-pane fade" id="fundings">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Financements</h5>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Partenaire</th>
+                                                <th>Type</th>
+                                                <th>Montant</th>
+                                                <th>Pays</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for funding in fundings %}
+                                            <tr>
+                                                <td>{{ funding.partner.name }}</td>
+                                                <td>{{ funding.get_funding_type_display }}</td>
+                                                <td>
+                                                    {% if funding.amount %}
+                                                    {{ funding.amount }} €
+                                                    {% else %}
+                                                    -
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ funding.country }}</td>
+                                                <td>
+                                                    <form method="post" action="{% url 'funding_delete' funding.id %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce financement?');">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center">Aucun financement défini</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <h6 class="mb-3">Ajouter un financement</h6>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="add_funding" value="1">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Partenaire</label>
+                                            {{ funding_form.partner }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Type</label>
+                                            {{ funding_form.funding_type }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Pays</label>
+                                            {{ funding_form.country }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Montant (optionnel)</label>
+                                            {{ funding_form.amount }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Nombre de participants couverts (optionnel)</label>
+                                            {{ funding_form.covers_participants }}
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Description</label>
+                                            {{ funding_form.description }}
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agenda Tab -->
+                    <div class="tab-pane fade show active" id="agenda" role="tabpanel">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Agenda</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if agenda_items %}
+                                    {% regroup agenda_items by date as agenda_by_date %}
+                                    {% for date_group in agenda_by_date %}
+                                        <h6 class="mb-3">{{ date_group.grouper|date:"l d F Y" }}</h6>
+                                        <div class="table-responsive mb-4">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Heure</th>
+                                                        <th>Titre</th>
+                                                        <th>Type</th>
+                                                        <th>Lieu</th>
+                                                        <th>Intervenant</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for item in date_group.list %}
+                                                    <tr>
+                                                        <td>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</td>
+                                                        <td>{{ item.title }}</td>
+                                                        <td>{{ item.get_item_type_display }}</td>
+                                                        <td>{{ item.location.name|default:"-" }}</td>
+                                                        <td>{{ item.speaker.name|default:"-" }}</td>
+                                                        <td>
+                                                            <a href="{% url 'agenda_edit' item.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <form method="post" action="{% url 'agenda_delete' item.id %}" style="display: inline;">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet élément d\'agenda ?');">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        Aucun élément d’agenda n’a été défini pour cette session.
+                                    </div>
+                                {% endif %}
+
+                                <hr class="my-4">
+                                <h6 class="mb-3">Ajouter un élément d’agenda</h6>
+                                {% if errors.general %}
+                                <div class="alert alert-danger mb-3">{{ errors.general }}</div>
+                                {% endif %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="add_agenda" value="1">
+                                    <div class="row g-3">
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="title">Titre*</label>
+                                            <input type="text" name="title" id="title" class="form-control {% if errors.title %}is-invalid{% endif %}" value="{{ request.POST.title|default:'' }}" required>
+                                            {% if errors.title %}
+                                            <div class="invalid-feedback">{{ errors.title }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="item_type">Type*</label>
+                                            <select name="item_type" id="item_type" class="form-control {% if errors.item_type %}is-invalid{% endif %}" required>
+                                                <option value="">Sélectionner un type</option>
+                                                {% for value, label in item_types %}
+                                                <option value="{{ value }}" {% if request.POST.item_type == value %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {% if errors.item_type %}
+                                            <div class="invalid-feedback">{{ errors.item_type }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4 mb-4">
+                                            <label class="form-label" for="date">Date*</label>
+                                            <input type="date" name="date" id="date" class="form-control {% if errors.date %}is-invalid{% endif %}" value="{{ request.POST.date|default:'' }}" required>
+                                            {% if errors.date %}
+                                            <div class="invalid-feedback">{{ errors.date }}</div>
+                                            {% endif %}
+                                            <small class="text-muted">Entre {{ session.start_date|date:"d F Y" }} et {{ session.end_date|date:"d F Y" }}</small>
+                                        </div>
+                                        <div class="col-md-4 mb-4">
+                                            <label class="form-label" for="start_time">Heure de début*</label>
+                                            <input type="time" name="start_time" id="start_time" class="form-control {% if errors.start_time %}is-invalid{% endif %}" value="{{ request.POST.start_time|default:'' }}" required>
+                                            {% if errors.start_time %}
+                                            <div class="invalid-feedback">{{ errors.start_time }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4 mb-4">
+                                            <label class="form-label" for="end_time">Heure de fin*</label>
+                                            <input type="time" name="end_time" id="end_time" class="form-control {% if errors.end_time %}is-invalid{% endif %}" value="{{ request.POST.end_time|default:'' }}" required>
+                                            {% if errors.end_time %}
+                                            <div class="invalid-feedback">{{ errors.end_time }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="location">Lieu</label>
+                                            <select name="location" id="location" class="form-control {% if errors.location %}is-invalid{% endif %}">
+                                                <option value="">Sélectionner un lieu (optionnel)</option>
+                                                {% for loc in locations %}
+                                                <option value="{{ loc.id }}" {% if request.POST.location == loc.id|stringformat:"s" %}selected{% endif %}>{{ loc }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {% if errors.location %}
+                                            <div class="invalid-feedback">{{ errors.location }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="description">Description</label>
+                                            <textarea name="description" id="description" class="form-control {% if errors.description %}is-invalid{% endif %}" rows="3">{{ request.POST.description|default:'' }}</textarea>
+                                            {% if errors.description %}
+                                            <div class="invalid-feedback">{{ errors.description }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter</button>
+                                        <a href="{% url 'session_detail' session.id %}" class="btn btn-outline-secondary">Annuler</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

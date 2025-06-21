@@ -1,0 +1,290 @@
+{% extends 'conference_app/base.html' %}
+
+{% block title %}{{ title }} - Conference 2025{% endblock %}
+
+{% block content %}
+<style>
+    /* Conteneur général */
+    .container {
+        max-width: 800px;
+    }
+
+    /* Carte */
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    /* En-têtes */
+    h5.mb-3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem !important;
+    }
+
+    h5.mb-3.mt-5 {
+        margin-top: 2.5rem !important;
+    }
+
+    /* Labels */
+    .form-label {
+        font-weight: 500;
+        color: #444;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Champs de formulaire */
+    input[type="text"],
+    input[type="file"],
+    textarea,
+    select {
+        border: 1px solid #d0d0d0;
+        border-radius: 6px;
+        padding: 0.75rem;
+        font-size: 1rem;
+        width: 100%;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="file"]:focus,
+    textarea:focus,
+    select:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 5px rgba(74, 144, 226, 0.2);
+        outline: none;
+    }
+
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Cases à cocher */
+    .form-check {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-check-input {
+        margin-top: 0.2rem;
+        margin-right: 0.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .form-check-label {
+        font-weight: 400;
+        color: #555;
+    }
+
+    /* Image (photo) */
+    .img-thumbnail {
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+        max-height: 100px;
+        margin-top: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .img-thumbnail:hover {
+        transform: scale(1.02);
+    }
+
+    /* Messages d'erreur */
+    .text-danger {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        color: #e74c3c;
+    }
+
+    /* Instructions pour le champ "Pays d'origine" */
+    .text-muted {
+        font-size: 0.85rem;
+        color: #777;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Boutons */
+    .btn-primary-custom {
+        background-color: #4a90e2;
+        border: none;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: #357bd8;
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-secondary {
+        border: 1px solid #b0b0b0;
+        color: #666;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: border-color 0.3s ease, color 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        border-color: #4a90e2;
+        color: #4a90e2;
+    }
+
+    /* Espacement entre les boutons */
+    .d-flex.gap-2 {
+        gap: 1rem;
+    }
+
+    /* Espacement entre les sections */
+    .row.mb-4,
+    .mb-4 {
+        margin-bottom: 1.5rem !important;
+    }
+</style>
+
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <h1>{{ title }}</h1>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <h5 class="mb-3">Informations personnelles</h5>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nom</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Genre</label>
+                                    {{ form.gender }}
+                                    {% if form.gender.errors %}
+                                    <div class="text-danger">{{ form.gender.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Titre</label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Organisation</label>
+                                    {{ form.organization }}
+                                    {% if form.organization.errors %}
+                                    <div class="text-danger">{{ form.organization.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- <div class="mb-4"> -->
+                                <!-- <label class="form-label">Biographie</label> -->
+                                <!-- {{ form.bio }} -->
+                                <!-- {% if form.bio.errors %} -->
+                                <!-- <div class="text-danger">{{ form.bio.errors }}</div> -->
+                                <!-- {% endif %} -->
+                            <!-- </div>  -->
+                        
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Photo</label>
+                                {{ form.photo }}
+                                {% if form.photo.errors %}
+                                <div class="text-danger">{{ form.photo.errors }}</div>
+                                {% endif %}
+                                {% if speaker.photo %}
+                                <div class="mt-2">
+                                    <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="img-thumbnail" style="max-height: 100px;">
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <h5 class="mb-3 mt-5">Informations d'intervention</h5>
+                            
+                            {% if not session %}
+                            <div class="mb-4">
+                                <label class="form-label">Session</label>
+                                {{ form.session }}
+                                {% if form.session.errors %}
+                                <div class="text-danger">{{ form.session.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Type d'intervention</label>
+                                    {{ form.intervention_type }}
+                                    {% if form.intervention_type.errors %}
+                                    <div class="text-danger">{{ form.intervention_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <!-- <div class="col-md-6">
+                                    <label class="form-label">Lieu d'intervention</label>
+                                    {{ form.location }}
+                                    {% if form.location.errors %}
+                                    <div class="text-danger">{{ form.location.errors }}</div>
+                                    {% endif %}
+                                </div> -->
+                            </div>
+                            
+                            <!-- <div class="mb-4 form-check">
+                                {{ form.is_remote }}
+                                <label class="form-check-label" for="{{ form.is_remote.id_for_label }}">
+                                    Intervention à distance
+                                </label>
+                                {% if form.is_remote.errors %}
+                                <div class="text-danger">{{ form.is_remote.errors }}</div>
+                                {% endif %}
+                            </div> -->
+                            
+                            <!-- <div class="mb-4">
+                                <label class="form-label">Pays d'origine</label>
+                                {{ form.countries }}
+                                {% if form.countries.errors %}
+                                <div class="text-danger">{{ form.countries.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Maintenez Ctrl/Cmd pour sélectionner plusieurs pays</small>
+                            </div> -->
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary-custom">Enregistrer</button>
+                                <a href="{% url 'speaker_list' %}" class="btn btn-outline-secondary">Annuler</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
