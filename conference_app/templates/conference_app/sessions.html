@@ -52,7 +52,7 @@
                     <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <h5 class="mb-2">{{ session.title }}</h5>
-                            <small class="text-muted">{{ session.date|date:"F d, Y" }} | {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</small>
+                            <small class="text-muted">{{ session.date|date:"F d, Y" }}  {{ session.start_time|time:"g:i A" }}  {{ session.end_time|time:"g:i A" }}</small>
                         </div>
                         <div class="mb-3">
                             <span class="badge bg-primary-dark me-2">{{ session.get_track_display }}</span>
@@ -67,7 +67,7 @@
                                 {% endfor %}
                                 </small>
                             </div>
-                            <a href="{% url 'session_detail' session.id %}" class="btn btn-sm btn-outline-primary-custom">View Details</a>
+                            <!-- <a href="{% url 'session_detail' session.id %}" class="btn btn-sm btn-outline-primary-custom">View Details</a> -->
                         </div>
                     </div>
                     {% empty %}

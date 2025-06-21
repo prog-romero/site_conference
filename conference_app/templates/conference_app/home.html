@@ -12,30 +12,15 @@
   /* --- Styles généraux pour les carrousels Swiper --- */
   .swiper-container-wrapper {
     position: relative;
-  }
-  
-  .swiper-container-wrapper .swiper {
-    padding-bottom: 40px; /* Espace pour la pagination */
+    overflow: hidden; /* Important pour l'effet de défilement continu */
   }
 
-  /* Pagination (les petits points) */
-  .swiper-pagination-bullet {
-    background: rgba(255, 255, 255, 0.5); /* Pour la section sombre */
-    opacity: 1;
-  }
-  .swiper-pagination-bullet-active {
-    background: white; /* Pour la section sombre */
-  }
-  /* Pagination sur fond clair */
-  .swiper-container-wrapper.on-light .swiper-pagination-bullet {
-      background: rgba(0, 0, 0, 0.3);
-  }
-  .swiper-container-wrapper.on-light .swiper-pagination-bullet-active {
-      background: var(--accent-color);
+  /* Pour le défilement continu, on s'assure que le wrapper prend toute la largeur */
+  .swiper-wrapper {
+      transition-timing-function: linear !important; /* Mouvement fluide et constant */
   }
 
-
-  /* --- Styles pour les cartes des organisateurs et speakers --- */
+  /* --- Styles pour les cartes des organisateurs et speakers (inchangés) --- */
   .person-card {
     display: flex;
     flex-direction: column;
@@ -99,7 +84,7 @@
     </div>
 </section>
 
-<!-- ▼▼▼▼ SECTION ORGANISATEURS AVEC DÉFILEMENT AUTOMATIQUE ▼▼▼▼ -->
+<!-- ▼▼▼▼ SECTION ORGANISATEURS AVEC DÉFILEMENT CONTINU ▼▼▼▼ -->
 <section class="py-5 bg-primary-dark text-white">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
@@ -118,7 +103,7 @@
                 <div class="swiper organizer-swiper">
                     <div class="swiper-wrapper">
                         {% for organizer in latest_session.organizers.all %}
-                        <div class="swiper-slide h-auto">
+                        <div class="swiper-slide h-auto" style="width: 280px;"> <!-- Largeur fixe pour un meilleur calcul -->
                             <div class="person-card">
                                 {% if organizer.photo %}
                                     <img src="{{ organizer.photo.url }}" alt="{{ organizer.name }}" class="card-img-top">
@@ -133,8 +118,6 @@
                         </div>
                         {% endfor %}
                     </div>
-                    <!-- Pagination -->
-                    <div class="swiper-pagination"></div>
                 </div>
             </div>
         {% else %}
@@ -143,6 +126,8 @@
     </div>
 </section>
 <!-- ▲▲▲▲ FIN DE LA SECTION ORGANISATEURS ▲▲▲▲ -->
+
+<!-- Why Attend Section (inchangée) -->
 
 <!-- Why Attend Section (inchangée) -->
 <section class="py-5 bg-light-custom">
@@ -154,8 +139,11 @@
         <!-- ... contenu inchangé ... -->
     </div>
 </section>
+<section class="py-5 bg-light-custom">
+    <!-- ... contenu inchangé ... -->
+</section>
 
-<!-- ▼▼▼▼ SECTION SPEAKERS AVEC DÉFILEMENT AUTOMATIQUE ▼▼▼▼ -->
+<!-- ▼▼▼▼ SECTION SPEAKERS AVEC DÉFILEMENT CONTINU ▼▼▼▼ -->
 <section class="py-5">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
@@ -168,11 +156,11 @@
         </div>
         
         {% if latest_session and latest_session.speakers.all %}
-            <div class="swiper-container-wrapper on-light">
+            <div class="swiper-container-wrapper">
                 <div class="swiper speaker-swiper">
                     <div class="swiper-wrapper">
                         {% for speaker in latest_session.speakers.all %}
-                        <div class="swiper-slide h-auto">
+                        <div class="swiper-slide h-auto" style="width: 280px;"> <!-- Largeur fixe pour un meilleur calcul -->
                             <div class="person-card">
                                 {% if speaker.photo %}
                                     <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="card-img-top">
@@ -191,8 +179,6 @@
                         </div>
                         {% endfor %}
                     </div>
-                    <!-- Pagination -->
-                    <div class="swiper-pagination"></div>
                 </div>
             </div>
         {% else %}
@@ -202,8 +188,7 @@
 </section>
 <!-- ▲▲▲▲ FIN DE LA SECTION SPEAKERS ▲▲▲▲ -->
 
-<!-- Upcoming Sessions, Partners, CTA (inchangés) -->
-<!-- ... collez ici le reste de votre code pour les sections Upcoming, Partners et CTA ... -->
+<!-- ... Autres sections (Upcoming, Partners, CTA) inchangées ... -->
 
 <!-- Upcoming Sessions Section -->
 <section class="py-5 bg-light-custom">
@@ -299,37 +284,71 @@
 
 <!-- Partners Section -->
 <section class="py-5 bg-light">
-  <div class="container">
-    <div class="text-center mb-4">
-      <h2 class="section-title">Our Valued Partners</h2>
-      <p class="lead">We're grateful for the support of these organizations who make this conference possible</p>
-    </div>
-
-    <div class="swiper mySwiper">
-      <div class="swiper-wrapper">
-        {% for partner in partners %}
-        <div class="swiper-slide">
-          <div class="partner-card text-center p-3 bg-white shadow-sm rounded">
-            <div class="partner-logo-container mb-2">
-              {% if partner.logo %}
-              <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo">
-              {% else %}
-              <div class="partner-initials">{{ partner.name|slice:":2"|upper }}</div>
-              {% endif %}
-            </div>
-            <h5 class="mb-1">{{ partner.name }}</h5>
-            {% if partner.website %}
-            <a href="{{ partner.website }}" target="_blank" class="small text-primary">
-              Visit Website <i class="fas fa-external-link-alt ms-1"></i>
-            </a>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="section-title section-title-center">Our Valued Partners</h2>
+        <p class="lead">We're grateful for the support of these organizations who make this conference possible.</p>
       </div>
+  
+      <!-- ▼▼▼▼ DÉBUT DE LA MODIFICATION : GRILLE STATIQUE AU LIEU DU CARROUSEL ▼▼▼▼ -->
+      <div class="row g-4 justify-content-center align-items-center">
+          {% for partner in partners %}
+          <div class="col-6 col-md-4 col-lg-2">
+              <div class="partner-card-static text-center p-3">
+                  <a href="{{ partner.website|default:'#' }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                      {% if partner.logo %}
+                          <img src="{{ partner.logo.url }}" alt="{{ partner.name }} logo" class="img-fluid partner-logo-static">
+                      {% else %}
+                          <div class="partner-initials-static">
+                              {{ partner.name|slice:":1"|upper }}
+                          </div>
+                          <h6 class="mt-2 text-dark">{{ partner.name }}</h6>
+                      {% endif %}
+                  </a>
+              </div>
+          </div>
+          {% empty %}
+          <div class="col-12">
+              <p class="text-center text-muted">Partners will be announced soon.</p>
+          </div>
+          {% endfor %}
+      </div>
+      <!-- ▲▲▲▲ FIN DE LA MODIFICATION ▲▲▲▲ -->
     </div>
-  </div>
-</section>
+  </section>
+
+  <style>
+    /* ... vos autres styles ... */
+  
+    .partner-logo-static {
+      max-height: 70px; /* Hauteur maximale du logo */
+      filter: grayscale(100%); /* Met les logos en noir et blanc */
+      transition: all 0.3s ease;
+    }
+    .partner-logo-static:hover {
+      filter: grayscale(0%); /* Couleur originale au survol */
+      transform: scale(1.1); /* Léger zoom au survol */
+    }
+  
+    .partner-initials-static {
+      font-size: 2rem;
+      font-weight: bold;
+      /* color: #6c757d; */
+      background-color: #e9ecef;
+      width: 70px;
+      height: 70px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+    .partner-card-static:hover .partner-initials-static {
+      background-color: var(--accent-color);
+      color: white;
+      transform: scale(1.1);
+    }
+  </style>
 
 <!-- CTA Section -->
 <section class="py-5 bg-primary-dark text-white text-center">
@@ -345,67 +364,30 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-<!-- ▼▼▼▼ JAVASCRIPT MIS À JOUR POUR LE DÉFILEMENT AUTOMATIQUE ▼▼▼▼ -->
+<!-- ▼▼▼▼ JAVASCRIPT MIS À JOUR POUR LE DÉFILEMENT CONTINU ▼▼▼▼ -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     
-    const autoplayOptions = {
-        delay: 2000, // Délai de 4 secondes entre les transitions
-        disableOnInteraction: false, // Le défilement ne s'arrête pas si l'utilisateur interagit
-        pauseOnMouseEnter: true, // Met le défilement en pause quand la souris est sur le carrousel
+    // Options pour un défilement continu type "marquee"
+    const marqueeOptions = {
+        slidesPerView: 'auto', // Laisse Swiper calculer le nombre de slides visibles
+        spaceBetween: 30,      // Espace entre les slides
+        loop: true,            // Essentiel pour le défilement infini
+        speed: 8000,           // Vitesse de la transition (plus c'est élevé, plus c'est lent)
+        allowTouchMove: false, // Empêche l'interaction manuelle
+        autoplay: {
+            delay: 0,              // Pas de délai, le mouvement est immédiat
+            disableOnInteraction: false, // Continue même si l'utilisateur interagit
+        },
     };
 
     // Carrousel des Organisateurs
-    new Swiper('.organizer-swiper', {
-        loop: true,
-        slidesPerView: 1,
-        spaceBetween: 30,
-        autoplay: autoplayOptions,
-        pagination: {
-            el: '.organizer-swiper + .swiper-pagination',
-            clickable: true,
-        },
-        breakpoints: {
-            576: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            1200: { slidesPerView: 4 }
-        }
-    });
+    new Swiper('.organizer-swiper', marqueeOptions);
 
     // Carrousel des Speakers
-    new Swiper('.speaker-swiper', {
-        loop: true,
-        slidesPerView: 1,
-        spaceBetween: 30,
-        autoplay: autoplayOptions,
-        pagination: {
-            el: '.speaker-swiper + .swiper-pagination',
-            clickable: true,
-        },
-        breakpoints: {
-            576: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            1200: { slidesPerView: 4 }
-        }
-    });
+    new Swiper('.speaker-swiper', marqueeOptions);
 
-    // Carrousel des Partenaires (votre code existant, mais optimisé)
-    new Swiper('.mySwiper', {
-        slidesPerView: 'auto',
-        spaceBetween: 30,
-        loop: true,
-        speed: 8000, // Vitesse de transition plus lente pour un effet "continu"
-        allowTouchMove: false,
-        autoplay: {
-            delay: 0, // Délai de 0 pour un défilement continu
-            disableOnInteraction: false,
-        },
-        breakpoints: {
-            576: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            992: { slidesPerView: 5 }
-        }
-    });
+    
 });
 </script>
 <!-- ▲▲▲▲ FIN DU JAVASCRIPT MIS À JOUR ▲▲▲▲ -->
