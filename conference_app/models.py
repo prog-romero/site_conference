@@ -122,6 +122,7 @@ class Session(models.Model):
     
     title = models.CharField(max_length=200)
     description = models.TextField()
+    logo = models.ImageField(upload_to='session_logos/', null=True, blank=True) # <<< CHAMP AJOUTÉ
     # Uniquement des dates, pas d'heures
     start_date = models.DateField()
     end_date = models.DateField()

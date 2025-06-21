@@ -2,6 +2,8 @@
 
 {% block title %}{% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %} - The Premier IT Event{% endblock %}
 
+{% load static %}
+
 {% block content %}
 
 <!-- Swiper CSS -->
@@ -74,6 +76,10 @@
     </div>
 </section>
 
+
+
+
+<!-- Organizers Section -->
 <!-- Organizers Section -->
 <section class="py-5 bg-primary-dark text-white">
     <div class="container">
@@ -91,11 +97,16 @@
                 {% for organizer in latest_session.organizers.all|slice:":4" %}
                 <div class="col-md-6 col-lg-3">
                     <div class="card h-100 border-0 shadow-sm organizer-card text-center">
+                        
+                        <!-- ▼▼▼▼ LOGIQUE D'IMAGE CORRIGÉE ▼▼▼▼ -->
                         {% if organizer.photo %}
-                        <img src="{{ organizer.photo.url }}" alt="{{ organizer.name }}" class="organizer-img">
+                            <img src="{{ organizer.photo.url }}" alt="{{ organizer.name }}" class="organizer-img">
                         {% else %}
-                        <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ organizer.name }}" class="organizer-img">
+                            <!-- Votre image de fallback Pexels -->
+                            <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ organizer.name }} placeholder" class="organizer-img">
                         {% endif %}
+                        <!-- ▲▲▲▲ FIN DE LA CORRECTION ▲▲▲▲ -->
+
                         <div class="card-body pb-2">
                             <h4 class="card-title">{{ organizer.name }}</h4>
                             <p class="card-text text-muted mb-2">Organizer</p>
@@ -110,66 +121,9 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <!-- Fallback when no latest_session or no organizers -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
-                        <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="John Smith" class="organizer-img">
-                        <div class="card-body pb-2">
-                            <h4 class="card-title">John Smith</h4>
-                            <p class="card-text text-muted mb-2">Organizer</p>
-                            <p class="card-text fw-bold">Tech Events Inc.</p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="#" class="btn btn-primary-custom">View Session</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
-                        <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Jane Doe" class="organizer-img">
-                        <div class="card-body pb-2">
-                            <h4 class="card-title">Jane Doe</h4>
-                            <p class="card-text text-muted mb-2">Organizer</p>
-                            <p class="card-text fw-bold">Conference Solutions</p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="#" class="btn btn-primary-custom">View Session</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
-                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Alice Brown" class="organizer-img">
-                        <div class="card-body pb-2">
-                            <h4 class="card-title">Alice Brown</h4>
-                            <p class="card-text text-muted mb-2">Organizer</p>
-                            <p class="card-text fw-bold">Event Masters</p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="#" class="btn btn-primary-custom">View Session</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm organizer-card text-center">
-                        <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Bob Wilson" class="organizer-img">
-                        <div class="card-body pb-2">
-                            <h4 class="card-title">Bob Wilson</h4>
-                            <p class="card-text text-muted mb-2">Organizer</p>
-                            <p class="card-text fw-bold">Global Conferences</p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="#" class="btn btn-primary-custom">View Session</a>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Message de fallback si aucun organisateur -->
+                <div class="col-12">
+                    <p class="text-center">Organizers will be announced soon.</p>
                 </div>
             {% endif %}
         </div>
@@ -242,6 +196,7 @@
 </section>
 
 <!-- Featured Speakers Section -->
+<!-- Featured Speakers Section -->
 <section class="py-5">
     <div class="container">
         <div class="d-flex align-items-center justify-content-between mb-5">
@@ -257,7 +212,7 @@
         
         <p class="lead mb-5">
             {% if latest_session %}
-                Meet the experts presenting at our upcoming session
+                Meet the experts presenting at our upcoming session.
             {% else %}
                 Get ready to hear from industry leaders and experts as they share valuable insights, best practices, and strategies to elevate your IT monitoring.
             {% endif %}
@@ -268,11 +223,16 @@
                 {% for speaker in latest_session.speakers.all|slice:":4" %}
                 <div class="col-md-6 col-lg-3">
                     <div class="card h-100 border-0 shadow-sm speaker-card text-center">
+                        
+                        <!-- ▼▼▼▼ LOGIQUE D'IMAGE CORRIGÉE ▼▼▼▼ -->
                         {% if speaker.photo %}
-                        <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="speaker-img">
+                            <img src="{{ speaker.photo.url }}" alt="{{ speaker.name }}" class="speaker-img">
                         {% else %}
-                        <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ speaker.name }}" class="speaker-img">
+                            <!-- Votre image de fallback Pexels -->
+                            <img src="https://images.pexels.com/photos/1270076/pexels-photo-1270076.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="{{ speaker.name }} placeholder" class="speaker-img">
                         {% endif %}
+                        <!-- ▲▲▲▲ FIN DE LA CORRECTION ▲▲▲▲ -->
+                        
                         <div class="card-body pb-2">
                             <h4 class="card-title">{{ speaker.name }}</h4>
                             <p class="card-text text-muted mb-2">{{ speaker.title }}</p>
@@ -288,70 +248,9 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <!-- Fallback when no latest_session or no speakers -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                        <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="John Doe" class="speaker-img">
-                        <div class="card-body pb-2">
-                            <h4 class="card-title">John Doe</h4>
-                            <p class="card-text text-muted mb-2">Developer Associate</p>
-                            <p class="card-text fw-bold">Tech Solutions Inc.</p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="#" class="btn btn-primary-custom">View Session</a>
-                                <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                        <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Dave Williams" class="speaker-img">
-                        <div class="card-body pb-2">
-                            <h4 class="card-title">Dave Williams</h4>
-                            <p class="card-text text-muted mb-2">SysAdmin</p>
-                            <p class="card-text fw-bold">Community Member</p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="#" class="btn btn-primary-custom">View Session</a>
-                                <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Sarah Johnson" class="speaker-img">
-                        <div class="card-body pb-2">
-                            <h4 class="card-title">Sarah Johnson</h4>
-                            <p class="card-text text-muted mb-2">Founder and President</p>
-                            <p class="card-text fw-bold">Monitoring Solutions</p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-between gap-2">
-                                <a href="#" class="btn btn-primary-custom">View Session</a>
-                                <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm speaker-card text-center">
-                        <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=300&w=300" alt="Eric Loyd" class="speaker-img">
-                        <div class="card-body pb-2">
-                            <h4 class="card-title">Eric Loyd</h4>
-                            <p class="card-text text-muted mb-2">COO</p>
-                            <p class="card-text fw-bold">Global Monitoring</p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-4">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="#" class="btn btn-primary-custom">View Session</a>
-                                <a href="#" class="btn btn-outline-primary-custom">View Bio</a>
-                            </div>
-                        </div>
-                    </div>
+                 <!-- Message de fallback si aucun speaker -->
+                <div class="col-12">
+                    <p class="text-center text-muted">The speakers for this session will be announced soon.</p>
                 </div>
             {% endif %}
         </div>
