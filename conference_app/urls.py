@@ -165,6 +165,7 @@ urlpatterns = [
     
     # --- Gestion des intervenants ---
     path('dashboard/speakers/', include([
+        #path('<int:session_id>/', views.speaker_list, name='speaker_list'),
         path('', views.SpeakersInterventionsAdminListView.as_view(), name='speaker_list'),
         path('<int:session_id>/', views.speaker_list, name='session_speakers'),
         path('<int:session_id>/add/', views.speaker_create, name='speaker_create'),

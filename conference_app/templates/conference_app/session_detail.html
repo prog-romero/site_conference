@@ -43,7 +43,7 @@
                             <a href="{% url 'agenda_create' session.id %}" class="btn btn-outline-primary">
                                 <i class="fas fa-plus me-2"></i> Ajouter un agenda
                             </a>
-                            <form method="post" action="{% url 'delete_session' session.id %}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette session?');">
+                            <form method="post" action="{% url 'session_delete' session.id %}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette session?');">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-outline-danger w-100">
                                     <i class="fas fa-trash me-2"></i> Supprimer la session
@@ -128,16 +128,12 @@
                         </div>
                     </div>
 
-                    <!-- Speakers Tab -->
+                    <!-- Speakers Tab (Corrected & Uniformized) -->
                     <div class="tab-pane fade" id="speakers">
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-header bg-white py-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">Intervenants</h5>
-                                    <a href="{% url 'speaker_create' %}?session={{ session.id }}" class="btn btn-primary-custom btn-sm">
-                                        <i class="fas fa-plus me-1"></i> Ajouter un intervenant
-                                    </a>
-                                </div>
+                                <!-- Le bouton "Ajouter" a été retiré pour uniformiser avec les autres onglets -->
+                                <h5 class="mb-0">Intervenants</h5>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -165,12 +161,12 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                                    <a href="{% url 'speaker_edit' speaker.id %}" class="btn btn-sm btn-outline-primary me-1" title="Modifier">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <form method="post" action="{% url 'delete_speaker_intervention' speaker.id %}" style="display: inline;">
+                                                    <form method="post" action="{% url 'speaker_delete' speaker.id %}" style="display: inline;">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet intervenant?');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet intervenant?');" title="Supprimer">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -188,33 +184,69 @@
                                 <hr class="my-4">
                                 
                                 <h6 class="mb-3">Ajouter un intervenant</h6>
+                                <!-- Le formulaire est maintenant le seul moyen d'ajouter, comme pour les autres onglets -->
+                                <!-- La gestion des erreurs est ajoutée, comme sur l'onglet Agenda -->
                                 <form method="post" enctype="multipart/form-data">
                                     {% csrf_token %}
                                     <input type="hidden" name="add_speaker" value="1">
+                                    
+                                    {% if speaker_form.non_field_errors %}
+                                        <div class="alert alert-danger">
+                                            {% for error in speaker_form.non_field_errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
                                     <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Nom</label>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ speaker_form.name.id_for_label }}" class="form-label">Nom*</label>
                                             {{ speaker_form.name }}
+                                            {% if speaker_form.name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.name.errors.0 }}
+                                                </div>
+                                            {% endif %}
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Organisation</label>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ speaker_form.organization.id_for_label }}" class="form-label">Organisation</label>
                                             {{ speaker_form.organization }}
+                                            {% if speaker_form.organization.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.organization.errors.0 }}
+                                                </div>
+                                            {% endif %}
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Type d'intervention</label>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ speaker_form.intervention_type.id_for_label }}" class="form-label">Type d'intervention*</label>
                                             {{ speaker_form.intervention_type }}
+                                            {% if speaker_form.intervention_type.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.intervention_type.errors.0 }}
+                                                </div>
+                                            {% endif %}
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Lieu</label>
-                                            {{ speaker_form.location }}
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ speaker_form.intervention_date.id_for_label }}" class="form-label">Date d'intervention</label>
+                                            {{ speaker_form.intervention_date }}
+                                            {% if speaker_form.intervention_date.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.intervention_date.errors.0 }}
+                                                </div>
+                                            {% endif %}
                                         </div>
-                                        <div class="col-12">
-                                            <label class="form-label">Biographie</label>
+                                        <div class="col-12 mb-3">
+                                            <label for="{{ speaker_form.bio.id_for_label }}" class="form-label">Biographie</label>
                                             {{ speaker_form.bio }}
+                                            {% if speaker_form.bio.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ speaker_form.bio.errors.0 }}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     <div class="mt-3">
-                                        <button type="submit" class="btn btn-primary-custom">Ajouter</button>
+                                        <button type="submit" class="btn btn-primary-custom">Ajouter l'intervenant</button>
                                     </div>
                                 </form>
                             </div>
@@ -400,7 +432,6 @@
                         </div>
                     </div>
 
-                    <!-- Agenda Tab -->
                     <!-- Agenda Tab -->
                     <div class="tab-pane fade show active" id="agenda" role="tabpanel">
                         <div class="card border-0 shadow-sm mb-4">

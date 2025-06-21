@@ -25,6 +25,10 @@ from reportlab.platypus import Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 import pycountry
 
+from io import BytesIO
+from itertools import groupby      # <-- L'IMPORT MANQUANT POUR 'groupby'
+from operator import attrgetter    # <-- L'IMPORT MANQUANT POUR 'attrgetter'
+
 # Imports des modèles et formulaires
 from .models import (
     SpeakersInterventions, Session, AgendaItem, AttendeeType, Attendee, 
@@ -259,49 +263,47 @@ def agenda_delete(request, pk):
         'title': f"Supprimer : {agenda_item.title}",
     })
 
+# Votre fonction agenda_download (maintenant elle fonctionnera)
 def agenda_download(request):
-    """Vue pour télécharger l'agenda en PDF"""
-    # Récupérer les éléments de l'agenda
-    agenda_items = AgendaItem.objects.all().order_by('date', 'start_time')
+    """Vue pour télécharger l'agenda en PDF (version corrigée et optimisée)"""
     
-    # Regrouper les éléments par date
-    dates = agenda_items.values_list('date', flat=True).distinct()
+    agenda_items = AgendaItem.objects.all().select_related('location').order_by('date', 'start_time')
     
-    agenda_days = []
-    for date in dates:
-        items = agenda_items.filter(date=date)
-        agenda_days.append({
-            'date': date,
-            'date_formatted': date.strftime("%A, %B %d, %Y"),
-            'items': items
-        })
-    
-    # Créer un buffer pour le PDF
     buffer = BytesIO()
-    
-    # Créer le canvas PDF
     p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
     
-    # Titre du document
     p.setFont("Helvetica-Bold", 16)
-    p.drawCentredString(300, 750, "Conference Agenda")
-    p.setFont("Helvetica", 12)
+    p.drawCentredString(width / 2, height - 50, "Conference Agenda")
     
-    y_position = 700  # Position verticale initiale
+    y_position = height - 100
     
-    for day in agenda_days:
+    # Cette ligne ne causera plus d'erreur car 'groupby' et 'attrgetter' sont importés
+    for date, items_iterator in groupby(agenda_items, key=attrgetter('date')):
+        
+        # Le 'groupby' retourne un itérateur, on le convertit en liste
+        items_for_day = list(items_iterator)
+        
         # Titre du jour
         p.setFont("Helvetica-Bold", 14)
-        p.drawString(50, y_position, day['date_formatted'])
-        y_position -= 20
+        date_formatted = date.strftime("%A, %d %B %Y")
         
-        # Préparer les données du tableau
-        data = [["Time", "Session", "Type", "Location"]]
+        # Gérer le saut de page AVANT de dessiner si l'espace est insuffisant pour le titre
+        if y_position < 100:
+            p.showPage()
+            p.setFont("Helvetica-Bold", 16) # Réappliquer la police après showPage
+            p.drawCentredString(width / 2, height - 50, "Conference Agenda (Suite)")
+            y_position = height - 100
+
+        p.drawString(50, y_position, date_formatted)
+        y_position -= 30 # Espace après le titre du jour
         
-        for item in day['items']:
+        # Préparer les données du tableau pour ce jour
+        data = [["Heure", "Titre", "Type", "Lieu"]]
+        for item in items_for_day:
             time_str = f"{item.start_time.strftime('%H:%M')} - {item.end_time.strftime('%H:%M')}"
-            location_name = item.location.name if item.location else ""
-            
+            location_name = item.location.name if item.location else "N/A"
+            # Utilisation de Paragraph pour gérer le retour à la ligne automatique dans les cellules
             data.append([
                 time_str,
                 item.title,
@@ -315,38 +317,45 @@ def agenda_download(request):
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'), # Aligner le texte en haut des cellules
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
         ]))
         
-        # Dessiner le tableau
-        table_height = len(data) * 20
+        # 3. CORRECTION : Utiliser la hauteur réelle calculée par ReportLab
+        # table.wrapOn() calcule la taille nécessaire et la renvoie.
+        table_width, table_height = table.wrapOn(p, width - 100, y_position)
         
         # Vérifier s'il y a assez d'espace sur la page actuelle
-        if y_position - table_height < 50:
+        if y_position - table_height < 70: # Marge de sécurité en bas
             p.showPage()
-            y_position = 750
+            p.setFont("Helvetica-Bold", 16)
+            p.drawCentredString(width / 2, height - 50, "Conference Agenda (Suite)")
+            y_position = height - 100
+            # Redessiner le titre du jour sur la nouvelle page
             p.setFont("Helvetica-Bold", 14)
-            p.drawString(50, y_position, day['date_formatted'] + " (continued)")
-            y_position -= 20
-        
-        table.wrapOn(p, 400, table_height)
+            p.drawString(50, y_position, f"{date_formatted} (suite)")
+            y_position -= 30
+
+        # Dessiner le tableau à la bonne position
         table.drawOn(p, 50, y_position - table_height)
         
-        y_position -= table_height + 40
+        # Mettre à jour la position y en utilisant la hauteur réelle
+        y_position -= (table_height + 25) # Espace après le tableau
     
     # Finaliser le PDF
     p.showPage()
     p.save()
     
-    # Récupérer le PDF depuis le buffer
+    # Récupérer le PDF depuis le buffer et créer la réponse
+    buffer.seek(0)
     pdf = buffer.getvalue()
     buffer.close()
     
-    # Créer la réponse HTTP
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="conference_agenda.pdf"'
     return response
@@ -1436,7 +1445,11 @@ def speaker_create(request, session_id):
             speaker.session = session
             speaker.save()
             messages.success(request, "Intervenant ajouté avec succès.")
-            return redirect('session_detail', pk=session_id)
+            
+            # --- MODIFICATION ICI ---
+            # Au lieu de rediriger vers 'speaker_list', on redirige vers 'session_speakers'
+            # en utilisant l'ID de la session, comme dans la vue d'édition.
+            return redirect('session_speakers', session_id=session.id)
     else:
         form = SpeakersInterventionsForm(session=session)
 
@@ -1446,6 +1459,8 @@ def speaker_create(request, session_id):
         'title': f"Ajouter un intervenant à : {session.title}",
     }
     return render(request, 'admin/speaker_form.html', context)
+
+
 
 @login_required
 def speaker_delete(request, pk):
