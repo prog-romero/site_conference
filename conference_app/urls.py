@@ -157,7 +157,7 @@ urlpatterns = [
         path('add/', views.session_create, name='session_create'),
         path('<int:pk>/', views.session_detail, name='session_detail'),
         path('<int:pk>/edit/', views.session_edit, name='session_edit'),
-        path('<int:pk>/delete/', views.session_delete, name='session_delete'),
+        path('<int:pk>/delete/', views.session_delete, name='delete_session'),
         # Ajout de l'URL pour les organisateurs (redirection vers organizer_list)
         path('<int:session_id>/organizers/', views.organizer_list, name='session_organizers'),
         # Ajout de l'URL pour les financements (redirection vers funding_list)

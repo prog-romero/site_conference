@@ -63,7 +63,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th style="width: 15%">Time</th>
-                                        <th style="width: 20%">Session</th>
+                                        <!-- <th style="width: 20%">Session</th> -->
                                         <th style="width: 15%">Type</th>
                                         <th style="width: 30%">Description</th>
                                         <th style="width: 20%">Location</th>
@@ -73,13 +73,13 @@
                                     {% for item in day.items %}
                                     <tr {% if item.item_type == 'break' or item.item_type == 'lunch' %}class="table-light"{% endif %}>
                                         <td>{{ item.start_time|time:"g:i A" }} - {{ item.end_time|time:"g:i A" }}</td>
-                                        <td>
+                                        <!-- <td>
                                             {% if item.item_type == 'session' and item.session %}
                                             <a href="{% url 'session_detail' item.session.id %}">{{ item.title }}</a>
                                             {% else %}
                                             {{ item.title }}
                                             {% endif %}
-                                        </td>
+                                        </td> -->
                                         <td>
                                             {% if item.item_type == 'session' and item.session %}
                                             <span class="badge bg-primary-dark">{{ item.session.get_track_display }}</span>
@@ -113,7 +113,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th style="width: 15%">Time</th>
-                                        <th style="width: 20%">Session</th>
+                                        <!-- <th style="width: 20%">Session</th> -->
                                         <th style="width: 15%">Type</th>
                                         <th style="width: 30%">Description</th>
                                         <th style="width: 20%">Location</th>
