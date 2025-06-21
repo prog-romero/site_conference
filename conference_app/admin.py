@@ -1,8 +1,20 @@
+# conference_app/admin.py
+
 from django.contrib import admin
 from .models import (
     SpeakersInterventions, Session, AgendaItem, Attendee, AttendeeType, 
     Partner, InterventionLocation, SessionOrganizer, SessionFunding, Subscriber
 )
+
+# --- CONFIGURATIONS POUR LES FORMULAIRES INLINE (Optionnel mais recommandé) ---
+# Ceci permet de gérer les organisateurs directement depuis la page d'une session.
+class SessionOrganizerInline(admin.TabularInline):
+    model = SessionOrganizer
+    extra = 1  # Affiche un champ vide pour ajouter un nouvel organisateur
+    fields = ('name', 'organization', 'photo', 'order', 'is_primary')
+    ordering = ('order',)
+
+# --------------------------------------------------------------------------
 
 @admin.register(SpeakersInterventions)
 class SpeakersInterventionsAdmin(admin.ModelAdmin):
@@ -39,9 +51,10 @@ class SessionAdmin(admin.ModelAdmin):
     date_hierarchy = 'start_date'
     list_per_page = 20
     
+    # MODIFIÉ : Ajout de 'logo' au fieldset
     fieldsets = (
         ('Informations générales', {
-            'fields': ('title', 'description', 'track', 'is_hybrid')
+            'fields': ('title', 'description', 'logo', 'track', 'is_hybrid')
         }),
         ('Dates', {
             'fields': ('start_date', 'end_date', 'duration_days')
@@ -51,6 +64,9 @@ class SessionAdmin(admin.ModelAdmin):
             'description': 'Le champ "location" est conservé pour compatibilité. Utilisez "locations" pour les nouveaux enregistrements.'
         }),
     )
+    
+    # MODIFIÉ : Ajout des inlines pour gérer les organisateurs
+    inlines = [SessionOrganizerInline]
     
     def speakers_count(self, obj):
         return obj.speakers.count()
@@ -102,7 +118,7 @@ class AttendeeAdmin(admin.ModelAdmin):
             'fields': ('name', 'email', 'company', 'job_title')
         }),
         ('Inscription', {
-            'fields': ('session', 'registration_date')
+            'fields': ('session', 'attendee_type', 'registration_date')
         }),
     )
     
@@ -173,9 +189,10 @@ class SessionOrganizerAdmin(admin.ModelAdmin):
     ordering = ('session', 'order')
     autocomplete_fields = ['session']
     
+    # MODIFIÉ : Ajout du champ 'photo' pour pouvoir le téléverser
     fieldsets = (
         ('Informations personnelles', {
-            'fields': ('name', 'organization')
+            'fields': ('name', 'organization', 'photo')
         }),
         ('Organisation', {
             'fields': ('session', 'order', 'is_primary')
@@ -223,8 +240,9 @@ admin.site.site_title = "Conference 2025 Admin"
 admin.site.index_title = "Bienvenue dans l'administration de Conference 2025"
 
 # Personnalisation des autocomplete fields
-Session.search_fields = ['title', 'description']
-SpeakersInterventions.search_fields = ['name', 'organization', 'title']
-Partner.search_fields = ['name', 'description']
-InterventionLocation.search_fields = ['name', 'country']
-AttendeeType.search_fields = ['name', 'description']
+# (ces lignes ne sont plus nécessaires avec les nouvelles versions de Django si search_fields est déjà défini sur le modèle admin de destination)
+# Session.search_fields = ['title', 'description']
+# SpeakersInterventions.search_fields = ['name', 'organization', 'title']
+# Partner.search_fields = ['name', 'description']
+# InterventionLocation.search_fields = ['name', 'country']
+# AttendeeType.search_fields = ['name', 'description']

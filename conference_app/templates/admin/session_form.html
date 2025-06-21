@@ -1,4 +1,5 @@
 {% extends 'conference_app/base.html' %}
+{% load static %}
 
 {% block title %}{{ title }} - Conference 2025{% endblock %}
 
@@ -19,88 +20,116 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <!-- Le `enctype` est crucial pour l'upload de fichiers -->
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             
-                            <h5 class="mb-3">Informations de la session</h5>
+                            <h5 class="mb-4">Informations de la session</h5>
                             
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <label class="form-label">Titre</label>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">Titre*</label>
                                     {{ form.title }}
                                     {% if form.title.errors %}
-                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                        <div class="invalid-feedback d-block">{{ form.title.errors|first }}</div>
                                     {% endif %}
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Piste</label>
-                                    {{ form.track }}
-                                    {% if form.track.errors %}
-                                    <div class="text-danger">{{ form.track.errors }}</div>
+
+                                <div class="col-md-12">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.description.errors|first }}</div>
                                     {% endif %}
                                 </div>
-                            </div>
-                            
-                            <div class="row mb-4">
+
+                                <!-- ▼▼▼▼ SECTION AJOUTÉE POUR LE LOGO ▼▼▼▼ -->
+                                <div class="col-md-12">
+                                    <label for="{{ form.logo.id_for_label }}" class="form-label">Logo de la session</label>
+                                    
+                                    <!-- Affichage du logo actuel en mode édition -->
+                                    {% if session.logo %}
+                                        <div class="mb-2">
+                                            <img src="{{ session.logo.url }}" alt="Logo de {{ session.title }}" class="img-thumbnail" style="max-height: 100px;">
+                                            <br>
+                                            <small class="text-muted">Logo actuel. Un nouveau fichier remplacera l'ancien.</small>
+                                        </div>
+                                    {% endif %}
+
+                                    {{ form.logo }}
+                                    {% if form.logo.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.logo.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+                                <!-- ▲▲▲▲ FIN DE LA SECTION LOGO ▲▲▲▲ -->
+
                                 <div class="col-md-6">
-                                    <label class="form-label">Date de début</label>
+                                    <label for="{{ form.start_date.id_for_label }}" class="form-label">Date de début*</label>
                                     {{ form.start_date }}
                                     {% if form.start_date.errors %}
-                                    <div class="text-danger">{{ form.start_date.errors }}</div>
+                                        <div class="invalid-feedback d-block">{{ form.start_date.errors|first }}</div>
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Date de fin</label>
+                                    <label for="{{ form.end_date.id_for_label }}" class="form-label">Date de fin*</label>
                                     {{ form.end_date }}
                                     {% if form.end_date.errors %}
-                                    <div class="text-danger">{{ form.end_date.errors }}</div>
+                                        <div class="invalid-feedback d-block">{{ form.end_date.errors|first }}</div>
                                     {% endif %}
                                 </div>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label">Description</label>
-                                {{ form.description }}
-                                {% if form.description.errors %}
-                                <div class="text-danger">{{ form.description.errors }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="row mb-4">
+                                
                                 <div class="col-md-6">
-                                    <label class="form-label">Lieu (texte)</label>
+                                    <label for="{{ form.track.id_for_label }}" class="form-label">Piste (Track)</label>
+                                    {{ form.track }}
+                                    {% if form.track.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.track.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.location.id_for_label }}" class="form-label">Lieu principal (texte)</label>
                                     {{ form.location }}
+                                    <div class="form-text">Pour un affichage simple (ex: "Salle A").</div>
                                     {% if form.location.errors %}
-                                    <div class="text-danger">{{ form.location.errors }}</div>
+                                        <div class="invalid-feedback d-block">{{ form.location.errors|first }}</div>
                                     {% endif %}
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Lieux (multiples)</label>
+                                
+                                <div class="col-md-12">
+                                    <label for="{{ form.locations.id_for_label }}" class="form-label">Lieux associés (sélection multiple)</label>
                                     {{ form.locations }}
+                                    <div class="form-text">Maintenez 'Ctrl' ou 'Cmd' pour sélectionner plusieurs lieux.</div>
                                     {% if form.locations.errors %}
-                                    <div class="text-danger">{{ form.locations.errors }}</div>
+                                        <div class="invalid-feedback d-block">{{ form.locations.errors|first }}</div>
                                     {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mt-4">
+                                        {{ form.is_hybrid }}
+                                        <label class="form-check-label" for="{{ form.is_hybrid.id_for_label }}">
+                                            Session hybride
+                                        </label>
+                                        {% if form.is_hybrid.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.is_hybrid.errors|first }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Durée (jours)</label>
+                                    <input type="text" class="form-control" value="{% if session.duration_days %}{{ session.duration_days }}{% else %}Calculée automatiquement{% endif %}" readonly disabled>
                                 </div>
                             </div>
                             
-                            <div class="mb-4 form-check">
-                                {{ form.is_hybrid }}
-                                <label class="form-check-label" for="{{ form.is_hybrid.id_for_label }}">
-                                    Session hybride
-                                </label>
-                                {% if form.is_hybrid.errors %}
-                                <div class="text-danger">{{ form.is_hybrid.errors }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label">Durée (jours, calculée)</label>
-                                <input type="text" class="form-control" value="{{ session.duration_days }}" readonly>
-                            </div>
+                            <hr class="my-4">
                             
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary-custom">Enregistrer</button>
+                                <button type="submit" class="btn btn-primary-custom px-4">
+                                    <i class="fas fa-save me-1"></i> Enregistrer
+                                </button>
                                 <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Annuler</a>
                             </div>
                         </form>

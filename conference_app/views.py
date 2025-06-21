@@ -17,6 +17,8 @@ from django.db.models import Q
 from datetime import datetime
 from io import StringIO, BytesIO
 
+from django.urls import reverse, reverse_lazy, include
+
 # Imports pour la génération de PDF
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -852,8 +854,23 @@ def location_manage(request):
 # ORGANIZER VIEWS - Vues pour la gestion des organisateurs
 # ============================================================================
 
+
+def organizer_list_public(request, session_id):
+    """
+    Vue publique pour afficher la liste de tous les organisateurs d'une session.
+    """
+    session = get_object_or_404(Session, pk=session_id)
+    organizers = session.organizers.all().order_by('order', 'name')
+    
+    context = {
+        'session': session,
+        'organizers': organizers,
+        'title': f'Organizers for {session.title}'
+    }
+    return render(request, 'conference_app/organizer_list.html', context)
+# ▲▲▲▲ FIN DE LA NOUVELLE VUE ▲▲▲▲
+
 class SessionOrganizerUpdateView(LoginRequiredMixin, UpdateView):
-    """Vue de mise à jour d'un organisateur"""
     model = SessionOrganizer
     form_class = SessionOrganizerForm
     template_name = 'admin/organizer_form.html'
@@ -867,16 +884,18 @@ class SessionOrganizerUpdateView(LoginRequiredMixin, UpdateView):
 
 @login_required
 def organizer_create(request, session_id):
-    """Vue pour créer un organisateur"""
     session = get_object_or_404(Session, pk=session_id)
     if request.method == 'POST':
-        form = SessionOrganizerForm(request.POST)
+        # MODIFIÉ: Ajout de request.FILES
+        form = SessionOrganizerForm(request.POST, request.FILES) 
         if form.is_valid():
             organizer = form.save(commit=False)
             organizer.session = session
             organizer.save()
             messages.success(request, "Organisateur ajouté avec succès.")
-            return redirect('organizer_list', session_id=session.id)
+            dashboard_url = reverse('dashboard')
+            redirect_url = f"{dashboard_url}?session_id={session.id}"
+            return redirect(redirect_url)
     else:
         form = SessionOrganizerForm()
 
@@ -900,17 +919,17 @@ def organizer_delete(request, pk):
         'organizer': organizer,
         'title': f"Supprimer : {organizer.name}",
     })
-
 @login_required
 def organizer_edit(request, pk):
-    """Vue pour modifier un organisateur"""
     organizer = get_object_or_404(SessionOrganizer, pk=pk)
+    session_id = organizer.session.id
     if request.method == 'POST':
-        form = SessionOrganizerForm(request.POST, instance=organizer)
+        # MODIFIÉ: Ajout de request.FILES
+        form = SessionOrganizerForm(request.POST, request.FILES, instance=organizer)
         if form.is_valid():
             form.save()
             messages.success(request, "Organisateur modifié avec succès.")
-            return redirect('organizer_list', session_id=organizer.session.id)
+            return redirect('dashboard', session_id=session_id)
     else:
         form = SessionOrganizerForm(instance=organizer)
 
@@ -1164,9 +1183,9 @@ class SessionListView(ListView):
 
 @login_required
 def session_create(request):
-    """Vue pour créer une session"""
     if request.method == 'POST':
-        form = SessionForm(request.POST)
+        # MODIFIÉ: Ajout de request.FILES
+        form = SessionForm(request.POST, request.FILES)
         if form.is_valid():
             session = form.save()
             messages.success(request, 'Session ajoutée avec succès.')
@@ -1312,10 +1331,10 @@ def session_detail(request, pk):
 
 @login_required
 def session_edit(request, pk):
-    """Vue pour modifier une session"""
     session = get_object_or_404(Session, pk=pk)
     if request.method == 'POST':
-        form = SessionForm(request.POST, instance=session)
+        # MODIFIÉ: Ajout de request.FILES
+        form = SessionForm(request.POST, request.FILES, instance=session)
         if form.is_valid():
             session = form.save()
             messages.success(request, 'Session mise à jour avec succès.')
@@ -1332,24 +1351,23 @@ def session_edit(request, pk):
 
 @login_required
 def session_get_data(request, session_id):
-    """Vue AJAX pour récupérer les données d'une session spécifique"""
     session = get_object_or_404(Session, pk=session_id)
     
-    # Récupérer les données de la session
     speakers = session.speakers.all()
     organizers = session.organizers.all().order_by('order')
     fundings = session.fundings.all()
     agenda_items = session.agenda_items.all().order_by('date', 'start_time')
     attendees = session.attendees.all()
     
-    # Préparer les données pour JSON
     data = {
         'session': {
             'id': session.id,
             'title': session.title,
+            # MODIFIÉ: Ajout de l'URL du logo
+            'logo_url': session.logo.url if session.logo else None,
             'track': session.get_track_display(),
-            'start_date': session.start_date.strftime('%M %d, %Y') if session.start_date else '',
-            'end_date': session.end_date.strftime('%M %d, %Y') if session.end_date else '',
+            'start_date': session.start_date.strftime('%b %d, %Y') if session.start_date else '',
+            'end_date': session.end_date.strftime('%b %d, %Y') if session.end_date else '',
             'duration_days': session.duration_days,
         },
         'speakers': [
@@ -1358,7 +1376,8 @@ def session_get_data(request, session_id):
                 'name': speaker.name,
                 'title': speaker.title,
                 'organization': speaker.organization,
-                'intervention_type': speaker.get_intervention_type_display(),
+                'intervention_type_display': speaker.get_intervention_type_display(),
+                'photo': speaker.photo.url if speaker.photo else None,
             } for speaker in speakers
         ],
         'organizers': [
@@ -1368,13 +1387,15 @@ def session_get_data(request, session_id):
                 'organization': organizer.organization,
                 'is_primary': organizer.is_primary,
                 'order': organizer.order,
+                # MODIFIÉ: Ajout de l'URL de la photo
+                'photo': organizer.photo.url if organizer.photo else None,
             } for organizer in organizers
         ],
         'fundings': [
             {
                 'id': funding.id,
                 'partner_name': funding.partner.name,
-                'funding_type': funding.get_funding_type_display(),
+                'funding_type_display': funding.get_funding_type_display(),
                 'amount': str(funding.amount) if funding.amount else '',
                 'country': funding.country,
             } for funding in fundings
@@ -1383,7 +1404,7 @@ def session_get_data(request, session_id):
             {
                 'id': item.id,
                 'title': item.title,
-                'item_type': item.get_item_type_display(),
+                'item_type_display': item.get_item_type_display(),
                 'date': item.date.strftime('%Y-%m-%d'),
                 'start_time': item.start_time.strftime('%H:%M'),
                 'end_time': item.end_time.strftime('%H:%M'),
@@ -1395,7 +1416,7 @@ def session_get_data(request, session_id):
                 'name': attendee.name,
                 'email': attendee.email,
                 'company': attendee.company,
-                'registration_date': attendee.registration_date.strftime('%Y-%m-%d'),
+                'registration_date': attendee.registration_date,
             } for attendee in attendees
         ]
     }

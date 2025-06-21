@@ -122,6 +122,7 @@ class Session(models.Model):
     
     title = models.CharField(max_length=200)
     description = models.TextField()
+    logo = models.ImageField(upload_to='session_logos/', null=True, blank=True) # <<< CHAMP AJOUTÉ
     # Uniquement des dates, pas d'heures
     start_date = models.DateField()
     end_date = models.DateField()
@@ -195,6 +196,7 @@ class SessionOrganizer(models.Model):
     organization = models.CharField(max_length=200)
     order = models.PositiveIntegerField(default=0)
     is_primary = models.BooleanField(default=False)
+    photo = models.ImageField(upload_to='organizer_photos/', null=True, blank=True)
 
     class Meta:
         ordering = ['order']

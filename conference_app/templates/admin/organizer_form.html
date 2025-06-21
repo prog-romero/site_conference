@@ -1,4 +1,5 @@
 {% extends 'conference_app/base.html' %}
+{% load static %}
 
 {% block title %}{{ title }} - Conference 2025{% endblock %}
 
@@ -7,9 +8,9 @@
     <div class="container">
         <h1>{{ title }}</h1>
         {% if organizer %}
-            <p class="mb-0">Gestion de l'organisateur pour la session: {{ organizer.session.title }}</p>
+            <p class="lead mb-0">Gestion de l'organisateur pour la session: <strong>{{ organizer.session.title }}</strong></p>
         {% elif session %}
-            <p class="mb-0">Nouvel organisateur pour la session: {{ session.title }}</p>
+            <p class="lead mb-0">Nouvel organisateur pour la session: <strong>{{ session.title }}</strong></p>
         {% endif %}
     </div>
 </section>
@@ -19,62 +20,86 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <form method="post">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <!-- ▼▼▼▼ CORRECTION MAJEURE : Ajout de l'enctype pour l'upload de fichiers ▼▼▼▼ -->
+                        <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             
-                            <h5 class="mb-3">Informations de l'organisateur</h5>
+                            <h5 class="mb-4">Informations de l'organisateur</h5>
                             
-                            <!-- Champ caché pour la session si elle est passée dans le contexte -->
+                            <!-- Champ caché pour la session si elle est passée dans le contexte (pour la création) -->
                             {% if session %}
                                 <input type="hidden" name="session" value="{{ session.id }}">
                             {% endif %}
                             
-                            <div class="row mb-4">
+                            <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Nom complet*</label>
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">Nom complet*</label>
                                     {{ form.name }}
                                     {% if form.name.errors %}
-                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                        <div class="invalid-feedback d-block">{{ form.name.errors|first }}</div>
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Organisation*</label>
+                                    <label for="{{ form.organization.id_for_label }}" class="form-label">Organisation*</label>
                                     {{ form.organization }}
                                     {% if form.organization.errors %}
-                                    <div class="text-danger">{{ form.organization.errors }}</div>
+                                        <div class="invalid-feedback d-block">{{ form.organization.errors|first }}</div>
                                     {% endif %}
                                 </div>
-                            </div>
-                            
-                            <div class="row mb-4">
+
+                                <div class="col-md-12">
+                                    <label for="{{ form.photo.id_for_label }}" class="form-label">Photo</label>
+                                    
+                                    <!-- Affichage de la photo actuelle en mode édition -->
+                                    {% if organizer.photo %}
+                                        <div class="mb-2">
+                                            <img src="{{ organizer.photo.url }}" alt="Photo de {{ organizer.name }}" class="img-thumbnail" style="max-height: 100px;">
+                                            <br>
+                                            <small class="text-muted">Photo actuelle. Un nouveau fichier remplacera l'ancien.</small>
+                                        </div>
+                                    {% endif %}
+
+                                    {{ form.photo }}
+                                    {% if form.photo.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.photo.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+
                                 <div class="col-md-6">
-                                    <label class="form-label">Ordre d'affichage</label>
+                                    <label for="{{ form.order.id_for_label }}" class="form-label">Ordre d'affichage</label>
                                     {{ form.order }}
+                                    <div class="form-text">Détermine l'ordre dans la liste des organisateurs (0 en premier).</div>
                                     {% if form.order.errors %}
-                                    <div class="text-danger">{{ form.order.errors }}</div>
+                                        <div class="invalid-feedback d-block">{{ form.order.errors|first }}</div>
                                     {% endif %}
-                                    <small class="text-muted">Détermine l'ordre dans la liste des organisateurs</small>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-check mt-4 pt-2">
+
+                                <div class="col-md-6 d-flex align-items-center">
+                                    <div class="form-check form-switch mt-3">
                                         {{ form.is_primary }}
                                         <label class="form-check-label" for="{{ form.is_primary.id_for_label }}">
                                             Organisateur principal
                                         </label>
                                         {% if form.is_primary.errors %}
-                                        <div class="text-danger">{{ form.is_primary.errors }}</div>
+                                            <div class="invalid-feedback d-block">{{ form.is_primary.errors|first }}</div>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="d-flex gap-2 mt-4">
-                                <button type="submit" class="btn btn-primary-custom">Enregistrer</button>
+                            <hr class="my-4">
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary-custom px-4">
+                                    <i class="fas fa-save me-1"></i> Enregistrer
+                                </button>
+                                
                                 {% if organizer %}
-                                    <a href="{% url 'session_detail' pk=organizer.session.id %}" class="btn btn-outline-secondary">Annuler</a>
+                                    <a href="{% url 'dashboard' %}?session_id={{ organizer.session.id }}" class="btn btn-outline-secondary">Annuler</a>
                                 {% elif session %}
-                                    <a href="{% url 'session_detail' pk=session.id %}" class="btn btn-outline-secondary">Annuler</a>
+                                    <a href="{% url 'dashboard' %}?session_id={{ session.id }}" class="btn btn-outline-secondary">Annuler</a>
                                 {% else %}
                                     <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Annuler</a>
                                 {% endif %}

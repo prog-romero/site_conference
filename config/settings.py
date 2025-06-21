@@ -39,6 +39,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -50,6 +52,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'conference_app.context_processors.site_context', # Doit être présent
             ],
         },
     },
@@ -57,17 +60,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+
+
 # Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'conferencebd',
-        'USER':'postgres',
-        'PASSWORD':'cpasBIEN',
+        'NAME': 'conference_bd',
+        'USER':'romero1',
+        'PASSWORD':'romerotchiaze',
         'HOST':'localhost',
         'PORT':'5432'
     }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

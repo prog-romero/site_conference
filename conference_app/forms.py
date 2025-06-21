@@ -151,12 +151,13 @@ class SessionForm(forms.ModelForm):
     class Meta:
         model = Session
         fields = [
-            'title', 'description', 'start_date', 'end_date', 
+            'title', 'description', 'logo', 'start_date', 'end_date', 
             'track', 'location', 'locations', 'is_hybrid'
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'logo': forms.FileInput(attrs={'class': 'form-control'}), # <<< WIDGET AJOUTÉ
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'track': forms.Select(attrs={'class': 'form-select'}),
@@ -167,7 +168,6 @@ class SessionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Make duration_days read-only if needed (optional)
         if 'duration_days' in self.fields:
             self.fields['duration_days'].widget.attrs['readonly'] = True
 
@@ -186,12 +186,13 @@ class SessionFundingForm(forms.ModelForm):
 class SessionOrganizerForm(forms.ModelForm):
     class Meta:
         model = SessionOrganizer
-        fields = ['name', 'organization', 'order', 'is_primary']
+        fields = ['name', 'organization', 'order', 'is_primary', 'photo']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'organization': forms.TextInput(attrs={'class': 'form-control'}),
             'order': forms.NumberInput(attrs={'class': 'form-control'}),
             'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
 # ============================================================================

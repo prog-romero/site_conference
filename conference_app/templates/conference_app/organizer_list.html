@@ -1,0 +1,96 @@
+{# templates/conference_app/organizer_list.html #}
+
+{% extends 'conference_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Conference 2025{% endblock %}
+
+{% block content %}
+
+<!-- ▼▼▼▼ STYLES CSS MODIFIÉS POUR UN AVATAR ROND ▼▼▼▼ -->
+<style>
+  .organizer-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 15px; /* Coins arrondis pour la carte elle-même */
+  }
+  .organizer-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+  }
+
+  .organizer-img-wrapper {
+      padding-top: 2rem; /* Espace au-dessus de l'image */
+      margin-bottom: 1rem;
+  }
+  
+  .organizer-img {
+    width: 150px;  /* Taille fixe pour le cercle */
+    height: 150px; /* Taille fixe pour le cercle */
+    border-radius: 50%; /* La magie pour un cercle parfait */
+    object-fit: cover; /* Assure que l'image remplit le cercle sans se déformer */
+    border: 4px solid white; /* Ajoute une bordure blanche élégante */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Ombre subtile pour l'avatar */
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+<!-- ▲▲▲▲ FIN DES STYLES CSS MODIFIÉS ▲▲▲▲ -->
+
+<!-- Page Header -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h1>Conference Organizers</h1>
+        <p class="lead">Meet the dedicated team working behind the scenes to make "{{ session.title }}" a success.</p>
+    </div>
+</section>
+
+<!-- Organizers List -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            {% for organizer in organizers %}
+            <div class="col-md-6 col-lg-3 d-flex align-items-stretch">
+                <div class="card h-100 border-0 shadow-sm organizer-card text-center">
+                    
+                    <!-- ▼▼▼▼ STRUCTURE HTML MODIFIÉE POUR L'AVATAR ROND ▼▼▼▼ -->
+                    <div class="organizer-img-wrapper">
+                        {% if organizer.photo %}
+                            <img src="{{ organizer.photo.url }}" alt="Photo de {{ organizer.name }}" class="organizer-img">
+                        {% else %}
+                            <img src="https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="{{ organizer.name }} placeholder" class="organizer-img">
+                        {% endif %}
+                    </div>
+                    <!-- ▲▲▲▲ FIN DE LA STRUCTURE HTML MODIFIÉE ▲▲▲▲ -->
+
+                    <div class="card-body d-flex flex-column pb-3 pt-0">
+                        <h4 class="card-title">{{ organizer.name }}</h4>
+                        <p class="card-text fw-bold text-primary-dark">{{ organizer.organization }}</p>
+                        
+                        <div class="mt-auto pt-2">
+                            {% if organizer.is_primary %}
+                                <span class="badge bg-primary-custom rounded-pill px-3 py-2">Primary</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- <div class="card-footer bg-white border-0 pt-0 pb-4">
+                        <a href="{% url 'session_detail' session.id %}" class="btn btn-outline-primary-custom">View Session</a>
+                    </div> -->
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="lead text-muted">The organizers for this session will be announced soon.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Bouton pour retourner à la session (décommenté et stylisé) -->
+        <!-- <div class="text-center mt-5">
+            <a href="{% url 'session_detail' session.id %}" class="btn btn-lg btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to "{{ session.title }}"
+            </a>
+        </div> -->
+    </div>
+</section>
+{% endblock %}
