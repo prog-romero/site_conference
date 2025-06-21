@@ -1499,6 +1499,7 @@ def speaker_delete(request, pk):
 
 
 
+
 @login_required
 def speaker_edit(request, pk):
     """Vue pour modifier un intervenant"""
