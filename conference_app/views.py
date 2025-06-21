@@ -845,6 +845,22 @@ def location_manage(request):
 # ORGANIZER VIEWS - Vues pour la gestion des organisateurs
 # ============================================================================
 
+
+def organizer_list_public(request, session_id):
+    """
+    Vue publique pour afficher la liste de tous les organisateurs d'une session.
+    """
+    session = get_object_or_404(Session, pk=session_id)
+    organizers = session.organizers.all().order_by('order', 'name')
+    
+    context = {
+        'session': session,
+        'organizers': organizers,
+        'title': f'Organizers for {session.title}'
+    }
+    return render(request, 'conference_app/organizer_list.html', context)
+# ▲▲▲▲ FIN DE LA NOUVELLE VUE ▲▲▲▲
+
 class SessionOrganizerUpdateView(LoginRequiredMixin, UpdateView):
     model = SessionOrganizer
     form_class = SessionOrganizerForm

@@ -3,7 +3,7 @@ from django.contrib import admin
 from . import views
 from .views import (
     # Agenda views
-    agenda_create, agenda_delete, agenda_edit,
+    agenda_create, agenda_delete, agenda_edit,agenda_download,
     # Attendee views  
     attendee_create, attendee_delete, attendee_update, attendee_list,
     # Attendee type views
@@ -13,7 +13,7 @@ from .views import (
     # Location views
     location_delete_intervention,
     # Organizer views
-    organizer_create, organizer_delete, organizer_edit, organizer_list,
+    organizer_create, organizer_delete, organizer_edit, organizer_list,organizer_list_public,
     # Partner views
     partner_delete, partner_edit, partner_create, partner_get_data,
     # Session views
@@ -138,6 +138,7 @@ urlpatterns = [
         path('<int:pk>/edit/', views.organizer_edit, name='organizer_edit'),
         path('<int:pk>/delete/', views.organizer_delete, name='organizer_delete'),
         path('<int:pk>/update/', views.SessionOrganizerUpdateView.as_view(), name='organizer_update'),
+        path('organizers/session/<int:session_id>/', views.organizer_list_public, name='organizer_list_public'),
     ])),
     
     # --- Gestion des partenaires ---
