@@ -1,0 +1,76 @@
+name: Auto-Deploy with Nginx
+
+on:
+  push:
+    branches: [Deployment]
+
+env:
+  APP_DIR: "/var/www/site-conference"
+  SERVER_IP: ${{ secrets.SERVER_IP }}
+  SSH_USER: ${{ secrets.SSH_USER }}
+  SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+      # - name: Install Docker on server
+      #   run: |
+      #     ssh $SSH_USER@$SERVER_IP << 'EOF'
+      #     if ! command -v docker &> /dev/null; then
+      #       sudo apt-get update
+      #       sudo apt-get install -y docker.io
+      #       sudo systemctl enable docker
+      #     fi
+      #     EOF
+
+      # - name: Install Nginx on server
+      #   run: |
+      #     ssh $SSH_USER@$SERVER_IP << 'EOF'
+      #     if ! command -v nginx &> /dev/null; then
+      #       sudo apt-get install -y nginx
+      #       sudo rm /etc/nginx/sites-enabled/default
+      #     fi
+      #     EOF
+
+      - name: Deploy all files
+        run: |
+          cat << EOF | ssh $SSH_USER@$SERVER_IP "sudo bash"
+          rm -rf $APP_DIR
+          EOF
+
+          rsync -avz --delete \
+            --exclude=.git \
+            ./ $SSH_USER@$SERVER_IP:$APP_DIR
+
+
+      - name: Launch stack
+        run: |
+          cat << EOF | ssh $SSH_USER@$SERVER_IP "sudo bash"
+            chmod -R 777 $APP_DIR
+            cd $APP_DIR
+
+            docker compose -f docker-compose.yml down
+            docker compose -f docker-compose.yml pull
+            docker compose -f docker-compose.yml up -d --build
+
+          EOF
+
+      - name: Setup Nginx config
+        run: |
+          cat << EOF | ssh $SSH_USER@$SERVER_IP "sudo bash"
+            rm -rf /etc/nginx/sites-available/site-conference.conf
+            cp $APP_DIR/deploy_config/nginx.conf /etc/nginx/sites-available/site-conference.conf
+            ln -sf /etc/nginx/sites-available/site-conference.conf /etc/nginx/sites-enabled/
+            nginx -t && systemctl reload nginx
+          EOF
