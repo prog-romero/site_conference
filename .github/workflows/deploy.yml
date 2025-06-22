@@ -69,8 +69,8 @@ jobs:
       - name: Setup Nginx config
         run: |
           cat << EOF | ssh $SSH_USER@$SERVER_IP "sudo bash"
-            rm -rf /etc/nginx/sites-available/site-conference.conf
-            cp $APP_DIR/deploy_config/nginx.conf /etc/nginx/sites-available/site-conference.conf
-            ln -sf /etc/nginx/sites-available/site-conference.conf /etc/nginx/sites-enabled/
+            rm -rf /etc/nginx/sites-available/site_conference.conf
+            cp $APP_DIR/deploy_config/nginx.conf /etc/nginx/sites-available/site_conference.conf
+            ln -sf /etc/nginx/sites-available/site_conference.conf /etc/nginx/sites-enabled/
             nginx -t && systemctl reload nginx
           EOF

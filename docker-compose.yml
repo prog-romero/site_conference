@@ -17,7 +17,7 @@ services:
       # ✅ GARDER le dump (pour l'initialisation quand le volume est vide)
       - ./dump_conference_informatique.sql:/docker-entrypoint-initdb.d/dump_conference_informatique.sql
 
-  site-labo:
+  conference-labo:
     image: lontsi/conference:latest
     container_name: conference-labo
     restart: unless-stopped
