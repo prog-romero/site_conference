@@ -10,12 +10,12 @@ services:
     ports:
       - "54323:5432"
     networks:
-      - conference_network  # Ce nom est correct
+      - conference_network
     volumes:
-      # Volume nommé pour persister les données
+      # ✅ GARDER le volume persistant (pour la persistence des données)
       - postgres_data:/var/lib/postgresql/data
-      # Dump uniquement si la DB n'existe pas
-      - ./dump_confernce_informatique.sql:/docker-entrypoint-initdb.d/dump_conference_informatique.sql
+      # ✅ GARDER le dump (pour l'initialisation quand le volume est vide)
+      - ./dump_conference_informatique.sql:/docker-entrypoint-initdb.d/dump_conference_informatique.sql
 
   site-labo:
     image: lontsi/conference:latest
@@ -24,20 +24,16 @@ services:
     ports:
       - "8023:8000"
     networks:
-      - conference_network  # Ce nom est correct
+      - conference_network
     depends_on:
       - postgres
     stdin_open: true
     tty: true
 
 networks:
-  # ▼▼▼▼ LA CORRECTION EST ICI ▼▼▼▼
-  # Renommez 'labo_network' en 'conference_network' pour correspondre aux services.
   conference_network:
     driver: bridge
-  # ▲▲▲▲ FIN DE LA CORRECTION ▲▲▲▲
 
-# Définir le volume nommé
 volumes:
   postgres_data:
     driver: local

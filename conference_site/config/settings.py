@@ -69,7 +69,7 @@ DATABASES = {
         'NAME': 'conference_bd',
         'USER':'romero1',
         'PASSWORD':'romerotchiaze',
-        'HOST':'localhost',
+        'HOST':'postgres',
         'PORT':'5432'
     }
 }
