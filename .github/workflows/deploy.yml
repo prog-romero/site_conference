@@ -2,10 +2,10 @@ name: Auto-Deploy with Nginx
 
 on:
   push:
-    branches: [Deployment]
+    branches: [deploiement]
 
 env:
-  APP_DIR: "/var/www/site-conference"
+  APP_DIR: "/var/www/site_conference"
   SERVER_IP: ${{ secrets.SERVER_IP }}
   SSH_USER: ${{ secrets.SSH_USER }}
   SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
