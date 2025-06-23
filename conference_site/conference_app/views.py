@@ -301,17 +301,17 @@ def agenda_download(request):
         y_position -= 30 # Espace après le titre du jour
         
         # Préparer les données du tableau pour ce jour
-        data = [["Heure", "Description", "Type", "Lieu"]]
+        data = [["Heure", "Description", "Type"]]
         for item in items_for_day:
             time_str = f"{item.start_time.strftime('%H:%M')} - {item.end_time.strftime('%H:%M')}"
             description = item.description
-            location_name = item.location.name if item.location else "N/A"
+            #location_name = item.location.name if item.location else "N/A"
             # Utilisation de Paragraph pour gérer le retour à la ligne automatique dans les cellules
             data.append([
                 time_str,
                 description,
                 item.get_item_type_display(),
-                location_name
+                #location_name
             ])
         
         # Créer le tableau

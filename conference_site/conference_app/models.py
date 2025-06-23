@@ -9,7 +9,7 @@ from django.db.models import Count
 class AgendaItem(models.Model):
     ITEM_TYPE_CHOICES = [
         ('break', 'Break'),
-        ('keynote', 'Keynote'),
+        ('Talk', 'Talk'),
         ('lunch', 'Lunch'),
         ('networking', 'Networking'),
         ('registration', 'Registration'),
