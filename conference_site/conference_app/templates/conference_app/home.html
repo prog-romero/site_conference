@@ -54,11 +54,45 @@
     padding: 1.25rem;
   }
 
+  .collaboration-text {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.collaboration-text h2 {
+  color: #2c3e50;
+  font-size: 24px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 5px;
+}
+
+.collaboration-text p {
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+.collaboration-text strong {
+  color: #2980b9;
+  font-weight: 600;
+}
+
   .person-card .card-title { font-size: 1.25rem; font-weight: 600; color: var(--primary-color); }
   .person-card .card-subtitle { color: #6c757d; font-size: 0.9rem; }
   .person-card .card-text { font-weight: 500; color: #343a40; }
   /* Amélioration : Assure que le footer est toujours en bas */
   .person-card .card-footer { padding: 1rem 1.25rem; background: #f8f9fa; border-top: 1px solid #e9ecef; margin-top: auto; }
+
+
+
 
   /* ... (le reste de vos styles est inchangé) ... */
 </style>
@@ -70,10 +104,10 @@
     <div class="container">
         <h1 class="hero-title">{% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %}</h1>
         <p class="hero-subtitle">{% if latest_session %}{{ latest_session.description }}{% else %}The Premier IT Event Returns.{% endif %}</p>
-        <div class="d-flex gap-3 justify-content-center">
+        <!-- <div class="d-flex gap-3 justify-content-center">
             <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Now</a>
             <a href="{% url 'sessions' %}" class="btn btn-outline-light btn-lg">Explore Sessions</a>
-        </div>
+        </div> -->
     </div>
 </section> 
 
@@ -81,9 +115,15 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0">
-                <h2 class="section-title">Reconnect with the Ecosystem</h2>
-                <p class="lead mb-4">After a decade away, the Conference is back, and we're bringing it home! Join us for three days of hands-on training, expert-led sessions, and networking opportunities.</p>
-                <a href="{% url 'sessions' %}" class="btn btn-primary-custom mt-3">Explore Sessions</a>
+                <h2 class="section-title">Collaboration goals</h2>
+                <p class="lead mb-4">
+                    <div class="collaboration-text">
+                        
+                        <p>The collaboration between Cameroun and the partners in Grenoble aims to establish a long-term scientific and technological partnership focused on <strong>IoT, distributed systems, artificial intelligence (AI) and Security</strong>.</p>
+                        <p>The primary goals of this initiative include <strong>strengthening research capacity</strong> through joint projects. It also seeks to <strong>promote knowledge transfer and skills development</strong> by supervising students (master's and PhD), organizing workshops and seminars, and sharing educational resources.</p>
+                        <p>In addition, the collaboration is committed to <strong>developing solutions tailored to local contexts</strong>, addressing real-world challenges in fields like healthcare, smart agriculture, and energy optimization. Another important aspect is the <strong>enhancement of software infrastructure</strong>, ensuring broader access to high-performance computing tools for researchers in the Global South.</p>
+                      </div></p>
+                <!-- <a href="{% url 'sessions' %}" class="btn btn-primary-custom mt-3">Explore Sessions</a> -->
             </div>
             <div class="col-lg-6">
                 <img src="https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Conference audience" class="img-fluid rounded shadow">
@@ -97,7 +137,7 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
             <h2 class="section-title section-title-center text-white mb-0" style="left: 0; transform: none;">
-                {% if latest_session %}Organizers for {{ latest_session.title }}{% else %}Meet Our Organizers{% endif %}
+                <p>Organizers</p> 
             </h2>
             {% if latest_session and latest_session.organizers.all.count > 4 %}
                 <a href="{% url 'organizer_list_public' latest_session.id %}" class="btn btn-outline-light flex-shrink-0">
@@ -122,9 +162,9 @@
                                     <h4 class="card-title">{{ organizer.name }}</h4>
                                     <p class="card-text">{{ organizer.organization }}</p>
                                 </div>
-                                <div class="card-footer">
+                                <!-- <div class="card-footer">
                                     <a href="{% url 'session_detail' latest_session.id %}" class="btn btn-sm btn-outline-primary-custom">View Session</a>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         {% endfor %}
@@ -138,7 +178,7 @@
 </section>
 
 <!-- Why Attend Section -->
-<section class="py-5 bg-light-custom">
+<!-- <section class="py-5 bg-light-custom">
     <div class="container">
         <div class="text-center mb-5">
             <h2 class="section-title section-title-center text-center">Why Should I Attend?</h2>
@@ -192,14 +232,14 @@
             </div>
         </div>
     </div>
-</section>
+</section> -->
 
 <!-- Featured Speakers Section -->
 <section class="py-5">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
             <h2 class="section-title mb-0">
-                {% if latest_session %}Speakers for {{ latest_session.title }}{% else %}Featured Speakers{% endif %}
+                <p>Speakers</p>
             </h2>
             <a href="{% url 'speakers' %}" class="btn btn-primary-custom flex-shrink-0">
                 View All <i class="fas fa-arrow-right ms-1"></i>
@@ -223,9 +263,9 @@
                                     <p class="card-subtitle">{{ speaker.title }}</p>
                                     <p class="card-text">{{ speaker.organization }}</p>
                                 </div>
-                                <div class="card-footer">
+                                <!-- <div class="card-footer">
                                     <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-sm btn-outline-primary-custom">View Bio</a>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         {% endfor %}
@@ -241,7 +281,7 @@
 <!-- ... Reste de votre page (Upcoming Sessions, Partners, CTA) ... -->
 
 <!-- Upcoming Sessions Section -->
-<section class="py-5 bg-light-custom">
+<!-- <section class="py-5 bg-light-custom">
     <div class="container">
         <div class="d-flex align-items-center justify-content-between mb-5">
             <h2 class="section-title mb-0">Upcoming Sessions</h2>
@@ -256,6 +296,7 @@
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <h5 class="mb-2">{{ session.title }}</h5>
                             <small class="text-muted">{{ session.start_date|date:"F d, Y" }}</small>
+                            <small class="text-muted">24-26th June</small>
                         </div>
                         <div class="mb-3">
                             <span class="badge bg-primary-dark me-2">{{ session.get_track_display }}</span>
@@ -270,7 +311,7 @@
                                 {% endfor %}
                                 </small>
                             </div>
-                            <!-- <a href="{% url 'session_detail' session.id %}" class="btn btn-sm btn-outline-primary-custom">View Details</a> -->
+                            <a href="{% url 'session_detail' session.id %}" class="btn btn-sm btn-outline-primary-custom">View Details</a>
                         </div>
                     </div>
                     {% empty %}
@@ -330,7 +371,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> -->
 
 <!-- Partners Section -->
 <section class="py-5 bg-light">
@@ -365,49 +406,60 @@
       </div>
       <!-- ▲▲▲▲ FIN DE LA MODIFICATION ▲▲▲▲ -->
     </div>
-  </section>
+</section>
 
-  <style>
+<style>
     /* ... vos autres styles ... */
   
     .partner-logo-static {
-      max-height: 70px; /* Hauteur maximale du logo */
-      filter: grayscale(100%); /* Met les logos en noir et blanc */
+      max-height: 120px;  /* Augmenté de 80px à 120px */
+      width: auto;
+      max-width: 600%;
+      object-fit: contain;
+      padding: 10px;
       transition: all 0.3s ease;
     }
     .partner-logo-static:hover {
-      filter: grayscale(0%); /* Couleur originale au survol */
-      transform: scale(1.1); /* Léger zoom au survol */
+      filter: grayscale(0%);
+      transform: scale(1.1);
     }
   
     .partner-initials-static {
-      font-size: 2rem;
+      font-size: 2.5rem;  /* Légèrement augmenté */
       font-weight: bold;
-      /* color: #6c757d; */
       background-color: #e9ecef;
-      width: 70px;
-      height: 70px;
+      width: 700px;       /* Augmenté de 90px à 120px */
+      height: 700px;      /* Augmenté de 90px à 120px */
       display: inline-flex;
       justify-content: center;
       align-items: center;
       border-radius: 50%;
+      margin: 0 auto;
       transition: all 0.3s ease;
     }
+    
+    .partner-card-static {
+      min-height: 180px;  /* Hauteur minimale pour uniformiser */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
     .partner-card-static:hover .partner-initials-static {
       background-color: var(--accent-color);
       color: white;
       transform: scale(1.1);
     }
-  </style>
+</style>
 
 <!-- CTA Section -->
-<section class="py-5 bg-primary-dark text-white text-center">
+<!-- <section class="py-5 bg-primary-dark text-white text-center">
     <div class="container">
         <h2 class="mb-4">Ready to Join Us at {% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %}?</h2>
         <p class="lead mb-4">Secure your spot now and prepare for three days of learning, networking, and professional growth.</p>
         <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Today</a>
     </div>
-</section>
+</section> -->
 
 {% endblock %}
 
