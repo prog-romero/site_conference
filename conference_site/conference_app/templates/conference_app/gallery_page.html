@@ -1,0 +1,168 @@
+{# templates/conference_app/gallery_page.html #}
+
+{% extends 'conference_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Conference 2025{% endblock %}
+
+{% block extra_css %}
+<!-- CSS for the Lightbox (baguetteBox.js) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.11.1/baguetteBox.min.css">
+
+<style>
+  /* Style for the gallery container */
+  .gallery-session-group {
+    margin-bottom: 3rem;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* Style for each photo item */
+  .gallery-item {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  }
+
+  .gallery-item .photo-link {
+    display: block;
+    position: relative;
+  }
+  
+  .gallery-item .photo-link img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  /* Overlay effect on hover */
+  .gallery-item .photo-link::after {
+    content: '\f00e'; /* Font Awesome search-plus icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    color: white;
+    font-size: 2.5rem;
+    background: rgba(6, 21, 46, 0.5);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .gallery-item:hover .photo-link::after {
+    opacity: 1;
+  }
+  
+  /* Text content below the photo */
+  .gallery-item .text-content {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    flex-grow: 1;
+  }
+
+  .gallery-item .caption {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #343a40;
+    margin-bottom: 0.5rem;
+  }
+  
+  .gallery-item .description {
+    font-size: 0.9rem;
+    color: #6c757d;
+    line-height: 1.5;
+  }
+  
+  /* Lightbox style */
+  #baguetteBox-overlay {
+    background-color: rgba(6, 21, 46, 0.95);
+  }
+  #baguetteBox-next-button, #baguetteBox-previous-button {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  .baguetteBox-caption {
+    font-size: 1rem;
+    background-color: rgba(0,0,0,0.6);
+  }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-5 bg-primary-dark text-white text-center">
+    <div class="container">
+        <h1>Event Gallery</h1>
+        <p class="lead">Relive the best moments of our events.</p>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="py-5">
+    <div class="container">
+        {% if photos_by_session %}
+            {% for session, photos in photos_by_session.items %}
+                <div class="gallery-session-group">
+                    <h2 class="section-title mb-4">{{ session.title }}</h2>
+                    <div class="gallery-grid baguetteBox-gallery">
+                        {% for photo in photos %}
+                        <div class="gallery-item">
+                            <a href="{{ photo.photo.url }}" class="photo-link" data-caption="{{ photo.caption|default:'' }}{% if photo.description %} - {{ photo.description }}{% endif %}">
+                                <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}">
+                            </a>
+                            <div class="text-content">
+                                {% if photo.caption %}
+                                    <h5 class="caption">{{ photo.caption }}</h5>
+                                {% endif %}
+                                {% if photo.description %}
+                                    <p class="description">{{ photo.description|linebreaksbr }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-camera-retro fa-4x text-muted mb-3"></i>
+                <h3 class="text-muted">The gallery is empty for now.</h3>
+                <p class="lead text-muted">Event photos will be available soon!</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- JS for the Lightbox -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.11.1/baguetteBox.min.js" async></script>
+<script>
+window.addEventListener('load', function() {
+    // Initialize the lightbox on all galleries with the .baguetteBox-gallery class
+    if(typeof baguetteBox !== 'undefined') {
+        baguetteBox.run('.baguetteBox-gallery');
+    }
+});
+</script>
+{% endblock %}

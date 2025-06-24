@@ -37,9 +37,29 @@ from .models import (
     Partner, InterventionLocation, SessionFunding, SessionOrganizer
 )
 from .forms import (
-    RegistrationForm, ContactForm, SpeakersInterventionsForm, SubscribeForm, 
+    RegistrationForm, 
+    ContactForm,
+    SpeakersInterventionsForm, SubscribeForm, 
     PartnerForm, SessionForm, SessionOrganizerForm, SessionFundingForm, 
     InterventionLocationForm, AgendaItemForm, AttendeeForm
+)
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+# Modèles et Formulaires pour les nouvelles classes
+from .models import Session, MenuPhoto, StudentVolunteer
+from .forms import MenuPhotoForm, StudentVolunteerForm
+
+
+
+# ▼▼▼▼ ASSUREZ-VOUS QUE CES IMPORTS SONT PRÉSENTS EN HAUT DU FICHIER ▼▼▼▼
+from django.shortcuts import render
+from django.utils import timezone
+from .models import (
+    SpeakersInterventions, Session, AttendeeType, Partner, StudentVolunteer
 )
 
 # ============================================================================
@@ -101,29 +121,39 @@ def contact_view(request):
 def faq_view(request):
     """Vue pour la page FAQ"""
     return render(request, 'conference_app/faq.html')
+# conference_app/views.py
+
+# ▲▲▲▲ FIN DES IMPORTS NÉCESSAIRES ▲▲▲▲
 
 def home(request):
     """Vue pour la page d'accueil"""
-    # Récupérer les intervenants mis en avant
-    featured_speakers = SpeakersInterventions.objects.all()[:4]
     
-    # Récupérer les sessions à venir
-    today = timezone.now().date()
-    upcoming_sessions = Session.objects.filter(start_date__gte=today).order_by('start_date')[:5]
+    # Récupérer la session la plus pertinente (en cours ou la prochaine)
     latest_session = Session.get_current_session()
     
-    attendee_types = AttendeeType.objects.all()
+    # Récupérer les sessions à venir pour la liste
+    today = timezone.now().date()
+    upcoming_sessions = Session.objects.filter(start_date__gte=today).order_by('start_date')[:5]
+    
+    # Récupérer les partenaires actifs
     partners = Partner.objects.filter(is_active=True).order_by('name')
     
+    # Initialiser une liste vide pour les volontaires
+    student_volunteers = []
+    
+    # Si une session a été trouvée, récupérer les volontaires qui y sont liés
+    if latest_session:
+        student_volunteers = StudentVolunteer.objects.filter(session=latest_session).order_by('order', 'full_name')
+
+    # Créer le contexte à envoyer au template
     context = {
-        'featured_speakers': featured_speakers,
         'upcoming_sessions': upcoming_sessions,
-        'attendee_types': attendee_types,
         'partners': partners,
         'latest_session': latest_session,
+        'student_volunteers': student_volunteers, # <-- Ajout des volontaires au contexte
     }
+    
     return render(request, 'conference_app/home.html', context)
-
 def privacy_policy(request):
     """Vue pour la politique de confidentialité"""
     return render(request, 'conference_app/policy.html')
@@ -1349,22 +1379,34 @@ def session_edit(request, pk):
         'title': 'Modifier la session',
     }
     return render(request, 'admin/session_form.html', context)
+# conference_app/views.py
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Session # Assurez-vous que Session et les autres modèles sont importés
 
 @login_required
 def session_get_data(request, session_id):
+    """
+    Vue AJAX pour récupérer toutes les données liées à une session spécifique,
+    y compris la galerie et les volontaires.
+    """
     session = get_object_or_404(Session, pk=session_id)
     
+    # Récupération de toutes les données liées en optimisant les requêtes
     speakers = session.speakers.all()
     organizers = session.organizers.all().order_by('order')
-    fundings = session.fundings.all()
+    fundings = session.fundings.select_related('partner').all() # Optimisation
     agenda_items = session.agenda_items.all().order_by('date', 'start_time')
     attendees = session.attendees.all()
+    gallery_photos = session.gallery_photos.all().order_by('order') # NOUVEAU
+    volunteers = session.student_volunteers.all().order_by('order') # NOUVEAU
     
     data = {
         'session': {
             'id': session.id,
             'title': session.title,
-            # MODIFIÉ: Ajout de l'URL du logo
             'logo_url': session.logo.url if session.logo else None,
             'track': session.get_track_display(),
             'start_date': session.start_date.strftime('%b %d, %Y') if session.start_date else '',
@@ -1388,7 +1430,6 @@ def session_get_data(request, session_id):
                 'organization': organizer.organization,
                 'is_primary': organizer.is_primary,
                 'order': organizer.order,
-                # MODIFIÉ: Ajout de l'URL de la photo
                 'photo': organizer.photo.url if organizer.photo else None,
             } for organizer in organizers
         ],
@@ -1417,9 +1458,28 @@ def session_get_data(request, session_id):
                 'name': attendee.name,
                 'email': attendee.email,
                 'company': attendee.company,
-                'registration_date': attendee.registration_date,
+                'registration_date': attendee.registration_date.strftime('%b %d, %Y, %H:%M') if attendee.registration_date else '',
             } for attendee in attendees
+        ],
+
+        # ▼▼▼▼ NOUVELLES DONNÉES AJOUTÉES POUR LA GALERIE ET LES VOLONTAIRES ▼▼▼▼
+        'gallery_photos': [
+            {
+                'id': photo.id,
+                'url': photo.photo.url if photo.photo else None,
+                'caption': photo.caption,
+            } for photo in gallery_photos
+        ],
+        'volunteers': [
+            {
+                'id': volunteer.id,
+                'full_name': volunteer.full_name,
+                'institute': volunteer.institute,
+                'role': volunteer.role,
+                'photo_url': volunteer.photo.url if volunteer.photo else None,
+            } for volunteer in volunteers
         ]
+        # ▲▲▲▲ FIN DES NOUVELLES DONNÉES ▲▲▲▲
     }
     
     return JsonResponse(data)
@@ -1556,3 +1616,195 @@ def speaker_list(request, session_id):
         'intervention_type_choices': SpeakersInterventions.INTERVENTION_TYPES,
         'locations': InterventionLocation.objects.all(),
     })
+
+
+
+
+
+# ============================================================================
+# IMPORTS NÉCESSAIRES (à placer en haut de votre fichier views.py)
+# ============================================================================
+
+# Assurez-vous que tous ces imports sont présents.
+# Si certains existent déjà, ne les dupliquez pas.
+
+
+
+
+# ============================================================================
+# GALLERY & VOLUNTEER VIEWS - VUES POUR LES NOUVELLES CLASSES
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# VUES POUR LA GALERIE (MenuPhoto)
+# ----------------------------------------------------------------------------
+
+@login_required
+def gallery_list(request, session_id):
+    """Affiche toutes les photos de la galerie pour une session donnée."""
+    session = get_object_or_404(Session, pk=session_id)
+    photos = MenuPhoto.objects.filter(session=session)
+    form = MenuPhotoForm() # Pour ajouter une nouvelle photo directement depuis la liste
+
+    if request.method == 'POST':
+        form = MenuPhotoForm(request.POST, request.FILES)
+        if form.is_valid():
+            photo = form.save(commit=False)
+            photo.session = session
+            photo.save()
+            messages.success(request, 'La photo a été ajoutée à la galerie avec succès.')
+            return redirect('gallery_list', session_id=session.id)
+        else:
+            messages.error(request, 'Erreur lors de l\'ajout de la photo.')
+
+    context = {
+        'session': session,
+        'photos': photos,
+        'form': form,
+        'title': f"Galerie de la session : {session.title}"
+    }
+    return render(request, 'admin/gallery_list.html', context)
+
+@login_required
+def gallery_photo_edit(request, pk):
+    """Modifie les détails d'une photo de la galerie."""
+    photo = get_object_or_404(MenuPhoto, pk=pk)
+    session_id = photo.session.id
+    
+    if request.method == 'POST':
+        form = MenuPhotoForm(request.POST, request.FILES, instance=photo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Les détails de la photo ont été mis à jour.')
+            return redirect('gallery_list', session_id=session_id)
+    else:
+        form = MenuPhotoForm(instance=photo)
+
+    context = {
+        'form': form,
+        'photo': photo,
+        'session': photo.session,
+        'title': f"Modifier la photo : {photo.caption or photo.id}"
+    }
+    return render(request, 'admin/gallery_photo_form.html', context)
+
+@login_required
+def gallery_photo_delete(request, pk):
+    """Supprime une photo de la galerie."""
+    photo = get_object_or_404(MenuPhoto, pk=pk)
+    session_id = photo.session.id
+    
+    if request.method == 'POST':
+        photo.delete()
+        messages.success(request, 'La photo a été supprimée de la galerie.')
+        return redirect('gallery_list', session_id=session_id)
+
+    # Si la méthode n'est pas POST, on affiche une page de confirmation
+    return render(request, 'admin/gallery_photo_confirm_delete.html', {'photo': photo})
+
+
+# ----------------------------------------------------------------------------
+# VUES POUR LES ÉTUDIANTS VOLONTAIRES (StudentVolunteer)
+# ----------------------------------------------------------------------------
+
+@login_required
+def volunteer_list(request, session_id):
+    """Affiche tous les étudiants volontaires pour une session."""
+    session = get_object_or_404(Session, pk=session_id)
+    volunteers = StudentVolunteer.objects.filter(session=session)
+    context = {
+        'session': session,
+        'volunteers': volunteers,
+        'title': f"Volontaires pour la session : {session.title}"
+    }
+    return render(request, 'admin/volunteer_list.html', context)
+
+@login_required
+def volunteer_create(request, session_id):
+    """Ajoute un nouvel étudiant volontaire à une session."""
+    session = get_object_or_404(Session, pk=session_id)
+    if request.method == 'POST':
+        form = StudentVolunteerForm(request.POST, request.FILES)
+        if form.is_valid():
+            volunteer = form.save(commit=False)
+            volunteer.session = session
+            volunteer.save()
+            messages.success(request, f"Le volontaire {volunteer.full_name} a été ajouté.")
+            return redirect('volunteer_list', session_id=session.id)
+    else:
+        form = StudentVolunteerForm()
+
+    context = {
+        'form': form,
+        'session': session,
+        'title': f"Ajouter un volontaire à : {session.title}"
+    }
+    return render(request, 'admin/volunteer_form.html', context)
+
+@login_required
+def volunteer_edit(request, pk):
+    """Modifie les informations d'un étudiant volontaire."""
+    volunteer = get_object_or_404(StudentVolunteer, pk=pk)
+    session_id = volunteer.session.id
+
+    if request.method == 'POST':
+        form = StudentVolunteerForm(request.POST, request.FILES, instance=volunteer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Les informations du volontaire ont été mises à jour.')
+            return redirect('volunteer_list', session_id=session_id)
+    else:
+        form = StudentVolunteerForm(instance=volunteer)
+
+    context = {
+        'form': form,
+        'volunteer': volunteer,
+        'session': volunteer.session,
+        'title': f"Modifier le volontaire : {volunteer.full_name}"
+    }
+    return render(request, 'admin/volunteer_form.html', context)
+
+@login_required
+def volunteer_delete(request, pk):
+    """Supprime un étudiant volontaire."""
+    volunteer = get_object_or_404(StudentVolunteer, pk=pk)
+    session_id = volunteer.session.id
+    
+    if request.method == 'POST':
+        volunteer.delete()
+        messages.success(request, 'Le volontaire a été supprimé de la liste.')
+        return redirect('volunteer_list', session_id=session_id)
+    
+    return render(request, 'admin/volunteer_confirm_delete.html', {'volunteer': volunteer})
+
+
+
+
+
+    # conference_app/views.py
+# conference_app/views.py
+
+from django.shortcuts import render
+from .models import MenuPhoto, Session
+
+def gallery_page(request):
+    """
+    Public view to display the event gallery.
+    It groups photos by session for a clear presentation.
+    """
+    # Récupère toutes les photos, en pré-chargeant les informations de la session
+    # pour optimiser les requêtes.
+    all_photos = MenuPhoto.objects.select_related('session').order_by('session__start_date', 'order')
+
+    # Grouper les photos par session
+    photos_by_session = {}
+    for photo in all_photos:
+        if photo.session not in photos_by_session:
+            photos_by_session[photo.session] = []
+        photos_by_session[photo.session].append(photo)
+
+    context = {
+        'photos_by_session': photos_by_session,
+        'title': "Event Gallery", # Titre de la page
+    }
+    return render(request, 'conference_app/gallery_page.html', context)
