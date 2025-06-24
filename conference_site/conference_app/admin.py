@@ -3,15 +3,41 @@
 from django.contrib import admin
 from .models import (
     SpeakersInterventions, Session, AgendaItem, Attendee, AttendeeType, 
-    Partner, InterventionLocation, SessionOrganizer, SessionFunding, Subscriber
+    Partner, InterventionLocation, SessionOrganizer, SessionFunding, Subscriber,
+    MenuPhoto, StudentVolunteer  # <-- NOUVEAUX MODÈLES IMPORTÉS
 )
+from django.utils.html import format_html
 
 # --- CONFIGURATIONS POUR LES FORMULAIRES INLINE (Optionnel mais recommandé) ---
-# Ceci permet de gérer les organisateurs directement depuis la page d'une session.
+
 class SessionOrganizerInline(admin.TabularInline):
+    """Permet de gérer les organisateurs directement depuis la page d'une session."""
     model = SessionOrganizer
-    extra = 1  # Affiche un champ vide pour ajouter un nouvel organisateur
+    extra = 1
     fields = ('name', 'organization', 'photo', 'order', 'is_primary')
+    ordering = ('order',)
+
+class MenuPhotoInline(admin.TabularInline):
+    """Permet de gérer la galerie photo directement depuis la page d'une session."""
+    model = MenuPhoto
+    extra = 1
+    fields = ('photo', 'caption', 'order')
+    ordering = ('order',)
+    
+    # Ajout d'un aperçu de l'image dans l'inline
+    readonly_fields = ('image_preview',)
+    
+    def image_preview(self, obj):
+        if obj.photo:
+            return format_html('<img src="{}" width="100" />', obj.photo.url)
+        return "Aucune image"
+    image_preview.short_description = 'Aperçu'
+
+class StudentVolunteerInline(admin.TabularInline):
+    """Permet de gérer les volontaires directement depuis la page d'une session."""
+    model = StudentVolunteer
+    extra = 1
+    fields = ('full_name', 'institute', 'role', 'photo', 'order')
     ordering = ('order',)
 
 # --------------------------------------------------------------------------
@@ -51,7 +77,6 @@ class SessionAdmin(admin.ModelAdmin):
     date_hierarchy = 'start_date'
     list_per_page = 20
     
-    # MODIFIÉ : Ajout de 'logo' au fieldset
     fieldsets = (
         ('Informations générales', {
             'fields': ('title', 'description', 'logo', 'track', 'is_hybrid')
@@ -65,8 +90,12 @@ class SessionAdmin(admin.ModelAdmin):
         }),
     )
     
-    # MODIFIÉ : Ajout des inlines pour gérer les organisateurs
-    inlines = [SessionOrganizerInline]
+    # Ajout des inlines pour TOUS les modèles liés à la session
+    inlines = [
+        SessionOrganizerInline,
+        MenuPhotoInline,
+        StudentVolunteerInline,
+    ]
     
     def speakers_count(self, obj):
         return obj.speakers.count()
@@ -105,7 +134,7 @@ class AgendaItemAdmin(admin.ModelAdmin):
 
 @admin.register(Attendee)
 class AttendeeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'company', 'job_title',  'session', 'registration_date')
+    list_display = ('name', 'email', 'company', 'job_title', 'session', 'registration_date')
     list_filter = ('attendee_type', 'registration_date', 'session')
     search_fields = ('name', 'email', 'company', 'job_title')
     date_hierarchy = 'registration_date'
@@ -189,7 +218,6 @@ class SessionOrganizerAdmin(admin.ModelAdmin):
     ordering = ('session', 'order')
     autocomplete_fields = ['session']
     
-    # MODIFIÉ : Ajout du champ 'photo' pour pouvoir le téléverser
     fieldsets = (
         ('Informations personnelles', {
             'fields': ('name', 'organization', 'photo')
@@ -234,15 +262,34 @@ class SubscriberAdmin(admin.ModelAdmin):
     readonly_fields = ('date_subscribed',)
     list_per_page = 50
 
-# Configuration globale de l'admin
+# --- GESTION DES NOUVEAUX MODÈLES ---
+
+@admin.register(MenuPhoto)
+class MenuPhotoAdmin(admin.ModelAdmin):
+    list_display = ('caption', 'session', 'order', 'image_preview')
+    list_filter = ('session',)
+    search_fields = ('caption', 'description')
+    list_editable = ('order',)
+    autocomplete_fields = ['session']
+    readonly_fields = ('image_preview',)
+    
+    def image_preview(self, obj):
+        if obj.photo:
+            return format_html('<img src="{}" width="150" />', obj.photo.url)
+        return "Aucune image"
+    image_preview.short_description = 'Aperçu'
+
+@admin.register(StudentVolunteer)
+class StudentVolunteerAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'institute', 'session', 'role', 'order')
+    list_filter = ('session', 'institute')
+    search_fields = ('full_name', 'institute', 'role')
+    list_editable = ('order',)
+    autocomplete_fields = ['session']
+
+
+# --- CONFIGURATION GLOBALE DU SITE ADMIN ---
+
 admin.site.site_header = "Conference 2025 Administration"
 admin.site.site_title = "Conference 2025 Admin"
 admin.site.index_title = "Bienvenue dans l'administration de Conference 2025"
-
-# Personnalisation des autocomplete fields
-# (ces lignes ne sont plus nécessaires avec les nouvelles versions de Django si search_fields est déjà défini sur le modèle admin de destination)
-# Session.search_fields = ['title', 'description']
-# SpeakersInterventions.search_fields = ['name', 'organization', 'title']
-# Partner.search_fields = ['name', 'description']
-# InterventionLocation.search_fields = ['name', 'country']
-# AttendeeType.search_fields = ['name', 'description']

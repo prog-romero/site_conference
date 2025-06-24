@@ -122,12 +122,10 @@ class Session(models.Model):
     
     title = models.CharField(max_length=200)
     description = models.TextField()
-    logo = models.ImageField(upload_to='session_logos/', null=True, blank=True) # <<< CHAMP AJOUTÉ
-    # Uniquement des dates, pas d'heures
+    logo = models.ImageField(upload_to='session_logos/', null=True, blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
     track = models.CharField(max_length=20, choices=TRACK_CHOICES)
-    # Garder location comme champ de texte pour compatibilité
     location = models.CharField(max_length=100, blank=True, null=True)
     locations = models.ManyToManyField(InterventionLocation, related_name='sessions', blank=True)
     is_hybrid = models.BooleanField(default=False)
@@ -140,7 +138,6 @@ class Session(models.Model):
         return self.title
     
     def save(self, *args, **kwargs):
-        # Calculer automatiquement duration_days
         if self.start_date and self.end_date:
             delta = self.end_date - self.start_date
             self.duration_days = delta.days + 1
@@ -148,26 +145,13 @@ class Session(models.Model):
 
     @classmethod
     def get_current_session(cls):
-        """Retourne la session la plus récente (actuelle)"""
         today = timezone.now().date()
-        # D'abord, chercher une session en cours
-        current_session = cls.objects.filter(
-            start_date__lte=today,
-            end_date__gte=today
-        ).first()
-        
+        current_session = cls.objects.filter(start_date__lte=today, end_date__gte=today).first()
         if current_session:
             return current_session
-            
-        # Sinon, retourner la prochaine session
-        upcoming_session = cls.objects.filter(
-            start_date__gt=today
-        ).order_by('start_date').first()
-        
+        upcoming_session = cls.objects.filter(start_date__gt=today).order_by('start_date').first()
         if upcoming_session:
             return upcoming_session
-            
-        # En dernier recours, retourner la session la plus récente
         return cls.objects.order_by('-start_date').first()
 
 class SessionFunding(models.Model):
@@ -222,7 +206,6 @@ class SpeakersInterventions(models.Model):
         ('workshop', 'Workshop'),
     ]
     
-    # Attributs de base du speaker
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
     organization = models.CharField(max_length=100)
@@ -230,13 +213,11 @@ class SpeakersInterventions(models.Model):
     photo = models.ImageField(upload_to='speakers/', null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='U')
     
-    # Attributs liés à l'intervention
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='speakers')
     intervention_type = models.CharField(max_length=20, choices=INTERVENTION_TYPES)
     location = models.ForeignKey(InterventionLocation, on_delete=models.SET_NULL, null=True, blank=True, related_name='speakers')
     is_remote = models.BooleanField(default=False)
     
-    # Autres attributs
     countries = models.ManyToManyField(InterventionLocation, blank=True, related_name='speaker_countries')
 
     class Meta:
@@ -257,3 +238,45 @@ class Subscriber(models.Model):
 
     def __str__(self):
         return self.email
+
+# ============================================================================
+# GALLERY & VOLUNTEER MODELS - NOUVEAUX MODÈLES AJOUTÉS
+# ============================================================================
+
+class MenuPhoto(models.Model):
+    """
+    Modèle pour stocker les photos d'une galerie associée à une session spécifique.
+    """
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='gallery_photos')
+    photo = models.ImageField(upload_to='gallery_photos/')
+    caption = models.CharField(max_length=255, blank=True, help_text="Courte description ou titre de la photo.")
+    description = models.TextField(blank=True, null=True, help_text="Description plus détaillée (optionnel).")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    order = models.PositiveIntegerField(default=0, help_text="Ordre d'affichage dans la galerie.")
+
+    class Meta:
+        ordering = ['order', 'uploaded_at']
+        verbose_name = "Photo de la Galerie"
+        verbose_name_plural = "Photos de la Galerie"
+
+    def __str__(self):
+        return self.caption or f"Photo for {self.session.title} ({self.id})"
+
+class StudentVolunteer(models.Model):
+    """
+    Modèle pour lister les étudiants volontaires pour une session.
+    """
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='student_volunteers')
+    full_name = models.CharField(max_length=200)
+    institute = models.CharField(max_length=200, help_text="Université, école ou institut de l'étudiant.")
+    role = models.CharField(max_length=150, blank=True, help_text="Rôle spécifique (ex: Accueil, Support Technique...).")
+    photo = models.ImageField(upload_to='volunteer_photos/', null=True, blank=True)
+    order = models.PositiveIntegerField(default=0, help_text="Ordre d'affichage dans la liste.")
+
+    class Meta:
+        ordering = ['order', 'full_name']
+        verbose_name = "Étudiant Volontaire"
+        verbose_name_plural = "Étudiants Volontaires"
+
+    def __str__(self):
+        return f"{self.full_name} ({self.institute})"

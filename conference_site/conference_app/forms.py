@@ -1,7 +1,8 @@
 from django import forms
 from .models import (
     Session, SpeakersInterventions, AgendaItem, AttendeeType, Attendee, 
-    Partner, InterventionLocation, SessionFunding, SessionOrganizer
+    Partner, InterventionLocation, SessionFunding, SessionOrganizer,
+    MenuPhoto, StudentVolunteer  # <-- NOUVEAUX MODÈLES IMPORTÉS
 )
 import pycountry
 
@@ -14,10 +15,13 @@ class AgendaItemForm(forms.ModelForm):
         model = AgendaItem
         fields = ['title', 'description', 'date', 'start_time', 'end_time', 'item_type', 'location']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'start_time': forms.TimeInput(attrs={'type': 'time'}),
-            'end_time': forms.TimeInput(attrs={'type': 'time'}),
-            'description': forms.Textarea(attrs={'rows': 5}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'rows': 5, 'class': 'form-control'}),
+            'item_type': forms.Select(attrs={'class': 'form-select'}),
+            'location': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, session=None, **kwargs):
@@ -47,11 +51,13 @@ class AgendaItemForm(forms.ModelForm):
 class AttendeeForm(forms.ModelForm):
     class Meta:
         model = Attendee
-        fields = ['name', 'email', 'company']
+        fields = ['name', 'email', 'company', 'job_title', 'attendee_type']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'company': forms.TextInput(attrs={'class': 'form-control'}),
+            'job_title': forms.TextInput(attrs={'class': 'form-control'}),
+            'attendee_type': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, session=None, **kwargs):
@@ -92,7 +98,6 @@ class ContactForm(forms.Form):
 # ============================================================================
 
 class InterventionLocationForm(forms.ModelForm):
-    # Définir les choix pour le champ country
     COUNTRY_CHOICES = [(country.alpha_2, country.name) for country in pycountry.countries]
     
     country = forms.ChoiceField(
@@ -106,7 +111,7 @@ class InterventionLocationForm(forms.ModelForm):
         fields = ['name', 'country', 'is_primary']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'is_primary': forms.CheckboxInput(),
+            'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 # ============================================================================
@@ -157,7 +162,7 @@ class SessionForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
-            'logo': forms.FileInput(attrs={'class': 'form-control'}), # <<< WIDGET AJOUTÉ
+            'logo': forms.FileInput(attrs={'class': 'form-control'}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'track': forms.Select(attrs={'class': 'form-select'}),
@@ -204,14 +209,14 @@ class SpeakersInterventionsForm(forms.ModelForm):
         model = SpeakersInterventions
         fields = ['name', 'title', 'organization', 'intervention_type', 'photo', 'session']
         widgets = {
-            'session': forms.HiddenInput(),  # Rendre le champ caché
+            'session': forms.HiddenInput(),
         }
 
     def __init__(self, *args, session=None, **kwargs):
         super().__init__(*args, **kwargs)
         if session:
-            self.fields['session'].initial = session  # Définir la session par défaut
-            self.fields['session'].disabled = True  # Empêcher la modification
+            self.fields['session'].initial = session
+            self.fields['session'].disabled = True
 
 # ============================================================================
 # SUBSCRIPTION FORMS - Formulaires d'abonnement
@@ -223,4 +228,37 @@ class SubscribeForm(forms.ModelForm):
         fields = ['email']
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Votre email'})
+        }
+
+# ============================================================================
+# GALLERY & VOLUNTEER FORMS - NOUVEAUX FORMULAIRES AJOUTÉS
+# ============================================================================
+
+class MenuPhotoForm(forms.ModelForm):
+    """
+    Formulaire pour téléverser et gérer une photo de la galerie.
+    """
+    class Meta:
+        model = MenuPhoto
+        fields = ['photo', 'caption', 'description', 'order']
+        widgets = {
+            'photo': forms.FileInput(attrs={'class': 'form-control', 'required': True}),
+            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Cérémonie d\'ouverture'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Description détaillée de la photo (optionnel)'}),
+            'order': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+        }
+
+class StudentVolunteerForm(forms.ModelForm):
+    """
+    Formulaire pour ajouter ou modifier un étudiant volontaire.
+    """
+    class Meta:
+        model = StudentVolunteer
+        fields = ['full_name', 'institute', 'role', 'photo', 'order']
+        widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'institute': forms.TextInput(attrs={'class': 'form-control'}),
+            'role': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Accueil, Support Technique'}),
+            'photo': forms.FileInput(attrs={'class': 'form-control'}),
+            'order': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
         }

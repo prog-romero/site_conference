@@ -13,17 +13,14 @@
   .swiper-container-wrapper {
     position: relative;
     overflow: hidden;
-    /* ▼▼▼▼ CORRECTION CLÉ : Donner une hauteur minimale au conteneur ▼▼▼▼ */
-    /* Cela empêche le conteneur de s'aplatir avant que Swiper ne calcule sa taille. */
     min-height: 450px; 
-    /* ▲▲▲▲ FIN DE LA CORRECTION ▲▲▲▲ */
   }
 
   .swiper-wrapper {
       transition-timing-function: linear !important;
   }
 
-  /* --- Styles pour les cartes Person (Organizers & Speakers) --- */
+  /* --- Styles pour les cartes Person (Organizers, Speakers, Volunteers) --- */
   .person-card {
     display: flex;
     flex-direction: column;
@@ -54,52 +51,15 @@
     padding: 1.25rem;
   }
 
-  .collaboration-text {
-  font-family: 'Arial', sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  color: #333;
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.collaboration-text h2 {
-  color: #2c3e50;
-  font-size: 24px;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #3498db;
-  padding-bottom: 5px;
-}
-
-.collaboration-text p {
-  margin-bottom: 15px;
-  text-align: justify;
-}
-
-.collaboration-text strong {
-  color: #2980b9;
-  font-weight: 600;
-}
-
   .person-card .card-title { font-size: 1.25rem; font-weight: 600; color: var(--primary-color); }
   .person-card .card-subtitle { color: #6c757d; font-size: 0.9rem; }
   .person-card .card-text { font-weight: 500; color: #343a40; }
-  /* Amélioration : Assure que le footer est toujours en bas */
   .person-card .card-footer { padding: 1rem 1.25rem; background: #f8f9fa; border-top: 1px solid #e9ecef; margin-top: auto; }
-
-
-
-
-  /* ... (le reste de vos styles est inchangé) ... */
 </style>
 
-<!-- Hero Section et About Section -->
+<!-- Hero, About, Organizers, Speakers Sections (inchangées) -->
+<!-- ... Collez ici vos sections Hero, About, Organizers et Speakers existantes ... -->
 
-<!-- Hero Section et About Section (inchangés) -->
 <section class="hero-section">
     <div class="container">
         <h1 class="hero-title">{% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %}</h1>
@@ -373,6 +333,49 @@
     </div>
 </section> -->
 
+<!-- ▼▼▼▼ NOUVELLE SECTION POUR LES VOLONTAIRES ▼▼▼▼ -->
+<section class="py-5 bg-light-custom">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2 class="section-title mb-0">Student Volunteers</h2>
+            <!-- Optionnel: lien vers une page dédiée si vous en créez une -->
+            <!-- <a href="#" class="btn btn-primary-custom flex-shrink-0">View All</a> -->
+        </div>
+        
+        {% if student_volunteers %}
+            <div class="swiper-container-wrapper">
+                <div class="swiper volunteer-swiper">
+                    <div class="swiper-wrapper">
+                        {% for volunteer in student_volunteers %}
+                        <div class="swiper-slide h-auto" style="width: 280px;">
+                            <div class="person-card">
+                                {% if volunteer.photo %}
+                                    <img src="{{ volunteer.photo.url }}" alt="{{ volunteer.full_name }}" class="card-img-top">
+                                {% else %}
+                                    <!-- Image de fallback pour les volontaires -->
+                                    <img src="https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Placeholder" class="card-img-top">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ volunteer.full_name }}</h4>
+                                    <p class="card-subtitle">{{ volunteer.role|default:'Volunteer' }}</p>
+                                    <p class="card-text">{{ volunteer.institute }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center text-muted">Our dedicated student volunteers will be announced soon.</p>
+        {% endif %}
+    </div>
+</section>
+<!-- ▲▲▲▲ FIN DE LA SECTION VOLONTAIRES ▲▲▲▲ -->
+
+<!-- Partners Section (inchangée) -->
+<!-- ... Collez ici votre section Partners existante ... -->
+
 <!-- Partners Section -->
 <section class="py-5 bg-light">
     <div class="container">
@@ -407,6 +410,8 @@
       <!-- ▲▲▲▲ FIN DE LA MODIFICATION ▲▲▲▲ -->
     </div>
 </section>
+
+
 
 <style>
     /* ... vos autres styles ... */
@@ -452,15 +457,6 @@
     }
 </style>
 
-<!-- CTA Section -->
-<!-- <section class="py-5 bg-primary-dark text-white text-center">
-    <div class="container">
-        <h2 class="mb-4">Ready to Join Us at {% if latest_session %}{{ latest_session.title }}{% else %}Conference 2025{% endif %}?</h2>
-        <p class="lead mb-4">Secure your spot now and prepare for three days of learning, networking, and professional growth.</p>
-        <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">Register Today</a>
-    </div>
-</section> -->
-
 {% endblock %}
 
 {% block extra_js %}
@@ -473,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function () {
         slidesPerView: 'auto',
         spaceBetween: 30,
         loop: true,
-        speed: 5000, // Vitesse ajustée
+        speed: 5000,
         allowTouchMove: false,
         autoplay: {
             delay: 0,
@@ -483,8 +479,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     new Swiper('.organizer-swiper', marqueeOptions);
     new Swiper('.speaker-swiper', marqueeOptions);
+    
+    // ▼▼▼▼ NOUVELLE INITIALISATION POUR LE CARROUSEL DES VOLONTAIRES ▼▼▼▼
+    new Swiper('.volunteer-swiper', marqueeOptions);
+    // ▲▲▲▲ FIN DE LA NOUVELLE INITIALISATION ▲▲▲▲
 
-    // ... (code pour le carrousel des partenaires s'il est réactivé) ...
 });
 </script>
 {% endblock %}

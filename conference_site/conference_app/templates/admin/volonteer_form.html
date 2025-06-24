@@ -1,0 +1,91 @@
+{# templates/admin/volunteer_form.html #}
+
+{% extends 'conference_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-primary-dark text-white">
+    <div class="container">
+        <h1>{{ title }}</h1>
+        <p class="mb-0">Gestion des volontaires pour la session : <strong>{{ session.title }}</strong></p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <h5 class="mb-4">Informations du Volontaire</h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.full_name.id_for_label }}" class="form-label">Nom Complet*</label>
+                                    {{ form.full_name }}
+                                    {% if form.full_name.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.full_name.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.institute.id_for_label }}" class="form-label">Institut / Université*</label>
+                                    {{ form.institute }}
+                                    {% if form.institute.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.institute.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="{{ form.photo.id_for_label }}" class="form-label">Photo (optionnel)</label>
+                                    
+                                    {% if volunteer.photo %}
+                                        <div class="mb-2">
+                                            <img src="{{ volunteer.photo.url }}" alt="Photo de {{ volunteer.full_name }}" class="img-thumbnail" style="max-height: 100px;">
+                                            <br>
+                                            <small class="text-muted">Photo actuelle. Un nouveau fichier remplacera l'ancien.</small>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {{ form.photo }}
+                                    {% if form.photo.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.photo.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.role.id_for_label }}" class="form-label">Rôle</label>
+                                    {{ form.role }}
+                                    {% if form.role.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.role.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.order.id_for_label }}" class="form-label">Ordre d'affichage</label>
+                                    {{ form.order }}
+                                    <div class="form-text">Les volontaires avec un ordre plus petit apparaissent en premier.</div>
+                                    {% if form.order.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.order.errors|first }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+                            
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary-custom">Enregistrer</button>
+                                <a href="{% url 'volunteer_list' session_id=session.id %}" class="btn btn-outline-secondary">Annuler</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

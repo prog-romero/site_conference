@@ -387,6 +387,41 @@
                                 </div>
                             </div>
                         </div>
+
+                      <!-- Gallery -->
+                      <div class="col-lg-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0"><i class="fas fa-images me-2 text-info"></i>Gallery</h6>
+                                <div>
+                                    <a id="manage-gallery-btn" href="#" class="btn btn-outline-info btn-sm me-2" style="display: none;">Gérer</a>
+                                    <button id="add-photo-btn" class="btn btn-info btn-sm text-white" disabled>
+                                        <i class="fas fa-plus me-1"></i> Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body"><div id="session-gallery">...</div></div>
+                        </div>
+                    </div>
+                    <!-- Volunteers -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0"><i class="fas fa-hands-helping me-2 text-warning"></i>Volunteers</h6>
+                                <div>
+                                    <a id="manage-volunteers-btn" href="#" class="btn btn-outline-warning btn-sm me-2" style="display: none;">Gérer</a>
+                                    <button id="add-volunteer-btn" class="btn btn-warning btn-sm text-white" disabled>
+                                        <i class="fas fa-plus me-1"></i> Ajouter
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body"><div id="session-volunteers">...</div></div>
+                        </div>
+                    </div>
+
+
+
+
                     </div>
                 </div>
             </div>
@@ -542,6 +577,8 @@ document.addEventListener('DOMContentLoaded', function() {
             loadSessionData(sessionId);
             defaultView.style.display = 'none';
             sessionDetails.style.display = 'block';
+
+            
         });
     });
 
@@ -712,31 +749,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function loadSessionData(sessionId) {
-        console.log("loadSessionData called for session ID:", sessionId);
-        fetch(`/api/session/${sessionId}/data/`)
-            .then((response) => {
-                console.log("Session fetch response status:", response.status);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then((data) => {
-                console.log("Session data received:", data);
-                updateSpeakers(data.speakers || [], sessionId);
-                updateOrganizers(data.organizers || [], sessionId);
-                updateFundings(data.fundings || [], sessionId);
-                updateAgenda(data.agenda_items || [], sessionId);
-                updateRegistrations(data.attendees || [], sessionId);
-            })
-            .catch((error) => {
-                console.error("Error loading session data:", error);
-                document.getElementById("session-agenda").innerHTML = '<p class="text-danger">Error loading agenda.</p>';
-                document.getElementById("session-speakers").innerHTML = '<p class="text-danger">Error loading speakers.</p>';
-                document.getElementById("session-organizers").innerHTML = '<p class="text-danger">Error loading organizers.</p>';
-                document.getElementById("session-fundings").innerHTML = '<p class="text-danger">Error loading fundings.</p>';
-                document.getElementById("session-registrations").innerHTML = '<p class="text-danger">Error loading registrations.</p>';
-            });
-    }
+    // function loadSessionData(sessionId) {
+    //     console.log("loadSessionData called for session ID:", sessionId);
+    //     fetch(`/api/session/${sessionId}/data/`)
+    //         .then((response) => {
+    //             console.log("Session fetch response status:", response.status);
+    //             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    //             return response.json();
+    //         })
+    //         .then((data) => {
+    //             console.log("Session data received:", data);
+    //             updateSpeakers(data.speakers || [], sessionId);
+    //             updateOrganizers(data.organizers || [], sessionId);
+    //             updateFundings(data.fundings || [], sessionId);
+    //             updateAgenda(data.agenda_items || [], sessionId);
+    //             updateRegistrations(data.attendees || [], sessionId);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error loading session data:", error);
+    //             document.getElementById("session-agenda").innerHTML = '<p class="text-danger">Error loading agenda.</p>';
+    //             document.getElementById("session-speakers").innerHTML = '<p class="text-danger">Error loading speakers.</p>';
+    //             document.getElementById("session-organizers").innerHTML = '<p class="text-danger">Error loading organizers.</p>';
+    //             document.getElementById("session-fundings").innerHTML = '<p class="text-danger">Error loading fundings.</p>';
+    //             document.getElementById("session-registrations").innerHTML = '<p class="text-danger">Error loading registrations.</p>';
+    //         });
+    // }
 
     function updateFundings(fundings, sessionId) {
         console.log('updateFundings called with:', fundings); // Debug
@@ -856,6 +893,107 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
     }
+
+
+
+
+    // ... à l'intérieur du script principal ...
+
+    // ▼▼▼▼ NOUVELLE FONCTION POUR METTRE À JOUR LA GALERIE ▼▼▼▼
+    function updateGallery(photos, sessionId) {
+        const galleryContainer = document.getElementById('session-gallery');
+        if (!galleryContainer) return;
+
+        if (!Array.isArray(photos) || photos.length === 0) {
+            galleryContainer.innerHTML = '<p class="text-muted">Aucune photo dans la galerie pour cette session.</p>';
+            return;
+        }
+
+        galleryContainer.innerHTML = `
+            <div class="row g-2">
+                ${photos.slice(0, 4).map(photo => `
+                    <div class="col-3">
+                        <img src="${photo.url}" alt="${photo.caption}" class="img-fluid rounded" title="${photo.caption}" style="height: 80px; width: 100%; object-fit: cover;">
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        if (photos.length > 4) {
+            galleryContainer.innerHTML += `
+                <p class="text-muted mt-2 small">${photos.length - 4} autre(s) photo(s) dans la galerie.</p>
+            `;
+        }
+    }
+    // ▲▲▲▲ FIN DE LA FONCTION GALERIE ▲▲▲▲
+
+    // ▼▼▼▼ NOUVELLE FONCTION POUR METTRE À JOUR LES VOLONTAIRES ▼▼▼▼
+    function updateVolunteers(volunteers, sessionId) {
+        const volunteersContainer = document.getElementById('session-volunteers');
+        if (!volunteersContainer) return;
+
+        if (!Array.isArray(volunteers) || volunteers.length === 0) {
+            volunteersContainer.innerHTML = '<p class="text-muted">Aucun volontaire assigné à cette session.</p>';
+            return;
+        }
+
+        volunteersContainer.innerHTML = volunteers.slice(0, 3).map(volunteer => `
+            <div class="d-flex align-items-center mb-2">
+                ${volunteer.photo_url ? `
+                    <img src="${volunteer.photo_url}" alt="${volunteer.full_name}" class="me-2 rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                ` : `
+                    <div class="me-2 d-flex align-items-center justify-content-center bg-light rounded-circle" style="width: 40px; height: 40px;">
+                        <i class="fas fa-user text-muted"></i>
+                    </div>
+                `}
+                <div>
+                    <strong>${volunteer.full_name}</strong>
+                    <br>
+                    <small class="text-muted">${volunteer.institute}</small>
+                </div>
+            </div>
+        `).join('');
+    }
+    // ▲▲▲▲ FIN DE LA FONCTION VOLONTAIRES ▲▲▲▲
+
+    function loadSessionData(sessionId) {
+        console.log("loadSessionData called for session ID:", sessionId);
+        fetch(`/api/session/${sessionId}/data/`)
+            .then((response) => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then((data) => {
+                console.log("Session data received:", data);
+                updateSpeakers(data.speakers || [], sessionId);
+                updateOrganizers(data.organizers || [], sessionId);
+                updateFundings(data.fundings || [], sessionId);
+                updateAgenda(data.agenda_items || [], sessionId);
+                updateRegistrations(data.attendees || [], sessionId);
+                
+                // ▼▼▼▼ APPEL DES NOUVELLES FONCTIONS ▼▼▼▼
+                updateGallery(data.gallery_photos || [], sessionId);
+                updateVolunteers(data.volunteers || [], sessionId);
+                // ▲▲▲▲ FIN DE L'APPEL ▲▲▲▲
+            })
+            .catch((error) => {
+                console.error("Error loading session data:", error);
+                // ... (gestion des erreurs existante) ...
+                
+                // ▼▼▼▼ GESTION DES ERREURS POUR LES NOUVELLES CARTES ▼▼▼▼
+                document.getElementById("session-gallery").innerHTML = '<p class="text-danger">Error loading gallery.</p>';
+                document.getElementById("session-volunteers").innerHTML = '<p class="text-danger">Error loading volunteers.</p>';
+                // ▲▲▲▲ FIN DE LA GESTION DES ERREURS ▲▲▲▲
+            });
+    }
+
+
+
+
+
+
+
+
 
     // Fonction pour récupérer le jeton CSRF
     function getCookie(name) {
