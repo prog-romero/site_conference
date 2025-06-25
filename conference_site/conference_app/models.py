@@ -25,6 +25,18 @@ class AgendaItem(models.Model):
     location = models.ForeignKey('InterventionLocation', on_delete=models.SET_NULL, null=True, blank=True, related_name='agenda_items')
     session = models.ForeignKey('Session', on_delete=models.SET_NULL, blank=True, null=True, related_name='agenda_items')
     
+    # ▼▼▼▼ CHAMP AJOUTÉ ▼▼▼▼
+    # Lien vers l'intervention d'un speaker pour récupérer les slides
+    speaker_intervention = models.ForeignKey(
+        'SpeakersInterventions',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='agenda_entries',
+        help_text="Link this agenda item to a specific speaker's talk to show their slides."
+    )
+    # ▲▲▲▲ FIN DE L'AJOUT ▲▲▲▲
+
     class Meta:
         ordering = ['date', 'start_time']
     
@@ -57,7 +69,6 @@ class Attendee(models.Model):
         return f"{self.name} - {self.email} ({self.session.title if self.session else 'No session'})"
     
     def save(self, *args, **kwargs):
-        # Auto-assigner la session courante si aucune session n'est spécifiée
         if not self.session_id:
             self.session = Session.get_current_session()
         super().save(*args, **kwargs)
@@ -205,7 +216,15 @@ class SpeakersInterventions(models.Model):
         ('presentation', 'Presentation'),
         ('workshop', 'Workshop'),
     ]
+
+    # ▼▼▼▼ CHOIX POUR LE STATUT DES SLIDES ▼▼▼▼
+    SLIDES_STATUS_CHOICES = [
+        ('pending', 'Pending'),        # Slides non encore reçues
+        ('available', 'Available'),      # Slides disponibles au téléchargement
+        ('confidential', 'Confidential'),# Slides confidentielles, non téléchargeables
+    ]
     
+    # Attributs de base du speaker
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
     organization = models.CharField(max_length=100)
@@ -213,11 +232,28 @@ class SpeakersInterventions(models.Model):
     photo = models.ImageField(upload_to='speakers/', null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='U')
     
+    # Attributs liés à l'intervention
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='speakers')
     intervention_type = models.CharField(max_length=20, choices=INTERVENTION_TYPES)
     location = models.ForeignKey(InterventionLocation, on_delete=models.SET_NULL, null=True, blank=True, related_name='speakers')
     is_remote = models.BooleanField(default=False)
     
+    # ▼▼▼▼ NOUVEAUX CHAMPS POUR LES SLIDES ▼▼▼▼
+    slides_file = models.FileField(
+        upload_to='slides/',
+        null=True,
+        blank=True,
+        help_text="PDF of the presentation slides."
+    )
+    slides_status = models.CharField(
+        max_length=20,
+        choices=SLIDES_STATUS_CHOICES,
+        default='pending',
+        help_text="Status of the presentation slides."
+    )
+    # ▲▲▲▲ FIN DES NOUVEAUX CHAMPS ▲▲▲▲
+
+    # Autres attributs
     countries = models.ManyToManyField(InterventionLocation, blank=True, related_name='speaker_countries')
 
     class Meta:
@@ -240,13 +276,10 @@ class Subscriber(models.Model):
         return self.email
 
 # ============================================================================
-# GALLERY & VOLUNTEER MODELS - NOUVEAUX MODÈLES AJOUTÉS
+# GALLERY & VOLUNTEER MODELS - Modèles pour la galerie et les volontaires
 # ============================================================================
 
 class MenuPhoto(models.Model):
-    """
-    Modèle pour stocker les photos d'une galerie associée à une session spécifique.
-    """
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='gallery_photos')
     photo = models.ImageField(upload_to='gallery_photos/')
     caption = models.CharField(max_length=255, blank=True, help_text="Courte description ou titre de la photo.")
@@ -263,9 +296,6 @@ class MenuPhoto(models.Model):
         return self.caption or f"Photo for {self.session.title} ({self.id})"
 
 class StudentVolunteer(models.Model):
-    """
-    Modèle pour lister les étudiants volontaires pour une session.
-    """
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='student_volunteers')
     full_name = models.CharField(max_length=200)
     institute = models.CharField(max_length=200, help_text="Université, école ou institut de l'étudiant.")
