@@ -234,6 +234,8 @@ def venue_view(request):
 # AGENDA VIEWS - Vues pour la gestion de l'agenda
 # ============================================================================
 
+# conference_app/views.py
+
 class AgendaView(TemplateView):
     """Vue publique pour afficher l'agenda"""
     template_name = 'conference_app/agenda.html'
@@ -241,7 +243,15 @@ class AgendaView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         agenda_by_date = {}
-        agenda_items = AgendaItem.objects.all().order_by('date', 'start_time')
+        
+        # ▼▼▼▼ MODIFICATION : Optimisation de la requête ▼▼▼▼
+        # On pré-charge les données du speaker lié pour un accès plus rapide
+        agenda_items = AgendaItem.objects.select_related(
+            'location', 
+            'session', 
+            'speaker_intervention'
+        ).order_by('date', 'start_time')
+        # ▲▲▲▲ FIN DE LA MODIFICATION ▲▲▲▲
         
         for item in agenda_items:
             date_str = item.date.strftime('%Y-%m-%d')
@@ -254,14 +264,19 @@ class AgendaView(TemplateView):
             agenda_by_date[date_str]['items'].append(item)
         
         context['agenda_days'] = agenda_by_date.values()
+        context['title'] = "Conference Agenda" # Ajout d'un titre pour le contexte
         return context
+
+
+
+# conference_app/views.py
 
 @login_required
 def agenda_create(request, session_id):
     """Vue pour créer un élément d'agenda"""
     session = get_object_or_404(Session, pk=session_id)
     if request.method == 'POST':
-        form = AgendaItemForm(request.POST, session=session)
+        form = AgendaItemForm(request.POST, session=session) # On passe la session au formulaire
         if form.is_valid():
             agenda_item = form.save(commit=False)
             agenda_item.session = session
@@ -271,14 +286,15 @@ def agenda_create(request, session_id):
         else:
             messages.error(request, "Erreur lors de l'ajout de l'élément d'agenda. Veuillez vérifier les champs.")
     else:
-        form = AgendaItemForm(session=session)
+        form = AgendaItemForm(session=session) # On passe la session au formulaire
+        
     return render(request, 'admin/agenda_form.html', {
         'form': form,
         'session': session,
         'title': f"Ajouter un élément d'agenda à : {session.title}",
-        'item_types': AgendaItem.ITEM_TYPE_CHOICES,
-        'locations': InterventionLocation.objects.all(),
     })
+
+    
 
 @login_required
 def agenda_delete(request, pk):
@@ -393,27 +409,27 @@ def agenda_download(request):
     response['Content-Disposition'] = 'attachment; filename="conference_agenda.pdf"'
     return response
 
+# conference_app/views.py
+
 @login_required
 def agenda_edit(request, pk):
     """Vue pour modifier un élément d'agenda"""
     agenda_item = get_object_or_404(AgendaItem, pk=pk)
     session = agenda_item.session
     if request.method == 'POST':
-        form = AgendaItemForm(request.POST, instance=agenda_item, session=session)
+        form = AgendaItemForm(request.POST, instance=agenda_item, session=session) # On passe la session
         if form.is_valid():
             form.save()
             messages.success(request, "Élément d'agenda modifié avec succès.")
             return redirect('agenda_list', session_id=session.id)
     else:
-        form = AgendaItemForm(instance=agenda_item, session=session)
+        form = AgendaItemForm(instance=agenda_item, session=session) # On passe la session
 
     return render(request, 'admin/agenda_form.html', {
         'form': form,
         'agenda_item': agenda_item,
         'session': session,
         'title': f"Modifier : {agenda_item.title}",
-        'item_types': AgendaItem.ITEM_TYPE_CHOICES,
-        'locations': InterventionLocation.objects.all(),
     })
 
 @login_required
@@ -1808,3 +1824,32 @@ def gallery_page(request):
         'title': "Event Gallery", # Titre de la page
     }
     return render(request, 'conference_app/gallery_page.html', context)
+
+
+
+
+
+
+# # Gallery ge ne sais pas trop
+# def gallery_page(request):
+#     """
+#     Vue publique pour afficher la galerie de photos de tous les événements.
+#     Les photos sont groupées par session pour une présentation claire.
+#     """
+#     # Récupère toutes les photos, en pré-chargeant les informations de la session
+#     # pour optimiser les requêtes, et les trie par date de session.
+#     all_photos = MenuPhoto.objects.select_related('session').order_by('-session__start_date', 'order')
+
+#     # Grouper les photos par session en utilisant itertools.groupby
+#     photos_by_session = []
+#     for key, group in groupby(all_photos, key=lambda photo: photo.session):
+#         photos_by_session.append({
+#             'session': key,
+#             'photos': list(group)
+#         })
+
+#     context = {
+#         'photos_by_session': photos_by_session,
+#         'title': "Event Gallery",
+#     }
+#     return render(request, 'conference_app/gallery_page.html', context)

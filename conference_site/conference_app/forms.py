@@ -1,8 +1,9 @@
+
 from django import forms
 from .models import (
     Session, SpeakersInterventions, AgendaItem, AttendeeType, Attendee, 
     Partner, InterventionLocation, SessionFunding, SessionOrganizer,
-    MenuPhoto, StudentVolunteer  # <-- NOUVEAUX MODÈLES IMPORTÉS
+    MenuPhoto, StudentVolunteer
 )
 import pycountry
 
@@ -13,20 +14,26 @@ import pycountry
 class AgendaItemForm(forms.ModelForm):
     class Meta:
         model = AgendaItem
-        fields = ['title', 'description', 'date', 'start_time', 'end_time', 'item_type', 'location']
+        # ▼▼▼▼ CHAMP 'speaker_intervention' AJOUTÉ ▼▼▼▼
+        fields = ['title', 'description', 'date', 'start_time', 'end_time', 'item_type', 'location', 'speaker_intervention']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'rows': 5, 'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'item_type': forms.Select(attrs={'class': 'form-select'}),
             'location': forms.Select(attrs={'class': 'form-select'}),
+            # ▼▼▼▼ WIDGET POUR LE NOUVEAU CHAMP ▼▼▼▼
+            'speaker_intervention': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, session=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.session = session
+        # Limiter les choix de speaker_intervention à ceux de la session actuelle
+        if self.session:
+            self.fields['speaker_intervention'].queryset = SpeakersInterventions.objects.filter(session=self.session)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -37,10 +44,10 @@ class AgendaItemForm(forms.ModelForm):
 
         if session and date:
             if date < session.start_date or date > session.end_date:
-                self.add_error('date', f'La date doit être entre {session.start_date.strftime("%d %B %Y")} et {session.end_date.strftime("%d %B %Y")}.')
+                self.add_error('date', f'The date must be between {session.start_date.strftime("%d %B %Y")} and {session.end_date.strftime("%d %B %Y")}.')
 
         if start_time and end_time and start_time >= end_time:
-            self.add_error('end_time', 'L’heure de fin doit être postérieure à l’heure de début.')
+            self.add_error('end_time', 'The end time must be after the start time.')
 
         return cleaned_data
 
@@ -199,7 +206,6 @@ class SessionOrganizerForm(forms.ModelForm):
             'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
-
 # ============================================================================
 # SPEAKER FORMS - Formulaires pour la gestion des intervenants
 # ============================================================================
@@ -207,9 +213,21 @@ class SessionOrganizerForm(forms.ModelForm):
 class SpeakersInterventionsForm(forms.ModelForm):
     class Meta:
         model = SpeakersInterventions
-        fields = ['name', 'title', 'organization', 'intervention_type', 'photo', 'session']
+        # ▼▼▼▼ NOUVEAUX CHAMPS 'slides_file' ET 'slides_status' AJOUTÉS ▼▼▼▼
+        fields = [
+            'name', 'title', 'organization', 'intervention_type', 'photo', 
+            'session', 'slides_file', 'slides_status'
+        ]
         widgets = {
             'session': forms.HiddenInput(),
+            # ▼▼▼▼ WIDGETS POUR LES NOUVEAUX CHAMPS ▼▼▼▼
+            'slides_file': forms.FileInput(attrs={'class': 'form-control'}),
+            'slides_status': forms.Select(attrs={'class': 'form-select'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'organization': forms.TextInput(attrs={'class': 'form-control'}),
+            'intervention_type': forms.Select(attrs={'class': 'form-select'}),
+            'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, session=None, **kwargs):
@@ -217,6 +235,9 @@ class SpeakersInterventionsForm(forms.ModelForm):
         if session:
             self.fields['session'].initial = session
             self.fields['session'].disabled = True
+
+
+
 
 # ============================================================================
 # SUBSCRIPTION FORMS - Formulaires d'abonnement

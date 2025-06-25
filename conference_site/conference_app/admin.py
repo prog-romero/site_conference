@@ -1,40 +1,35 @@
+
 # conference_app/admin.py
 
 from django.contrib import admin
 from .models import (
     SpeakersInterventions, Session, AgendaItem, Attendee, AttendeeType, 
     Partner, InterventionLocation, SessionOrganizer, SessionFunding, Subscriber,
-    MenuPhoto, StudentVolunteer  # <-- NOUVEAUX MODÈLES IMPORTÉS
+    MenuPhoto, StudentVolunteer
 )
 from django.utils.html import format_html
 
-# --- CONFIGURATIONS POUR LES FORMULAIRES INLINE (Optionnel mais recommandé) ---
-
+# --- CONFIGURATIONS POUR LES FORMULAIRES INLINE ---
 class SessionOrganizerInline(admin.TabularInline):
-    """Permet de gérer les organisateurs directement depuis la page d'une session."""
     model = SessionOrganizer
     extra = 1
     fields = ('name', 'organization', 'photo', 'order', 'is_primary')
     ordering = ('order',)
 
 class MenuPhotoInline(admin.TabularInline):
-    """Permet de gérer la galerie photo directement depuis la page d'une session."""
     model = MenuPhoto
     extra = 1
-    fields = ('photo', 'caption', 'order')
-    ordering = ('order',)
-    
-    # Ajout d'un aperçu de l'image dans l'inline
+    fields = ('photo', 'caption', 'order', 'image_preview')
     readonly_fields = ('image_preview',)
+    ordering = ('order',)
     
     def image_preview(self, obj):
         if obj.photo:
             return format_html('<img src="{}" width="100" />', obj.photo.url)
-        return "Aucune image"
-    image_preview.short_description = 'Aperçu'
+        return "No Image"
+    image_preview.short_description = 'Preview'
 
 class StudentVolunteerInline(admin.TabularInline):
-    """Permet de gérer les volontaires directement depuis la page d'une session."""
     model = StudentVolunteer
     extra = 1
     fields = ('full_name', 'institute', 'role', 'photo', 'order')
@@ -44,21 +39,27 @@ class StudentVolunteerInline(admin.TabularInline):
 
 @admin.register(SpeakersInterventions)
 class SpeakersInterventionsAdmin(admin.ModelAdmin):
-    list_display = ('name', 'title', 'organization', 'session', 'intervention_type', 'is_remote')
-    list_filter = ('intervention_type', 'is_remote', 'session', 'gender')
+    # ▼▼▼▼ 'slides_status' AJOUTÉ À list_display ▼▼▼▼
+    list_display = ('name', 'title', 'organization', 'session', 'intervention_type', 'is_remote', 'slides_status')
+    list_filter = ('intervention_type', 'is_remote', 'session', 'gender', 'slides_status')
     search_fields = ('name', 'organization', 'bio', 'title')
     filter_horizontal = ('countries',)
     autocomplete_fields = ['session', 'location']
     list_per_page = 20
     
+    # ▼▼▼▼ NOUVEAUX CHAMPS AJOUTÉS AUX fieldsets ▼▼▼▼
     fieldsets = (
-        ('Informations personnelles', {
+        ('Personal Information', {
             'fields': ('name', 'title', 'organization', 'bio', 'photo', 'gender')
         }),
-        ('Informations d\'intervention', {
+        ('Intervention Details', {
             'fields': ('session', 'intervention_type', 'location', 'is_remote')
         }),
-        ('Pays d\'intervention', {
+        ('Presentation Slides', {
+            'fields': ('slides_status', 'slides_file'),
+            'description': "Set status to 'Available' to enable the download link."
+        }),
+        ('Intervention Countries', {
             'fields': ('countries',),
             'classes': ('collapse',)
         }),
@@ -78,19 +79,17 @@ class SessionAdmin(admin.ModelAdmin):
     list_per_page = 20
     
     fieldsets = (
-        ('Informations générales', {
+        ('General Information', {
             'fields': ('title', 'description', 'logo', 'track', 'is_hybrid')
         }),
         ('Dates', {
             'fields': ('start_date', 'end_date', 'duration_days')
         }),
-        ('Lieux', {
+        ('Locations', {
             'fields': ('location', 'locations'),
-            'description': 'Le champ "location" est conservé pour compatibilité. Utilisez "locations" pour les nouveaux enregistrements.'
         }),
     )
     
-    # Ajout des inlines pour TOUS les modèles liés à la session
     inlines = [
         SessionOrganizerInline,
         MenuPhotoInline,
@@ -114,23 +113,25 @@ class AgendaItemAdmin(admin.ModelAdmin):
     list_filter = ('date', 'item_type', 'location', 'session')
     search_fields = ('title', 'description')
     date_hierarchy = 'date'
-    autocomplete_fields = ['session', 'location']
+    autocomplete_fields = ['session', 'location', 'speaker_intervention']
     list_per_page = 25
     
+    # ▼▼▼▼ 'speaker_intervention' AJOUTÉ AU fieldset ▼▼▼▼
     fieldsets = (
-        ('Informations générales', {
+        ('General Information', {
             'fields': ('title', 'description', 'item_type')
         }),
-        ('Planification', {
+        ('Scheduling', {
             'fields': ('date', 'start_time', 'end_time')
         }),
         ('Associations', {
-            'fields': ('session', 'location')
+            'fields': ('session', 'location', 'speaker_intervention')
         }),
     )
     
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('session', 'location')
+        return super().get_queryset(request).select_related('session', 'location', 'speaker_intervention')
+
 
 @admin.register(Attendee)
 class AttendeeAdmin(admin.ModelAdmin):

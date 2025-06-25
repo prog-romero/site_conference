@@ -1,4 +1,5 @@
 {% extends 'conference_app/base.html' %}
+{% load static %}
 
 {% block title %}Agenda - Conference 2025{% endblock %}
 
@@ -31,14 +32,7 @@
             </li>
             {% empty %}
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" 
-                        id="day-1-tab" 
-                        data-bs-toggle="tab" 
-                        data-bs-target="#day-1" 
-                        type="button" 
-                        role="tab" 
-                        aria-controls="day-1" 
-                        aria-selected="true">
+                <button class="nav-link active" id="day-1-tab" data-bs-toggle="tab" data-bs-target="#day-1" type="button" role="tab" aria-controls="day-1" aria-selected="true">
                     Day 1
                 </button>
             </li>
@@ -59,40 +53,57 @@
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
+                            <table class="table table-hover mb-0 align-middle">
                                 <thead class="table-light">
                                     <tr>
-                                        <th style="width: 15%">Time</th>
-                                        <!-- <th style="width: 20%">Session</th> -->
-                                        <th style="width: 15%">Type</th>
-                                        <th style="width: 30%">Description</th>
-                                        <!-- <th style="width: 20%">Location</th> -->
+                                        <th style="width: 15%;">Time</th>
+                                        <th style="width: 15%;">Type</th>
+                                        <th style="width: 45%;">Title & Description</th>
+                                        <th style="width: 25%;" class="text-center">Resources</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for item in day.items %}
                                     <tr {% if item.item_type == 'break' or item.item_type == 'lunch' %}class="table-light"{% endif %}>
-                                        <td>{{ item.start_time|time:"g:i A" }} - {{ item.end_time|time:"g:i A" }}</td>
-                                        <!-- <td>
-                                            {% if item.item_type == 'session' and item.session %}
-                                            <a href="{% url 'session_detail' item.session.id %}">{{ item.title }}</a>
-                                            {% else %}
-                                            {{ item.title }}
-                                            {% endif %}
-                                        </td> -->
+                                        <td>{{ item.start_time|time:"H:i" }} - {{ item.end_time|time:"H:i" }}</td>
                                         <td>
-                                            {% if item.item_type == 'session' and item.session %}
-                                            <span class="badge bg-primary-dark">{{ item.session.get_track_display }}</span>
-                                            {% else %}
-                                            <span class="badge bg-secondary">{{ item.get_item_type_display }}</span>
+                                            <span class="badge {% if item.item_type == 'Talk' %}bg-primary-dark{% else %}bg-secondary{% endif %}">{{ item.get_item_type_display }}</span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ item.title }}</strong>
+                                            {% if item.speaker_intervention %}
+                                                <br><small class="text-muted">by {{ item.speaker_intervention.name }}</small>
+                                            {% endif %}
+                                            {% if item.description %}
+                                                <p class="small mb-0 mt-1">{{ item.description|truncatewords:20 }}</p>
                                             {% endif %}
                                         </td>
-                                        <td>{{ item.description|default:""|truncatewords:20 }}</td>
-                                        <!-- <td>{{ item.location|default:"" }}</td> -->
+                                        <td class="text-center">
+                                            <!-- ▼▼▼▼ LOGIQUE AMÉLIORÉE POUR LE BOUTON SLIDES ▼▼▼▼ -->
+                                            {% with intervention=item.speaker_intervention %}
+                                                {% if item.item_type == 'Talk' and intervention %}
+                                                    {% if intervention.slides_status == 'available' and intervention.slides_file %}
+                                                        <a href="{{ intervention.slides_file.url }}" class="btn btn-sm btn-primary-custom" download>
+                                                            <i class="fas fa-download me-1"></i> Slides
+                                                        </a>
+                                                    {% elif intervention.slides_status == 'confidential' %}
+                                                        <button type="button" class="btn btn-sm btn-secondary" 
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="top"
+                                                                title="These slides are confidential.">
+                                                            Slides <i class="fas fa-lock ms-1"></i>
+                                                        </button>
+                                                    {% else %}
+                                                        <span class="badge bg-light text-muted">Pending</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endwith %}
+                                            <!-- ▲▲▲▲ FIN DE LA LOGIQUE AMÉLIORÉE ▲▲▲▲ -->
+                                        </td>
                                     </tr>
                                     {% empty %}
                                     <tr>
-                                        <td colspan="5" class="text-center py-4">No agenda items scheduled for this day yet.</td>
+                                        <td colspan="4" class="text-center py-4">No agenda items scheduled for this day yet.</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -103,56 +114,11 @@
             </div>
             {% empty %}
             <div class="tab-pane fade show active" id="day-1" role="tabpanel" aria-labelledby="day-1-tab">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-primary-dark text-white">
-                        <h3 class="mb-0">Agenda</h3>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th style="width: 15%">Time</th>
-                                        <!-- <th style="width: 20%">Session</th> -->
-                                        <th style="width: 15%">Type</th>
-                                        <th style="width: 30%">Description</th>
-                                        <!-- <th style="width: 20%">Location</th> -->
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">No agenda data available yet.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div class="text-center py-5">
+                    <p>No agenda data available yet.</p>
                 </div>
             </div>
             {% endfor %}
-        </div>
-        
-        <!-- Agenda Legend -->
-        <div class="card border-0 shadow-sm mt-4">
-            <div class="card-body">
-                <h4 class="mb-3">Legend</h4>
-                <div class="d-flex flex-wrap gap-3">
-                    {% for track in tracks %}
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-primary-dark me-2">{{ track.name }}</span>
-                        <span>{{ track.description }}</span>
-                    </div>
-                    {% endfor %}
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-secondary me-2">Break</span>
-                        <span>Scheduled breaks and networking opportunities</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-secondary me-2">Lunch</span>
-                        <span>Lunch breaks</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </section>
@@ -167,4 +133,14 @@
         </a>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Script pour activer les tooltips de Bootstrap -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+});
+</script>
 {% endblock %}

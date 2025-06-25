@@ -1,4 +1,5 @@
 {% extends 'conference_app/base.html' %}
+{% load static %}
 
 {% block title %}Speakers - Conference 2025{% endblock %}
 
@@ -29,10 +30,27 @@
                         <p class="card-text fw-bold">{{ speaker.organization }}</p>
                     </div>
                     <div class="card-footer bg-white border-0 pt-0 pb-4">
-                        <!-- <div class="d-flex justify-content-center gap-2">
-                            <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-primary-custom">View Session</a>
-                            <a href="{% url 'speaker_detail' speaker.id %}#bio" class="btn btn-outline-primary-custom">View Bio</a>
-                        </div> -->
+                        <div class="d-flex justify-content-center gap-2">
+                            <!-- Bouton View Bio -->
+                            <!-- <a href="{% url 'speaker_detail' speaker.id %}#bio" class="btn btn-outline-primary-custom">View Bio</a> -->
+
+                            <!-- ▼▼▼▼ LOGIQUE AMÉLIORÉE POUR LE BOUTON SLIDES ▼▼▼▼ -->
+                            {% if speaker.slides_status == 'available' and speaker.slides_file %}
+                                <a href="{{ speaker.slides_file.url }}" class="btn btn-primary-custom" download>
+                                    Slides <i class="fas fa-download ms-1"></i>
+                                </a>
+                            {% elif speaker.slides_status == 'confidential' %}
+                                <button type="button" class="btn btn-secondary"
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top"
+                                        title="These slides are confidential.">
+                                    Slides <i class="fas fa-lock ms-1"></i>
+                                </button>
+                            {% else %}
+                                <button class="btn btn-light" disabled>Slides</button>
+                            {% endif %}
+                            <!-- ▲▲▲▲ FIN DE LA LOGIQUE AMÉLIORÉE ▲▲▲▲ -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -44,13 +62,14 @@
         </div>
     </div>
 </section>
+{% endblock %}
 
-<!-- CTA Section -->
-<!-- <section class="py-5 bg-light-custom">
-    <div class="container text-center">
-        <h2 class="mb-4">Want to join our speaker lineup?</h2>
-        <p class="lead mb-4">We're always looking for experts to share their knowledge and experience with our community.</p>
-        <a href="{% url 'contact' %}" class="btn btn-primary-custom">Contact Us About Speaking</a>
-    </div>
-</section> -->
+{% block extra_js %}
+<!-- Script pour activer les tooltips de Bootstrap -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+});
+</script>
 {% endblock %}

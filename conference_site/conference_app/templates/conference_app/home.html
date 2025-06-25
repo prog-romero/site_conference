@@ -137,62 +137,8 @@
     </div>
 </section>
 
-<!-- Why Attend Section -->
-<!-- <section class="py-5 bg-light-custom">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title section-title-center text-center">Why Should I Attend?</h2>
-            <p class="lead">After a decade away, the Conference is back! Join us for three days of hands-on training, expert-led sessions, and networking opportunities. Get certified, discover the latest in monitoring, and engage with IT professionals shaping the future.</p>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm feature-card">
-                    <div class="card-body p-4">
-                        <div class="feature-icon bg-primary-dark mb-4">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <h4 class="card-title mb-3">Attend</h4>
-                        <p class="card-text">Engage with industry experts through insightful sessions and live demos</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm feature-card">
-                    <div class="card-body p-4">
-                        <div class="feature-icon bg-warning mb-4">
-                            <i class="fas fa-wrench"></i>
-                        </div>
-                        <h4 class="card-title mb-3">Train</h4>
-                        <p class="card-text">Participate in hands-on workshops to enhance your IT monitoring skills</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm feature-card">
-                    <div class="card-body p-4">
-                        <div class="feature-icon bg-success mb-4">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <h4 class="card-title mb-3">Network</h4>
-                        <p class="card-text">Connect with global IT professionals and expand your professional circle</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm feature-card">
-                    <div class="card-body p-4">
-                        <div class="feature-icon bg-accent-color mb-4">
-                            <i class="fas fa-certificate"></i>
-                        </div>
-                        <h4 class="card-title mb-3">Certify</h4>
-                        <p class="card-text">Receive a discount code for the Certified Professional – Core certification exam</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section> -->
+
+
 <!-- ▼▼▼▼ NOUVELLE SECTION POUR LES VOLONTAIRES ▼▼▼▼ -->
 <section class="py-5 bg-light-custom">
     <div class="container">
@@ -231,13 +177,13 @@
         {% endif %}
     </div>
 </section>
-<!-- Featured Speakers Section . -->
+
+
+<!-- ▼▼▼▼ SECTION SPEAKERS MISE À JOUR AVEC LOGIQUE "CONFIDENTIAL" ▼▼▼▼ -->
 <section class="py-5">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
-            <h2 class="section-title mb-0">
-                <p>Speakers</p>
-            </h2>
+            <h2 class="section-title mb-0">Speakers</h2>
             <a href="{% url 'speakers' %}" class="btn btn-primary-custom flex-shrink-0">
                 View All <i class="fas fa-arrow-right ms-1"></i>
             </a>
@@ -260,9 +206,32 @@
                                     <p class="card-subtitle">{{ speaker.title }}</p>
                                     <p class="card-text">{{ speaker.organization }}</p>
                                 </div>
-                                <!-- <div class="card-footer">
-                                    <a href="{% url 'speaker_detail' speaker.id %}" class="btn btn-sm btn-outline-primary-custom">View Bio</a>
-                                </div> -->
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        
+                                        <!-- Bouton Bio (décommenté pour l'exemple) -->
+                                        <!-- <a href="{% url 'speaker_detail' speaker.id %}#bio" class="btn btn-sm btn-outline-primary-custom">View Bio</a> -->
+                                        
+                                        <!-- Logique améliorée pour le bouton Slides -->
+                                        {% if speaker.slides_status == 'available' and speaker.slides_file %}
+                                            <!-- Cas 1: Slides disponibles -->
+                                            <a href="{{ speaker.slides_file.url }}" class="btn btn-sm btn-primary-custom" download>
+                                                Slides <i class="fas fa-download ms-1"></i>
+                                            </a>
+                                        {% elif speaker.slides_status == 'confidential' %}
+                                            <!-- Cas 2: Slides confidentielles -->
+                                            <button type="button" class="btn btn-sm btn-secondary" 
+                                                    data-bs-toggle="tooltip" 
+                                                    data-bs-placement="top"
+                                                    title="These slides are confidential and not available for download.">
+                                                Slides <i class="fas fa-lock ms-1"></i>
+                                            </button>
+                                        {% else %}
+                                            <!-- Cas 3: Statut "pending" ou autre (bouton désactivé) -->
+                                            <button class="btn btn-sm btn-light" disabled>Slides</button>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         {% endfor %}
@@ -274,107 +243,9 @@
         {% endif %}
     </div>
 </section>
+<!-- ▲▲▲▲ FIN DE LA SECTION SPEAKERS ▲▲▲▲ -->
+<!-- ▲▲▲▲ FIN DE LA SECTION SPEAKERS ▲▲▲▲ -->
 
-<!-- ... Reste de votre page (Upcoming Sessions, Partners, CTA) ... -->
-
-<!-- Upcoming Sessions Section -->
-<!-- <section class="py-5 bg-light-custom">
-    <div class="container">
-        <div class="d-flex align-items-center justify-content-between mb-5">
-            <h2 class="section-title mb-0">Upcoming Sessions</h2>
-            <a href="{% url 'sessions' %}" class="btn btn-primary-custom">View All Sessions</a>
-        </div>
-        
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="list-group">
-                    {% for session in upcoming_sessions %}
-                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <h5 class="mb-2">{{ session.title }}</h5>
-                            <small class="text-muted">{{ session.start_date|date:"F d, Y" }}</small>
-                            <small class="text-muted">24-26th June</small>
-                        </div>
-                        <div class="mb-3">
-                            <span class="badge bg-primary-dark me-2">{{ session.get_track_display }}</span>
-                            <span class="badge bg-secondary">{{ session.location }}</span>
-                        </div>
-                        <p class="mb-3">{{ session.description|truncatewords:30 }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <small class="text-muted">Speakers: 
-                                {% for speaker in session.speakers.all %}
-                                    {{ speaker.name }}{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-                                </small>
-                            </div>
-                            <a href="{% url 'session_detail' session.id %}" class="btn btn-sm btn-outline-primary-custom">View Details</a>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <h5 class="mb-2">Advanced Monitoring Techniques</h5>
-                            <small class="text-muted">June 15, 2025</small>
-                        </div>
-                        <div class="mb-3">
-                            <span class="badge bg-primary-dark me-2">Technical</span>
-                            <span class="badge bg-secondary">Room 101</span>
-                        </div>
-                        <p class="mb-3">Learn advanced monitoring techniques that will help you identify and resolve issues before they affect your users...</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <small class="text-muted">Speakers: John Doe, Sara Smith</small>
-                            </div>
-                            <a href="#" class="btn btn-sm btn-outline-primary-custom">View Details</a>
-                        </div>
-                    </div>
-                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <h5 class="mb-2">Scaling Monitoring Infrastructure</h5>
-                            <small class="text-muted">June 15, 2025</small>
-                        </div>
-                        <div class="mb-3">
-                            <span class="badge bg-primary-dark me-2">Technical</span>
-                            <span class="badge bg-secondary">Room 102</span>
-                        </div>
-                        <p class="mb-3">Discover strategies and best practices for scaling your monitoring infrastructure to handle millions of metrics...</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <small class="text-muted">Speakers: Eric Loyd, Dave Williams</small>
-                            </div>
-                            <a href="#" class="btn btn-sm btn-outline-primary-custom">View Details</a>
-                        </div>
-                    </div>
-                    <div class="list-group-item list-group-item-action border mb-3 p-4 rounded shadow-sm">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <h5 class="mb-2">Monitoring for Business Impact</h5>
-                            <small class="text-muted">June 16, 2025</small>
-                        </div>
-                        <div class="mb-3">
-                            <span class="badge bg-primary-dark me-2">Business</span>
-                            <span class="badge bg-secondary">Main Hall</span>
-                        </div>
-                        <p class="mb-3">How to translate technical metrics into business value and demonstrate the ROI of your monitoring solutions...</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <small class="text-muted">Speakers: Sarah Johnson</small>
-                            </div>
-                            <a href="#" class="btn btn-sm btn-outline-primary-custom">View Details</a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</section> -->
-
-
-<!-- ▲▲▲▲ FIN DE LA SECTION VOLONTAIRES ▲▲▲▲ -->
-
-<!-- Partners Section (inchangée) -->
-<!-- ... Collez ici votre section Partners existante ... -->
 
 <!-- Partners Section -->
 <section class="py-5 bg-light">
@@ -483,6 +354,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // ▼▼▼▼ NOUVELLE INITIALISATION POUR LE CARROUSEL DES VOLONTAIRES ▼▼▼▼
     new Swiper('.volunteer-swiper', marqueeOptions);
     // ▲▲▲▲ FIN DE LA NOUVELLE INITIALISATION ▲▲▲▲
+
+    // ▼▼▼▼ CODE À AJOUTER POUR ACTIVER LES TOOLTIPS BOOTSTRAP ▼▼▼▼
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    // ▲▲▲▲ FIN DU CODE À AJOUTER ▲▲▲▲
 
 });
 </script>
