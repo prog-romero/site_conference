@@ -286,6 +286,8 @@ class MenuPhoto(models.Model):
     description = models.TextField(blank=True, null=True, help_text="Description plus détaillée (optionnel).")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     order = models.PositiveIntegerField(default=0, help_text="Ordre d'affichage dans la galerie.")
+    date = models.DateField(default=timezone.now, help_text="Date à laquelle la photo a été prise.") # NOUVEAU CHAMP
+
 
     class Meta:
         ordering = ['order', 'uploaded_at']
