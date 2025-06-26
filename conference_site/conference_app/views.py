@@ -1799,29 +1799,47 @@ def volunteer_delete(request, pk):
 
     # conference_app/views.py
 # conference_app/views.py
+# conference_app/views.py
 
 from django.shortcuts import render
 from .models import MenuPhoto, Session
+from itertools import groupby
+from operator import attrgetter
 
 def gallery_page(request):
     """
-    Public view to display the event gallery.
-    It groups photos by session for a clear presentation.
+    Vue publique pour afficher la galerie de photos, groupées par session PUIS par date.
     """
-    # Récupère toutes les photos, en pré-chargeant les informations de la session
-    # pour optimiser les requêtes.
-    all_photos = MenuPhoto.objects.select_related('session').order_by('session__start_date', 'order')
+    # 1. Récupère toutes les photos.
+    #    - select_related('session') optimise en récupérant les données de la session en une seule requête.
+    #    - L'ordre est CRUCIAL pour que groupby fonctionne : d'abord la session, puis la date.
+    all_photos = MenuPhoto.objects.select_related('session').order_by(
+        '-session__start_date', 'date', 'order'
+    )
 
-    # Grouper les photos par session
-    photos_by_session = {}
-    for photo in all_photos:
-        if photo.session not in photos_by_session:
-            photos_by_session[photo.session] = []
-        photos_by_session[photo.session].append(photo)
+    # 2. Structure finale des données à envoyer au template
+    sessions_with_photos = []
+
+    # 3. Premier groupement par session
+    for session, photos_in_session_iterator in groupby(all_photos, key=lambda photo: photo.session):
+        
+        days_in_session = []
+        # 4. Deuxième groupement par date pour les photos de cette session
+        for date, photos_on_day_iterator in groupby(photos_in_session_iterator, key=attrgetter('date')):
+            days_in_session.append({
+                'date': date,
+                'photos': list(photos_on_day_iterator)
+            })
+        
+        # 5. Ajoute la session et ses jours de photos à la liste finale
+        sessions_with_photos.append({
+            'session': session,
+            'days': days_in_session
+        })
 
     context = {
-        'photos_by_session': photos_by_session,
-        'title': "Event Gallery", # Titre de la page
+        'sessions_with_photos': sessions_with_photos,
+        'title': "Event Gallery",
     }
     return render(request, 'conference_app/gallery_page.html', context)
 
@@ -1829,8 +1847,7 @@ def gallery_page(request):
 
 
 
-
-# # Gallery ge ne sais pas trop
+# # Gallery
 # def gallery_page(request):
 #     """
 #     Vue publique pour afficher la galerie de photos de tous les événements.

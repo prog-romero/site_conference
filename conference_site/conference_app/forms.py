@@ -254,6 +254,7 @@ class SubscribeForm(forms.ModelForm):
 # ============================================================================
 # GALLERY & VOLUNTEER FORMS - NOUVEAUX FORMULAIRES AJOUTÉS
 # ============================================================================
+# conference_app/forms.py
 
 class MenuPhotoForm(forms.ModelForm):
     """
@@ -261,9 +262,17 @@ class MenuPhotoForm(forms.ModelForm):
     """
     class Meta:
         model = MenuPhoto
-        fields = ['photo', 'caption', 'description', 'order']
+        # ▼▼▼▼ 'date' AJOUTÉ À LA LISTE DES CHAMPS ▼▼▼▼
+        fields = ['photo', 'date', 'caption', 'description', 'order']
         widgets = {
             'photo': forms.FileInput(attrs={'class': 'form-control', 'required': True}),
+            # ▼▼▼▼ WIDGET POUR LE NOUVEAU CHAMP 'date' ▼▼▼▼
+            'date': forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date', # Utilise le sélecteur de date du navigateur
+                }
+            ),
             'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Cérémonie d\'ouverture'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Description détaillée de la photo (optionnel)'}),
             'order': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),

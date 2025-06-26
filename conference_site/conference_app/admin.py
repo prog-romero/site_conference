@@ -17,17 +17,20 @@ class SessionOrganizerInline(admin.TabularInline):
     ordering = ('order',)
 
 class MenuPhotoInline(admin.TabularInline):
+    """Permet de gérer la galerie photo directement depuis la page d'une session."""
     model = MenuPhoto
     extra = 1
-    fields = ('photo', 'caption', 'order', 'image_preview')
+    # ▼▼▼▼ 'date' AJOUTÉ AUX CHAMPS DE L'INLINE ▼▼▼▼
+    fields = ('photo', 'date', 'caption', 'order', 'image_preview')
     readonly_fields = ('image_preview',)
     ordering = ('order',)
     
     def image_preview(self, obj):
         if obj.photo:
             return format_html('<img src="{}" width="100" />', obj.photo.url)
-        return "No Image"
-    image_preview.short_description = 'Preview'
+        return "Aucune image"
+    image_preview.short_description = 'Aperçu'
+
 
 class StudentVolunteerInline(admin.TabularInline):
     model = StudentVolunteer
@@ -264,21 +267,32 @@ class SubscriberAdmin(admin.ModelAdmin):
     list_per_page = 50
 
 # --- GESTION DES NOUVEAUX MODÈLES ---
-
 @admin.register(MenuPhoto)
 class MenuPhotoAdmin(admin.ModelAdmin):
-    list_display = ('caption', 'session', 'order', 'image_preview')
-    list_filter = ('session',)
+    # ▼▼▼▼ 'date' AJOUTÉ À list_display ET list_filter ▼▼▼▼
+    list_display = ('caption', 'session', 'date', 'order', 'image_preview')
+    list_filter = ('session', 'date')
     search_fields = ('caption', 'description')
     list_editable = ('order',)
     autocomplete_fields = ['session']
     readonly_fields = ('image_preview',)
+    
+    # ▼▼▼▼ 'date' AJOUTÉ AU fieldset POUR LE FORMULAIRE DE DÉTAIL ▼▼▼▼
+    fieldsets = (
+        (None, {
+            'fields': ('session', ('photo', 'image_preview'))
+        }),
+        ('Details', {
+            'fields': ('caption', 'description', 'date', 'order')
+        }),
+    )
     
     def image_preview(self, obj):
         if obj.photo:
             return format_html('<img src="{}" width="150" />', obj.photo.url)
         return "Aucune image"
     image_preview.short_description = 'Aperçu'
+    
 
 @admin.register(StudentVolunteer)
 class StudentVolunteerAdmin(admin.ModelAdmin):

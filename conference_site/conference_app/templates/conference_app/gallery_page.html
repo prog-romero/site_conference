@@ -10,9 +10,16 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.11.1/baguetteBox.min.css">
 
 <style>
-  /* Style for the gallery container */
+  /* Style pour la galerie */
   .gallery-session-group {
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
+    padding-bottom: 2rem;
+  }
+  .gallery-session-group:not(:last-child) {
+      border-bottom: 1px solid #e9ecef;
+  }
+  .gallery-day-group {
+    margin-top: 2rem;
   }
 
   .gallery-grid {
@@ -21,7 +28,7 @@
     gap: 1.5rem;
   }
 
-  /* Style for each photo item */
+  /* Style pour chaque photo */
   .gallery-item {
     background: #fff;
     border-radius: 15px;
@@ -36,73 +43,31 @@
     box-shadow: 0 12px 30px rgba(0,0,0,0.15);
   }
 
-  .gallery-item .photo-link {
-    display: block;
-    position: relative;
-  }
+  .gallery-item .photo-link { display: block; position: relative; }
+  .gallery-item .photo-link img { width: 100%; height: 220px; object-fit: cover; display: block; }
   
-  .gallery-item .photo-link img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    display: block;
-  }
-  
-  /* Overlay effect on hover */
   .gallery-item .photo-link::after {
-    content: '\f00e'; /* Font Awesome search-plus icon */
+    content: '\f00e';
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%) scale(0.8);
-    color: white;
-    font-size: 2.5rem;
+    color: white; font-size: 2.5rem;
     background: rgba(6, 21, 46, 0.5);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    opacity: 0; transition: opacity 0.3s ease;
   }
-  .gallery-item:hover .photo-link::after {
-    opacity: 1;
-  }
+  .gallery-item:hover .photo-link::after { opacity: 1; }
   
-  /* Text content below the photo */
-  .gallery-item .text-content {
-    padding: 1rem 1.25rem;
-    text-align: left;
-    flex-grow: 1;
-  }
-
-  .gallery-item .caption {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: #343a40;
-    margin-bottom: 0.5rem;
-  }
+  .gallery-item .text-content { padding: 1rem 1.25rem; text-align: left; flex-grow: 1; }
+  .gallery-item .caption { font-weight: 600; font-size: 1.1rem; color: #343a40; margin-bottom: 0.5rem; }
+  .gallery-item .description { font-size: 0.9rem; color: #6c757d; line-height: 1.5; }
   
-  .gallery-item .description {
-    font-size: 0.9rem;
-    color: #6c757d;
-    line-height: 1.5;
-  }
-  
-  /* Lightbox style */
-  #baguetteBox-overlay {
-    background-color: rgba(6, 21, 46, 0.95);
-  }
-  #baguetteBox-next-button, #baguetteBox-previous-button {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-  }
-  .baguetteBox-caption {
-    font-size: 1rem;
-    background-color: rgba(0,0,0,0.6);
-  }
+  /* Style de la Lightbox */
+  #baguetteBox-overlay { background-color: rgba(6, 21, 46, 0.95); }
+  #baguetteBox-next-button, #baguetteBox-previous-button { background-color: rgba(255, 255, 255, 0.1) !important; }
+  .baguetteBox-caption { font-size: 1rem; background-color: rgba(0,0,0,0.6); }
 </style>
 {% endblock %}
 
@@ -119,29 +84,41 @@
 <!-- Gallery Section -->
 <section class="py-5">
     <div class="container">
-        {% if photos_by_session %}
-            {% for session, photos in photos_by_session.items %}
-                <div class="gallery-session-group">
-                    <h2 class="section-title mb-4">{{ session.title }}</h2>
-                    <div class="gallery-grid baguetteBox-gallery">
-                        {% for photo in photos %}
-                        <div class="gallery-item">
-                            <a href="{{ photo.photo.url }}" class="photo-link" data-caption="{{ photo.caption|default:'' }}{% if photo.description %} - {{ photo.description }}{% endif %}">
-                                <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}">
-                            </a>
-                            <div class="text-content">
-                                {% if photo.caption %}
-                                    <h5 class="caption">{{ photo.caption }}</h5>
-                                {% endif %}
-                                {% if photo.description %}
-                                    <p class="description">{{ photo.description|linebreaksbr }}</p>
-                                {% endif %}
+        {% if sessions_with_photos %}
+            <!-- La classe baguetteBox-gallery est maintenant sur le conteneur principal -->
+            <div class="baguetteBox-gallery">
+                <!-- Boucle 1 : Parcourir chaque session -->
+                {% for session_data in sessions_with_photos %}
+                    <div class="gallery-session-group">
+                        <h2 class="section-title mb-4">{{ session_data.session.title }}</h2>
+                        
+                        <!-- Boucle 2 : Parcourir chaque jour dans la session -->
+                        {% for day_data in session_data.days %}
+                            <div class="gallery-day-group">
+                                <h4 class="mb-3 text-muted">{{ day_data.date|date:"l, F j, Y" }}</h4>
+                                <div class="gallery-grid">
+                                    <!-- Boucle 3 : Parcourir chaque photo de ce jour -->
+                                    {% for photo in day_data.photos %}
+                                    <div class="gallery-item">
+                                        <a href="{{ photo.photo.url }}" class="photo-link" data-caption="{{ photo.caption|default:'' }}{% if photo.description %} - {{ photo.description }}{% endif %}">
+                                            <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}">
+                                        </a>
+                                        <div class="text-content">
+                                            {% if photo.caption %}
+                                                <h5 class="caption">{{ photo.caption }}</h5>
+                                            {% endif %}
+                                            {% if photo.description %}
+                                                <p class="description">{{ photo.description|linebreaksbr }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
                             </div>
-                        </div>
                         {% endfor %}
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         {% else %}
             <div class="text-center py-5">
                 <i class="fas fa-camera-retro fa-4x text-muted mb-3"></i>
@@ -159,8 +136,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.11.1/baguetteBox.min.js" async></script>
 <script>
 window.addEventListener('load', function() {
-    // Initialize the lightbox on all galleries with the .baguetteBox-gallery class
-    if(typeof baguetteBox !== 'undefined') {
+    // Initialize the lightbox on the main gallery container
+    if(typeof baguetteBox !== 'undefined' && document.querySelector('.baguetteBox-gallery')) {
         baguetteBox.run('.baguetteBox-gallery');
     }
 });
