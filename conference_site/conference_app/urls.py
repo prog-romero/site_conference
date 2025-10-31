@@ -2,7 +2,13 @@ from django.urls import path, include
 from django.contrib import admin
 from . import views
 
+
+handler404 = 'conference_app.views.custom_404_view'
+
+
 urlpatterns = [
+
+    
     # ========================================================================
     # PUBLIC URLS - URLs accessibles au public
     # ========================================================================
@@ -144,6 +150,11 @@ urlpatterns = [
         path('<int:pk>/delete/', views.volunteer_delete, name='volunteer_delete'),
     ])),
 
+    
+
     # --- Django Admin ---
     path('admin/', admin.site.urls),
+
+    # --- Test de la page 404 (à retirer en production) ---
+    path('test-404/', views.custom_404_view, name='test_404'),
 ]

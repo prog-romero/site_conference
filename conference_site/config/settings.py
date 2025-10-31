@@ -44,7 +44,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'conference_app' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -64,15 +64,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # # Database
 DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.postgresql',
-         'NAME': 'conference_bd',
-         'USER':'romero1',
-         'PASSWORD':'romerotchiaze',
-         'HOST':'postgres',
-         'PORT':'5432'
-     }
- }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'conferencebd',
+        'USER':'postgres',
+        'PASSWORD':'cpasBIEN',
+        'HOST':'localhost',
+        'PORT':'5432'
+    }
+}
 
 
 

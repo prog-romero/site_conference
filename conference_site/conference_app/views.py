@@ -62,6 +62,14 @@ from .models import (
     SpeakersInterventions, Session, AttendeeType, Partner, StudentVolunteer
 )
 
+
+# Vue de test pour la page 404
+def custom_404_view(request, exception=None):
+    """Vue personnalisée pour les erreurs 404"""
+    return render(request, '404.html', status=404)
+
+
+
 # ============================================================================
 # VIEWS PUBLIQUES - Vues accessibles au public
 # ============================================================================
